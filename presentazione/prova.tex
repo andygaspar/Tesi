@@ -1,0 +1,69 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+
+\title{Swap trading ATFM}
+%\author{Andrea Gasparin}
+%\date{October 2019}
+
+\begin{document}
+
+\maketitle
+
+\section*
+
+The model aims to develop a mechanism which, in addition to the FPFS and compression, tries to improve the solution provided by this two algorithms, reducing the delay costs, respecting fairness and keeping a reasonable level of simplicity.\\
+FPFS and compression are two algorithms currently in use due to their intuitive nature and inherent fairness which make them acceptable to the ATUs. Still, they don't provide an optimal solution in terms of costs and despite the fact they encourage companies to provide updated information about delays and cancelations, they don't involve companies as active players in the slot assignment problem.
+\\
+Furthermore, most of the alternative models proposed so far to improve the currently used algorithm, try to include costs parameters. This approach unfortunately has two main drawbacks: companies might be tempted to misrepresent their costs in order to increase their chances to obtain a better slot allocation; even under the assumption of a fair behaviour of the airlines, estimation and computation of costs are particularly difficult to perform.   \\In addition, airlines might be more open to mechanisms that guarantee high level of simplicity.\\  
+For these reasons, the main ideas of the model are: 
+\begin{itemize}
+    \item Keep the FPFS and compression solution as a baseline
+    \item Provide the airlines ready-made slot exchanging offers to better embrace their preferences
+\end{itemize}
+
+
+
+
+    Sets:
+\begin{equation}
+\begin{split}
+    & A =\textrm{set of airports}\\
+    & C = \textrm{set of companies}\\
+    & S = \textrm{set of all flights}\\
+    & S^{c}=\textrm{slots owned by company \textit{c}}\\
+    & S^{a}=\textrm{slots in airport $a$}\\
+    & S^{ca} = \textrm{slots owned by company \textit{c} in airport \textit{a}}
+\end{split}    
+\end{equation}
+
+Parameters:
+\begin{equation}
+\begin{split}
+    & p_i = \textrm{priority value of flight $i$}   \\
+    & d_{i j} = \textrm{delay of flight $i$ when assigned to slot $j$ }\\
+    & ETA_i = \textrm{index $j$ representing the expected arrival time of flight $i$}
+\end{split}
+   
+\end{equation}
+
+Variables:
+\begin{equation}
+\begin{split}
+  & x_{i j}^{c a } = \textrm{flight $i$ of company $c$ arriving to airport $a$ is assigned to slot $j$ }   \\
+\end{split}
+   
+\end{equation}
+
+
+\begin{equation}
+    \begin{split}
+        \min &\sum _{i\in S , j \in S} p_i d_{i j} \varepsilon \\
+        & \sum_{\substack{j \in S^a \\ j \not\in S^{c a} \\  j\geq ETA_i}} x_{i j}^{c a} + x_{i i}^{c a}=1 \quad \forall c \in C , \forall a \in A \quad \textrm{ (all flights have to be assigned, in the same airport, not before their ETA )} \\
+        & \sum_{\substack{i \in S^c \\ j \in S^{c'} \\ a \in A }} x_{i j}^{c a} 
+        = \sum_{\substack{j\in S^{c'} \\ i \in S^c \\  a \in A }} x_{j i}^{c' a} ,
+        \quad \forall c,c' \in C \quad \textrm{(swap between companies)} 
+    \end{split}
+\end{equation}
+\end{document}
+
