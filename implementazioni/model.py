@@ -1,4 +1,4 @@
-from airline.py import *
+from airline import *
 
 class model:
 
