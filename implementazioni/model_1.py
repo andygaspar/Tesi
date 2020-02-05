@@ -1,8 +1,8 @@
-from model import *
+from modelStructure import *
 
 
 
-class model_1(model):
+class model_1(modelStructure):
 
     def __init__(self,airlines,ETA,FPFS_scheduling,f=lambda x: x):
         super().__init__(airlines,ETA,FPFS_scheduling,f=lambda x: x)
