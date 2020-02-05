@@ -75,9 +75,3 @@ class model:
             "{0:^10}".format(self.ETA[sol[0]]),\
             "{0:^10}".format(self.delays[sol[0],sol[1]]),\
             "{0:^10}".format(self.which_airline(sol[0]).preferences[sol[0]]*self.delays[sol[0],sol[1]]))
-
-    def print_offers(self):
-        for i,j in product(self.slots,self.slots):
-            if i<j and self.solution[i,j].x!=0:
-                print("(",self.which_airline(i),",",self.get_flights_name(i),") x ("\
-                ,self.which_airline(j),",",self.get_flights_name(j),")")

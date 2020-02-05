@@ -40,3 +40,9 @@ class model_1(model):
             for i in self.slots:
                 if x[i,j].x!=0:
                     self.new_schedule.append((i,j))
+
+    def print_offers(self):
+        for i,j in product(self.slots,self.slots):
+            if i<j and self.solution[i,j].x!=0:
+                print("(",self.which_airline(i),",",self.get_flights_name(i),") x ("\
+                ,self.which_airline(j),",",self.get_flights_name(j),")")
