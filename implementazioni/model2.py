@@ -3,12 +3,10 @@ import numpy as np
 from modelStructure import *
 
 
+# noinspection PyPep8Naming
+class Model2(modelStructure):
 
-
-
-class model_2(modelStructure):
-
-    def index(self,array, elem):
+    def index(self, array, elem):
         for i in range(len(array)):
             if np.array_equiv(array[i], elem):
                 return i
@@ -26,6 +24,7 @@ class model_2(modelStructure):
         super().__init__(airlines, ETA, FPFS_scheduling, f=lambda x: x)
         self.airlines_pairs = pairs(self.airlines)
 
+    # noinspection SpellCheckingInspection
     def run(self):
 
         x = np.array([[self.m.add_var(var_type=BINARY) for i in self.slots] for j in self.slots])
@@ -44,7 +43,8 @@ class model_2(modelStructure):
 
         for i in self.slots:
             for j in np.setdiff1d(self.slots, self.which_airline(i).flights):
-                self.m += x[i, j] <= xsum([c[self.index(self.airlines, self.which_airline(i))][j] for j in self.get_tuple(i)])
+                self.m += x[i, j] <= xsum(
+                    [c[self.index(self.airlines, self.which_airline(i))][j] for j in self.get_tuple(i)])
 
         for air_pair in self.airlines_pairs:
             airApairs = air_pair[0].flight_pairs
