@@ -4,8 +4,8 @@ from modelStructure import *
 
 class model_1(modelStructure):
 
-    def __init__(self,airlines,ETA,FPFS_scheduling,f=lambda x: x):
-        super().__init__(airlines,ETA,FPFS_scheduling,f=lambda x: x)
+    def __init__(self, airlines, ETA, GDP_sched, f=lambda x: x):
+        super().__init__(airlines, ETA, GDP_sched, f=lambda x: x)
 
 
     def run(self):
@@ -39,7 +39,7 @@ class model_1(modelStructure):
         for j in self.slots:
             for i in self.slots:
                 if x[i,j].x!=0:
-                    self.new_schedule.append((i,j))
+                    self.solution_schedule.append((i, j))
 
     def print_offers(self):
         for i,j in product(self.slots,self.slots):

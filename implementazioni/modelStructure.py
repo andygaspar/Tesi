@@ -1,25 +1,25 @@
 from airline import *
 
 
-# noinspection PyPep8Naming
+# noinspection PyPep8Naming,SpellCheckingInspection
 class modelStructure:
 
     def compute_delays(self):
         delays = np.zeros((self.num_flights, self.num_flights))
         for i, j in product(self.slots, self.slots):
-            delays[i, j] = self.FPFS[j] - self.ETA[i]
+            delays[i, j] = abs(self.GDP_schedule[j] - self.ETA[i])
         return delays
 
     def compute_ETA_index(self, ETA):
         ETA_index = []
         for i in ETA:
             j = 0
-            while j < len(ETA) and self.FPFS[j] < i:
+            while j < len(ETA) and self.GDP_schedule[j + 1] < i:
                 j += 1
             ETA_index.append(j)
         return ETA_index
 
-    def __init__(self, airlines, ETA, FPFS_scheduling, model_name="model", f=lambda x: x):
+    def __init__(self, airlines, ETA, GDP_sched, f, model_name="model"):
 
         self.e = sys.float_info.min
 
@@ -28,15 +28,15 @@ class modelStructure:
         self.airlines = np.array(airlines)
 
         self.ETA = np.array(ETA)
-        self.FPFS = np.array(FPFS_scheduling)
+        self.GDP_schedule = np.array(GDP_sched)
         self.ETA_index = self.compute_ETA_index(self.ETA)
 
-        self.slots = np.array([i for i in range(len(self.FPFS))])
+        self.slots = np.array([i for i in range(len(self.GDP_schedule))])
         self.delays = self.compute_delays()
         for a in self.airlines:
             a.set_preferences(f)
 
-        self.new_schedule = []
+        self.solution_schedule = []
         self.solutionX = None
         self.solutionC = None
         self.m = Model(model_name)
@@ -76,7 +76,7 @@ class modelStructure:
         print("{0:^10}".format("AIRLINE"), "{0:^10}".format("FLIGHT"),
               "{0:^10}".format("ETA"), "{0:^10}".format("DELAY"), "{0:^10}".format("COSTS"))
 
-        for sol in self.new_schedule:
+        for sol in self.solution_schedule:
             print("{0:^10}".format(str(self.which_airline(sol[0]))),
                   "{0:^10}".format(self.which_airline(sol[0]).flights_name[sol[0]]),
                   "{0:^10}".format(self.ETA[sol[0]]),

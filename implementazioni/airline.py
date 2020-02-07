@@ -26,14 +26,14 @@ class Airline:
     def preference_function(priority, f):
         return priority * f(len(priority)) / sum(priority)
 
-    def __init__(self, airline_name, flights, priority, f_names=0, costs=[], f=lambda x: x):
+    def __init__(self, airline_name, flights, priority, f=lambda x: x, fl_names=[], costs=[]):
         self.name = airline_name
         self.flights = np.array(flights)
 
-        if f_names == 0:
+        if len(fl_names) == 0:
             self.flights_name = dict(zip(self.flights, self.f_names(flights)))
         else:
-            self.flights_name = f_names
+            self.flights_name = dict(zip(self.flights, fl_names))
 
         self.priority = np.array(priority)
         if len(costs) == 0:

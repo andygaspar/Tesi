@@ -39,6 +39,9 @@ problem.print_solution()
 problem.print_offers()
 
 
+BA = Airline("BA", [1, 4, 5], [4, 9, 12], fl_names=["B","E","F"],costs=[4, 9, 12])
+YA = Airline("YA", [0, 2, 3, 6], [1, 14, 1, 15], fl_names=["A","C","D","G"],costs=[1, 14, 1, 15])
+
 ETA = np.array(range(7))
 FPFS = ETA*2
 

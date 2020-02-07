@@ -6,7 +6,8 @@ from modelStructure import *
 # noinspection PyPep8Naming
 class Model2(modelStructure):
 
-    def index(self, array, elem):
+    @staticmethod
+    def index(array, elem):
         for i in range(len(array)):
             if np.array_equiv(array[i], elem):
                 return i
@@ -20,8 +21,8 @@ class Model2(modelStructure):
             j += 1
         return indexes
 
-    def __init__(self, airlines, ETA, FPFS_scheduling, f=lambda x: x):
-        super().__init__(airlines, ETA, FPFS_scheduling, f=lambda x: x)
+    def __init__(self, airlines, ETA, GDP_sched, f=lambda x: x):
+        super().__init__(airlines, ETA, GDP_sched, f)
         self.airlines_pairs = pairs(self.airlines)
 
     # noinspection SpellCheckingInspection
@@ -79,7 +80,7 @@ class Model2(modelStructure):
         for j in self.slots:
             for i in self.slots:
                 if x[i, j].x != 0:
-                    self.new_schedule.append((i, j))
+                    self.solution_schedule.append((i, j))
 
         for air in self.airlines:
             for flight_pair in air.flight_pairs:
