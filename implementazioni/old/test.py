@@ -1,6 +1,4 @@
-from airline import *
-from model_1 import *
-from model2 import *
+from old.model2 import *
 
 import numpy as np
 

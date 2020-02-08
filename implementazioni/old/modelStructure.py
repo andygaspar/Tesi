@@ -1,31 +1,8 @@
-import flight as fl
-import airline as air
-
-import numpy as np
-import pandas as pd
-from itertools import combinations, product
-import sys
+from old.airline import *
 
 
 # noinspection PyPep8Naming,SpellCheckingInspection
-class ModelStructure:
-
-    def make_flight_list(self,df):
-        flight_list = []
-        for i in range(self.num_flights):
-            line = df.iloc[i]
-            if line["flight"] != "Empty":
-                flight_list.append(fl.Flight(line["flight"],line["airline"],line["eta"],line["udpp"],line["priority"],line["costs"]))
-
-        return np.array(flight_list)
-
-    def make_airline_list(self, df):
-        airline_list = []
-        for airline in np.unique(df["airline"]):
-            if airline != "Empty":
-                airline_list.append(air.Airline(airline, [flight for flight in self.flights if flight.airline == airline], df[df["airline"]==airline]["priority"].to_numpy(), self.f))
-
-        return airline_list
+class modelStructure:
 
     def compute_delays(self):
         delays = np.zeros((self.num_flights, self.num_flights))
@@ -42,38 +19,30 @@ class ModelStructure:
             ETA_index.append(j)
         return ETA_index
 
-    def __init__(self, df, f, model_name):
+    def __init__(self, airlines, ETA, schedule, f, model_name="model"):
 
         self.e = sys.float_info.min
 
-        self.f=f
+        self.num_flights = len(ETA)
+        self.num_airlines = len(airlines)
+        self.airlines = np.array(airlines)
 
-        self.num_flights = df.shape[0]
+        self.ETA = np.array(ETA)
+        self.schedule = np.array(schedule)
+        self.ETA_index = self.compute_ETA_index(self.ETA)
 
-        self.flights = self.make_flight_list(df)
+        self.slots = np.array([i for i in range(len(self.schedule))])
+        self.delays = self.compute_delays()
+        for a in self.airlines:
+            a.set_preferences(f)
 
-        self.num_airlines = len(np.unique(df["airline"]))
+        self.solution_schedule = []
+        self.solutionX = None
+        self.solutionC = None
+        self.m = Model(model_name)
+        self.m.verbose = 0
 
-        self.airlines = self.make_airline_list(df)
-
-
-        #
-        # self.ETA = np.array(ETA)
-        # self.schedule = np.array(schedule)
-        # self.ETA_index = self.compute_ETA_index(self.ETA)
-        #
-        # self.slots = np.array([i for i in range(len(self.schedule))])
-        # self.delays = self.compute_delays()
-        # for a in self.airlines:
-        #     a.set_preferences(f)
-        #
-        # self.solution_schedule = []
-        # self.solutionX = None
-        # self.solutionC = None
-        # self.m = Model(model_name)
-        # self.m.verbose = 0
-        #
-        # self.offers = []
+        self.offers = []
 
     def __str__(self):
         return str(self.airlines)

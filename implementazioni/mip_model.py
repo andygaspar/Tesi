@@ -1,10 +1,13 @@
+import flight as fl
+import airline as al
+import modelStructure as ms
+from mip import *
+
 import numpy as np
+import pandas as pd
 
-from modelStructure import *
 
-
-# noinspection PyPep8Naming
-class Model2(modelStructure):
+class MipModel(ms.ModelStructure):
 
     @staticmethod
     def index(array, elem):
@@ -21,16 +24,19 @@ class Model2(modelStructure):
             j += 1
         return indexes
 
-    def __init__(self, airlines, ETA, GDP_sched, f=lambda x: x):
-        super().__init__(airlines, ETA, GDP_sched, f)
-        self.airlines_pairs = pairs(self.airlines)
+    def __init__(self, df, f=lambda x, y: x * y, model_name="model"):
+        super().__init__(df, f, model_name)
+        self.airlines_pairs = al.Airline.pairs(self.airlines)
+
+        self.m = Model(model_name)
+        self.m.verbose = 0
 
     # noinspection SpellCheckingInspection
     def run(self):
 
         x = np.array([[self.m.add_var(var_type=BINARY) for i in self.slots] for j in self.slots])
 
-        c = np.array([[self.m.add_var(var_type=BINARY) for i in air.flight_pairs] for air in self.airlines])
+        c = np.array([[self.m.add_var(var_type=BINARY) for i in airl.flight_pairs] for airl in self.airlines])
 
         for i in range(len(self.slots)):
             self.m += xsum(x[i, j] for j in np.append(np.setdiff1d(self.slots, self.which_airline(i).flights), i)) == 1
@@ -86,3 +92,17 @@ class Model2(modelStructure):
             for flight_pair in air.flight_pairs:
                 if c[self.index(self.airlines, air)][self.index(air.flight_pairs, flight_pair)].x != 0:
                     self.offers.append((air, flight_pair))
+
+
+
+
+df = pd.read_csv("data/ruiz.csv")
+df["costs"] =np.zeros(df.shape[0])
+print(df.columns)
+modello = MipModel(df)
+
+
+modello.airlines
+
+for fli in modello.flights:
+    print(fli, fli.preference)

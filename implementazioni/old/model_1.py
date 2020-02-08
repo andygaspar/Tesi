@@ -1,11 +1,11 @@
-from modelStructure import *
+from old.modelStructure import *
 
 
 
 class model_1(modelStructure):
 
-    def __init__(self, airlines, ETA, GDP_sched, f=lambda x: x):
-        super().__init__(airlines, ETA, GDP_sched, f=lambda x: x)
+    def __init__(self, airlines, ETA, schedule, f=lambda x: x):
+        super().__init__(airlines, ETA, schedule, f=lambda x: x)
 
 
     def run(self):
