@@ -10,52 +10,63 @@ import sys
 # noinspection PyPep8Naming,SpellCheckingInspection
 class ModelStructure:
 
-    def make_flight_list(self,df):
+    def make_flight_list(self, df):
         flight_list = []
         for i in range(self.num_flights):
             line = df.iloc[i]
             if line["flight"] != "Empty":
-                flight_list.append(fl.Flight(line["flight"],line["airline"],line["eta"],line["udpp"],line["priority"],line["costs"]))
+                comp_slots = self.compute_compatible_slots(line["eta"])
+                not_comp_slots = np.setdiff1d(self.slots,comp_slots)
+                flight_list.append(fl.Flight(line["slot"], line["flight"], line["airline"], line["eta"], line["udpp"],
+                                             line["priority"], comp_slots, not_comp_slots, line["costs"]))
 
         return np.array(flight_list)
 
     def make_airline_list(self, df):
         airline_list = []
+        i = 0
         for airline in np.unique(df["airline"]):
             if airline != "Empty":
-                airline_list.append(air.Airline(airline, [flight for flight in self.flights if flight.airline == airline], df[df["airline"]==airline]["priority"].to_numpy(), self.f))
+                airline_list.append(air.Airline(airline, i,
+                                                [flight for flight in self.flights if flight.airline == airline],
+                                                df[df["airline"] == airline]["priority"].to_numpy(), self.f))
+                i += 1
 
         return airline_list
 
     def compute_delays(self):
         delays = np.zeros((self.num_flights, self.num_flights))
-        for i, j in product(self.slots, self.slots):
-            delays[i, j] = abs(self.schedule[j] - self.ETA[i])
+        for flight, j in product(self.flights, self.slots):
+            delays[flight.slot, j] = abs(self.schedule[j] - flight.slot)
         return delays
 
-    def compute_ETA_index(self, ETA):
-        ETA_index = []
-        for i in ETA:
-            j = 0
-            while j < len(ETA) and self.schedule[j + 1] < i:
-                j += 1
-            ETA_index.append(j)
-        return ETA_index
+    def compute_compatible_slots(self, eta):
+        second_comp_slot = self.df[self.df["udpp"] > eta].iloc[0]["slot"]
+        return self.df[self.df["slot"] >= second_comp_slot-1]["slot"].to_numpy()
 
     def __init__(self, df, f, model_name):
 
         self.e = sys.float_info.min
 
-        self.f=f
+        self.df = df
+
+        self.f = f
 
         self.num_flights = df.shape[0]
 
-        self.flights = self.make_flight_list(df)
+        self.slots = np.array(df["slot"])
 
-        self.num_airlines = len(np.unique(df["airline"]))
+        self.flights = self.make_flight_list(self.df)
 
-        self.airlines = self.make_airline_list(df)
+        self.num_airlines = len(np.unique(self.df["airline"]))
 
+        self.airlines = self.make_airline_list(self.df)
+
+        self.empty_slots = self.df[df["flight"] == "Empty"]["slot"].to_numpy()
+
+        self.schedule = self.df["udpp"]
+
+        self.delays = self.compute_delays()
 
         #
         # self.ETA = np.array(ETA)
@@ -67,11 +78,9 @@ class ModelStructure:
         # for a in self.airlines:
         #     a.set_preferences(f)
         #
-        # self.solution_schedule = []
+        self.solution_schedule = []
         # self.solutionX = None
         # self.solutionC = None
-        # self.m = Model(model_name)
-        # self.m.verbose = 0
         #
         # self.offers = []
 
@@ -81,13 +90,13 @@ class ModelStructure:
     def __repr__(self):
         return str(self.airlines)
 
-    def score(self, airline, i, j):
-        return self.delays[i, j] * airline.preferences[i]
+    def score(self, flight, j):
+        return self.delays[flight.slot, j] * flight.preference
 
     def which_airline(self, flight):
-        for a in self.airlines:
-            if flight in a.flights:
-                return a
+        for airl in self.airlines:
+            if flight in airl.flights:
+                return airl
 
     def get_flights_name(self, i):
         return self.which_airline(i).flights_name[i]

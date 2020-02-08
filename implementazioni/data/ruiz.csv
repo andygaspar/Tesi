@@ -1,4 +1,4 @@
-,flight,eta,udpp,priority,airline
+slot,flight,eta,udpp,priority,airline
 0,OA3 5896D,736,736,0,OA3
 1,HUB 8384,736,738,2,HUB
 2,Empty,741,741,0,Empty

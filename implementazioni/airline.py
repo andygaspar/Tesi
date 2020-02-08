@@ -13,18 +13,19 @@ class Airline:
     def triplet(list_to_comb):
         return np.array(list(combinations(list_to_comb, 3)))
 
-
-    def __init__(self, airline_name, flights, priority, f):
+    def __init__(self, airline_name, index, flights, priority, f):
         self.name = airline_name
+        self.airline_index = index
         self.flights = np.array(flights)
-        self.priority= priority
-        self.f=f
+        self.priority = priority
+        self.f = f
 
         self.num_flights = self.flights.shape[0]
         self.sum_priorities = sum(priority)
 
-        for i in range(self.flights.shape[0]):
-            flights[i].set_preference(self.num_flights, self.sum_priorities, self.f)
+        for flight in self.flights:
+            flight.set_preference(self.num_flights, self.sum_priorities, self.f)
+            flight.airline = self
 
         self.flight_pairs = self.pairs(self.flights)
         self.flight_triplets = self.triplet(self.flights)
