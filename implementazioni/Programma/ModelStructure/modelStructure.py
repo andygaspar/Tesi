@@ -52,11 +52,6 @@ class ModelStructure:
     def score(self, flight, j):
         return self.delays[flight.slot, j] * flight.preference
 
-    def which_airline(self, flight):
-        for a in self.airlines:
-            if flight in a.flights:
-                return a
-
     def print_schedule(self):
         print(self.df)
 
@@ -68,12 +63,6 @@ class ModelStructure:
             if self.solutionX[i.slot, j] == 1:
                 return self.flights[j]
 
-    @staticmethod
-    def is_in_list(list_to_check, elem):
-        for el in list_to_check:
-            if np.array_equiv(el, elem):
-                return True
-        return False
 
 
 
