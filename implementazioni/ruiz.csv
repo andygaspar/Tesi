@@ -1,4 +1,4 @@
-,flight,initial schedule,udpp,priority,airline
+slot,flight,eta,gdp schedule,priority,airline
 0,OA3 5896D,736,736,25,OA3
 1,HUB 8384,736,738,25,HUB
 2,Empty,741,741,25,Empty
@@ -7,7 +7,7 @@
 5,HUB 9757,751,751,25,HUB
 6,LC1 311,751,753,25,LC1
 7,HUB 6068,756,756,25,HUB
-8,HUB 5701,756,756,25,HUB
+8,HUB 5701,756,757,25,HUB
 9,HUB 6612,756,762,25,HUB
 10,HUB 5229,758,765,25,HUB
 11,LC2 6426,761,768,25,LC2
