@@ -1,5 +1,5 @@
 import numpy as np
-from Airline import airline as air
+from Programma.Airline import airline as air
 
 
 def make_airlines_list(model):

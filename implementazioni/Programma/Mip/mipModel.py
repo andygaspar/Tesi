@@ -1,6 +1,7 @@
-from Airline import airline as al
-from ModelStructure import modelStructure as mS
+from Programma.Airline import airline as al
+from Programma.ModelStructure import modelStructure as mS
 from mip import *
+from Programma.Solution import solution as sol
 
 import numpy as np
 import pandas as pd
@@ -16,7 +17,8 @@ class MipModel(mS.ModelStructure):
             if np.array_equiv(array[i], elem):
                 return i
 
-    def get_tuple(self, flight):
+    @staticmethod
+    def get_tuple(flight):
         j = 0
         indexes = []
         for pair in flight.airline.flight_pairs:
@@ -104,7 +106,7 @@ class MipModel(mS.ModelStructure):
         start = time.time()
         self.set_constraints()
         end = time.time() - start
-        print("Set constraint time ", end)
+        print("Constraints setting time ", end)
 
         self.set_objective()
 
@@ -115,44 +117,20 @@ class MipModel(mS.ModelStructure):
 
         print(self.m.status)
 
-        # self.make_solution_df(self.x)
-        #
-        # self.make_solution_array(self.x)
-        #
-        # self.make_offers(self.c)
+        self.solution_array = self.make_solution_array(self.x)
+
+        self.solution = sol.Solution(self)
 
     def other_airlines_compatible_slots(self, flight):
         others_slots = self.df[self.df["airline"] != flight.airline.name]["slot"].to_numpy()
         return np.intersect1d(others_slots, flight.compatible_slots, assume_unique=True)
 
-    def compatible_slots(self, flight):
-        others_slots = self.df[self.df["airline"] != flight.airline.name]["slot"].to_numpy()
-        return np.sort(np.append(others_slots, flight.slot))
-
-    def make_solution_df(self, x):
-        cols = ["slot", "flight", "airline", "gdp_schedule", "old gdp_schedule", "eta", "cost", "old cost"]
-        self.solution_df = pd.DataFrame(columns=cols)
-        for j in self.slot_indexes:
-            for i in self.slot_indexes:
-                if x[i, j].x != 0:
-                    cic = x[i, j].x
-                    flight = self.flights[self.slot_to_flight[i]]
-                    row = dict(zip(cols,
-                                   [j, flight.name, flight.airline.name, self.gdp_schedule[j], self.gdp_schedule[i],
-                                    flight.eta, flight.cost * self.delays[i, j], flight.cost * self.delays[i, i]]))
-                    self.solution_df = self.solution_df.append(row, ignore_index=True)
-
     def make_solution_array(self, x):
-        sol = np.zeros((self.num_flights, self.slot_indexes.shape[0]))
+        solution_array = np.zeros((self.slot_indexes.shape[0], self.slot_indexes.shape[0]))
         for flight in self.flights:
             for j in self.slot_indexes:
-                sol[flight.slot, j] = x[flight.slot, j].x
-        self.solutionX = sol
+                solution_array[flight.slot, j] = x[flight.slot, j].x
+        return solution_array
 
-    def make_offers(self, c):
-        for air in self.airlines:
-            for flight_pair in air.flight_pairs:
-                if c[self.index(self.airlines, air)][self.index(air.flight_pairs, flight_pair)].x != 0:
-                    self.offers.append((air, flight_pair))
 
 

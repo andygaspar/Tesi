@@ -1,5 +1,4 @@
 import numpy as np
-import flight as fl
 
 
 def make_flight_list(model):

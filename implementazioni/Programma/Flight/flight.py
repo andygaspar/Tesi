@@ -7,6 +7,8 @@ class Flight:
 
         self.slot = line["slot"]
 
+        self.new_slot = None
+
         self.name = line["flight"]
 
         self.airline = airline
@@ -14,6 +16,8 @@ class Flight:
         self.eta = line["eta"]
 
         self.gdp_arrival = line["gdp schedule"]
+
+        self.new_arrival = None
 
         self.cost = line["cost"]
 

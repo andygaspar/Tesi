@@ -1,7 +1,7 @@
 import numpy as np
 from itertools import combinations
 
-import flight as fl
+from Programma.Flight import flight as fl
 
 
 class Airline:
