@@ -66,13 +66,18 @@ class MipModel(mS.ModelStructure):
                 self.m += self.x[flight.slot, slot_to_swap] <= xsum(
                     [self.c[flight.airline.airline_index][j] for j in self.get_tuple(flight)])
 
+        for flight in self.flights:
+            for other_flight in flight.airline.flights:
+                if flight != other_flight:
+                    self.m += self.x[flight.slot, other_flight.slot] == 0
+
         for airl_pair in self.airlines_pairs:
             fl_pair_a = airl_pair[0].flight_pairs
             fl_pair_b = airl_pair[1].flight_pairs
             for pairA in fl_pair_a:
                 for pairB in fl_pair_b:
                     self.m += xsum(self.x[i.slot, j.slot] for i in pairA for j in pairB) + \
-                              xsum(self.x[i.slot, j.slot] for i in pairB for j in pairA) >= \
+                              xsum(self.x[i.slot, j.slot] for i in pairB for j in pairA) <= \
                               (self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] +
                                self.c[self.index(self.airlines, airl_pair[1])][self.index(fl_pair_b, pairB)]) * 2 - \
                               (2 - self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] -
