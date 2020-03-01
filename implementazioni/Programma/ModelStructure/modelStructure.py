@@ -50,7 +50,7 @@ class ModelStructure:
         return str(self.airlines)
 
     def score(self, flight, j):
-        return self.delays[flight.slot, j] * flight.preference
+        return (flight.preference*self.delays[flight.slot, j]**2)/2
 
     def print_schedule(self):
         print(self.df)

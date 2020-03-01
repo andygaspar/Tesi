@@ -77,7 +77,7 @@ class MipModel(mS.ModelStructure):
             for pairA in fl_pair_a:
                 for pairB in fl_pair_b:
                     self.m += xsum(self.x[i.slot, j.slot] for i in pairA for j in pairB) + \
-                              xsum(self.x[i.slot, j.slot] for i in pairB for j in pairA) <= \
+                              xsum(self.x[i.slot, j.slot] for i in pairB for j in pairA) >= \
                               (self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] +
                                self.c[self.index(self.airlines, airl_pair[1])][self.index(fl_pair_b, pairB)]) * 2 - \
                               (2 - self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] -

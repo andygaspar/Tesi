@@ -4,9 +4,11 @@ from Programma.Mip import mipModel
 import os
 
 
-df = pd.read_csv("data/sample.csv")
+# df = pd.read_csv("data/sample.csv")
+# df["priority"] = df["cost"]
+df = pd.read_csv("data/data_ruiz.csv")
 
-df_init = df.iloc[0:30]
+df_init = df.iloc[0:40]
 
 model = mipModel.MipModel(df_init)
 
