@@ -8,7 +8,7 @@ import os
 # df["priority"] = df["cost"]
 df = pd.read_csv("data/data_ruiz.csv")
 
-df_init = df.iloc[0:40]
+df_init = df.iloc[0:10]
 
 model = mipModel.MipModel(df_init)
 
