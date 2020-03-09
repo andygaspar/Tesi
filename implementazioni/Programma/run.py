@@ -1,7 +1,6 @@
-import numpy as np
+
 import pandas as pd
 from Programma.Mip import mipModel
-import os
 
 
 # df = pd.read_csv("data/sample.csv")
@@ -33,3 +32,5 @@ print(model.solution.offers)
 #************************************************************************************
 #8,HUB 5701,756,757,25,HUB     sarebbe  8,HUB 5701,756,756,25,HUB
 #************************************************************************************
+
+
