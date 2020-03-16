@@ -19,7 +19,7 @@ class Offer:
 
 class OffersList:
 
-    def __init__(self,model):
+    def __init__(self, model):
 
         self.offers = self.get_offer(model)
 
@@ -34,7 +34,7 @@ class OffersList:
                 offer_flight_list.clear()
                 offer_flight_list.append(flight)
                 for i in range(3):
-                    flight = sol.get_flight(flight.new_slot,model.flights)
+                    flight = sol.get_flight(flight.new_slot, model.flights)
                     offer_flight_list.append(flight)
                 selected_flights += offer_flight_list
                 offers_list.append(Offer(copy.deepcopy(offer_flight_list)))
@@ -44,6 +44,6 @@ class OffersList:
         str_to_return = ""
         for offer in self.offers:
             for flight in offer.flight_offer_list:
-                str_to_return += " "+(str(flight))
+                str_to_return += (str(flight.slot)) + " " + (str(flight.new_slot)) + " "+(str(flight)) + "  --  "
             str_to_return += "\n"
         return str_to_return

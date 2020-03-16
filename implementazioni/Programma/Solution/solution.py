@@ -41,7 +41,7 @@ class Solution:
             for flight in airline.flights:
                 old_balance[airline.airline_index] += flight.cost * model.delays[flight.slot, flight.slot]
                 new_balance[airline.airline_index] += flight.cost * model.delays[flight.slot, flight.new_slot]
-        return pd.DataFrame({"airline": model.airlines, "new balance": new_balance, "old balance":old_balance})
+        return pd.DataFrame({"airline": model.airlines, "new balance": new_balance, "old balance": old_balance})
 
     @staticmethod
     def update_flights_status(model):
