@@ -1,30 +1,37 @@
 
 import pandas as pd
 from Programma.Mip import mipModel
-from Programma.Xpress_model import xpress_solver
+
 
 
 # df = pd.read_csv("data/sample.csv")
 # df["priority"] = df["cost"]
 df = pd.read_csv("../data/data_ruiz.csv")
 
-df_init = df.iloc[0:50]
+df_init = df.iloc[0:20]
 
 
-# Xp_model = xpress_solver.XpressModel(df_init)
-# Xp_model.run()
+
 
 
 model = mipModel.MipModel(df_init)
 
 model.run()
+#
+#
+# print(model.solution)
+# print(model.solution.airline_balance)
+# print(model.initial_objective_value)
+# print(model.m.objective_value)
+# print(model.solution.offers)
 
 
-print(model.solution)
-print(model.solution.airline_balance)
-print(model.initial_objective_value)
-print(model.m.objective_value)
-print(model.solution.offers)
+
+from Programma.Xpress_model import xpress_solver
+
+Xp_model = xpress_solver.XpressModel(df_init)
+Xp_model.run()
+
 
 
 # int_df = pd.read_csv("data/sample.csv")

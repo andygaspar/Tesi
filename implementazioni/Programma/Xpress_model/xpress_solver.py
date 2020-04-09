@@ -55,7 +55,7 @@ class XpressModel(mS.ModelStructure):
             self.m.addConstraint(xp.Sum(self.x[flight.slot, j] for j in flight.compatible_slots) == 1)
 
         for j in self.slot_indexes:
-            self.m.addConstraint((self.x[i, j] for i in self.slot_indexes) <= 1)
+            self.m.addConstraint(xp.Sum(self.x[i, j] for i in self.slot_indexes) <= 1)
 
         for flight in self.flights:
             for j in flight.not_compatible_slots:
@@ -77,7 +77,7 @@ class XpressModel(mS.ModelStructure):
             for pairA in fl_pair_a:
                 for pairB in fl_pair_b:
                     self.m.addConstraint(xp.Sum(self.x[i.slot, j.slot] for i in pairA for j in pairB) + \
-                              xp.Sum(self.x[i.slot, j.slot] for i in pairB for j in pairA) >= \
+                              xp.Sum([self.x[i.slot, j.slot] for i in pairB for j in pairA]) >= \
                               (self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] +
                                self.c[self.index(self.airlines, airl_pair[1])][self.index(fl_pair_b, pairB)]) * 2 - \
                               (2 - self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] -
