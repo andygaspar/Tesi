@@ -1,6 +1,7 @@
 
 import pandas as pd
 from Programma.Mip import mipModel
+from Programma.Amal import amal
 
 
 
@@ -17,7 +18,9 @@ model = mipModel.MipModel(df_init)
 model.run()
 #
 #
-print(model.solution)
+#print(model.solution)
+
+amal_model =  amal.Amal(df_init, "fromCsv")
 # print(model.solution.airline_balance)
 # print(model.initial_objective_value)
 # print(model.m.objective_value)

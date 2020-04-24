@@ -2,6 +2,8 @@ from Programma.Airline import airline as al
 from Programma.ModelStructure import modelStructure as mS
 from mip import *
 from Programma.Solution import solution as sol
+from Programma.Airline import airline as air
+from Programma.Amal import amalProperties
 
 import numpy as np
 import pandas as pd
@@ -27,9 +29,9 @@ class Amal(mS.ModelStructure):
             j += 1
         return indexes
 
-    def __init__(self, df_in, f=lambda x, y: x * y, model_name="model"):
+    def __init__(self, df_in: pd.DataFrame, kind: str, model_name="amal"):
 
-        super().__init__(df_in, f, model_name)
+        super().__init__(df_in, model_name)
 
         self.m = Model(model_name)
         self.x = []
@@ -38,6 +40,10 @@ class Amal(mS.ModelStructure):
         self.xo = None
         self.m.threads = -1
         self.m.verbose = 0
+
+        airline: air.Airline
+        for airline in self.airlines:
+            airline.set_amal_properties(amalProperties.AmalProperties(kind, airline.df))
 
     def set_variables(self):
 
@@ -70,7 +76,7 @@ class Amal(mS.ModelStructure):
         self.m.objective = minimize(
             xsum(self.x[flight.slot, j] * self.score(flight, j) for flight in self.flights for j in self.slot_indexes) \
             + xsum(
-                self.c[self.index(self.airlines, air)][self.index(air.flight_pairs, j)] for air in self.airlines for j
+                self.c[self.index(self.airlines, air)][self.index(air.flight_pairs, j)] for airline in self.airlines for j
                 in
                 air.flight_pairs))
 

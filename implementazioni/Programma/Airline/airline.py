@@ -45,8 +45,13 @@ class Airline:
 
         self.modelProperties = None
 
+        self.amalProperties = None
+
     def set_model_properties(self, mP: modelProperties.ModelProperties):
         self.modelProperties = mP
+
+    def set_amal_properties(self, amalProperties):
+        self.amalProperties = amalProperties
 
     def __str__(self):
         return self.name
