@@ -13,7 +13,7 @@ class ModelStructure:
     def print_gatto(self):
         print("gatto")
 
-    def __init__(self, int_df, make_airlines_list, model_name):
+    def __init__(self, int_df):
 
         self.df = int_df
 
@@ -21,9 +21,9 @@ class ModelStructure:
 
         self.gdp_schedule = self.df["gdp schedule"]
 
-        from Programma.ModelStructure import airlineList as air, flightList as fll
+        from Programma.ModelStructure import airlineList as airList, flightList as fll
 
-        self.airlines = make_airlines_list(self)
+        self.airlines = airList.make_airlines_list(self)
 
         self.num_airlines = len(np.unique(self.df["airline"]))
 

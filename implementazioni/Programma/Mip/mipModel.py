@@ -2,9 +2,8 @@ from Programma.ModelStructure import modelStructure as mS
 from mip import *
 import sys
 from Programma.Solution import solution as sol
-from Programma.Mip import modelProperties as modProp
-from Programma.Airline import airline as air
-from Programma.ModelStructure import airlineList
+from Programma.Mip import modelAirline as air
+from Programma.Mip import modelFlight as modFl
 
 import numpy as np
 import pandas as pd
@@ -32,20 +31,19 @@ class MipModel(mS.ModelStructure):
 
     def __init__(self, df_in, f=lambda x, y: x * y, model_name="model"):
 
-        super().__init__(df_in, airlineList.make_airlines_list, model_name)
-
-        self.airlines_pairs = air.Airline.pairs(self.airlines)
         self.f = f
+        self.airlineConstructor = air.ModelAirline
+        self.flightConstructor = modFl.ModelFlight
+        super().__init__(df_in)
+
+        self.airlines_pairs = air.ModelAirline.pairs(self.airlines)
+
         self.epsilon = sys.float_info.min
         self.m = Model(model_name)
         self.x = None
         self.c = None
         self.m.threads = -1
         self.m.verbose = 0
-
-        airline: air.Airline
-        for airline in self.airlines:
-            airline.set_model_properties(modProp.ModelProperties(airline, self.f))
 
         self.initial_objective_value = sum([self.score(flight, flight.slot) for flight in self.flights])
 

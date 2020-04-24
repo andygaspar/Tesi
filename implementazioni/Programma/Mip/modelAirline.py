@@ -15,14 +15,20 @@ class ModelAirline(air.Airline):
     def triplet(list_to_comb):
         return np.array(list(combinations(list_to_comb, 3)))
 
-    def __init__(self, airline: air.Airline, f):
+    def __init__(self, df_airline: pd.DataFrame, airline_index, model):
 
-        self.sum_priorities = sum(airline.df["priority"])
+        super().__init__(df_airline, airline_index, model)
 
-        self.priorityFunction = f
+        self.sum_priorities = sum(self.df["priority"])
 
-        self.flight_pairs = self.pairs(airline.flights)
+        self.priorityFunction = model.f
 
-        self.flight_triplets = self.triplet(airline.flights)
+        self.flight_pairs = self.pairs(self.flights)
 
+        self.flight_triplets = self.triplet(self.flights)
 
+        flight: fl.Flight
+        for flight in self.flights:
+            df_flight = self.df[self.df["flight"] == flight.name]
+            flight.set_priority(df_flight["priority"].values[0])
+            flight.set_preference(self.sum_priorities, self.priorityFunction)

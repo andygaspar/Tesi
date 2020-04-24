@@ -1,30 +1,25 @@
 import numpy as np
+from Programma.Flight import flight as fl
 
 
-class Flight:
+class ModelFlight(fl.Flight):
 
     def __init__(self, line, airline, model):
 
-        self.slot = line["slot"]
+        super().__init__(line, airline, model)
 
-        self.new_slot = None
+        self.priority = line["priority"]
 
-        self.name = line["flight"]
+        self.preference = None
 
-        self.airline = airline
+    def set_preference(self, sum_priorities, f):
+        self.preference = self.compute_preference(self.airline.num_flights, sum_priorities, f)
 
-        self.eta = line["eta"]
+    def compute_preference(self, num_flights, sum_priorities, f):
+        return f(self.priority, num_flights) / sum_priorities
 
-        self.gdp_arrival = line["gdp schedule"]
-
-        self.new_arrival = None
-
-        self.cost = line["cost"]
-
-        self.compatible_arrival_time, self.compatible_slots = self.compute_compatible_slots(model.df)
-
-        self.not_compatible_slots = np.setdiff1d(model.df["slot"], self.compatible_slots)
-
+    def set_priority(self, priority):
+        self.priority = priority
 
     def __str__(self):
         return self.name
