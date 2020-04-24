@@ -1,8 +1,5 @@
-from Programma.ModelStructure import airlineList as airll, flightList as fll
-
 import numpy as np
 from itertools import product
-import sys
 
 
 class ModelStructure:
@@ -13,9 +10,10 @@ class ModelStructure:
             delays[flight.slot, j] = abs(self.gdp_schedule[j] - flight.eta)
         return delays
 
-    def __init__(self, int_df, model_name):
+    def print_gatto(self):
+        print("gatto")
 
-        self.epsilon = sys.float_info.min
+    def __init__(self, int_df, make_airlines_list, model_name):
 
         self.df = int_df
 
@@ -23,7 +21,9 @@ class ModelStructure:
 
         self.gdp_schedule = self.df["gdp schedule"]
 
-        self.airlines = airll.make_airlines_list(self)
+        from Programma.ModelStructure import airlineList as air, flightList as fll
+
+        self.airlines = make_airlines_list(self)
 
         self.num_airlines = len(np.unique(self.df["airline"]))
 
@@ -45,9 +45,6 @@ class ModelStructure:
     def __repr__(self):
         return str(self.airlines)
 
-    def score(self, flight, j):
-        return (flight.preference*self.delays[flight.slot, j]**2)/2
-
     def print_schedule(self):
         print(self.df)
 
@@ -58,7 +55,3 @@ class ModelStructure:
         for j in self.slot_indexes[self.slot_indexes != i]:
             if self.solutionX[i.slot, j] == 1:
                 return self.flights[j]
-
-
-
-

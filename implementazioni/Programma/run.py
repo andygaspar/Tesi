@@ -18,9 +18,9 @@ model = mipModel.MipModel(df_init)
 model.run()
 #
 #
-#print(model.solution)
+print(model.solution)
 
-amal_model =  amal.Amal(df_init, "fromCsv")
+#amal_model =  amal.Amal(df_init, "1")
 # print(model.solution.airline_balance)
 # print(model.initial_objective_value)
 # print(model.m.objective_value)

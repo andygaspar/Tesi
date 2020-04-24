@@ -43,7 +43,7 @@ class Amal(mS.ModelStructure):
 
         airline: air.Airline
         for airline in self.airlines:
-            airline.set_amal_properties(amalProperties.AmalProperties(kind, airline.df))
+            airline.set_amal_properties(amalProperties.AmalProperties(kind, self, airline))
 
     def set_variables(self):
 
@@ -94,7 +94,7 @@ class Amal(mS.ModelStructure):
         start = time.time()
         self.m.optimize()
         end = time.time() - start
-        print("Simplex time ",end)
+        print("Simplex time ", end)
 
         print(self.m.status)
 

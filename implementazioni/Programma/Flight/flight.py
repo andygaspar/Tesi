@@ -25,7 +25,7 @@ class Flight:
 
         self.not_compatible_slots = np.setdiff1d(model.df["slot"], self.compatible_slots)
 
-        self.priority = None
+        self.priority = line["priority"]
 
         self.preference = None
 

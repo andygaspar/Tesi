@@ -2,10 +2,33 @@ import numpy as np
 import pandas as pd
 from Programma.Amal.amalOffer import AmalOffer
 from Programma.Airline import airline as air
+from Programma.ModelStructure import modelStructure
 
 
 class AmalProperties:
 
+    def make_offer_list(self, kind, model: modelStructure.ModelStructure, airline: air.Airline):
+        if kind == "1":
+            return []
+
+    def __init__(self, kind: str, model: modelStructure.ModelStructure, airline: air.Airline) -> object:
+
+        self.offerList = self.make_offer_list(kind, model, airline)
+
+    def get_offers_for_flight(self, flight):
+
+        offer_for_flight_list = []
+
+        for offer in self.offerList:
+            if offer.flightDown == flight:
+                offer_for_flight_list.append(offer.atMost)
+            if offer.flightUp == flight:
+                offer_for_flight_list.append(offer.atLeast)
+
+        return offer_for_flight_list
+
+
+"""
     def from_csv(self, df_airline):
         amal_offers = []
         df = df_airline[df_airline["amal offer"].notna()]
@@ -22,23 +45,4 @@ class AmalProperties:
 
         return amal_offers
 
-    def make_offer_list(self, kind, df_airline):
-
-        if kind == "fromCsv":
-            return self.from_csv(df_airline)
-
-    def __init__(self, kind: str, df_airline: pd.DataFrame) -> object:
-
-        self.offerList = self.makeOfferList(kind, df_airline)
-
-    def get_offers_for_flight(self, flight):
-
-        offer_for_flight_list = []
-
-        for offer in self.offerList:
-            if offer.flightDown == flight:
-                offer_for_flight_list.append(offer.atMost)
-            if offer.flightUp == flight:
-                offer_for_flight_list.append(offer.atLeast)
-
-        return offer_for_flight_list
+"""

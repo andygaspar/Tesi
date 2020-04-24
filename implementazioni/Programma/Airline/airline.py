@@ -3,8 +3,8 @@ import pandas as pd
 from itertools import combinations
 
 from Programma.Flight import flight as fl
-from Programma.ModelStructure import modelStructure
-from Programma.Mip import modelProperties
+#from Programma.Mip.modelProperties import ModelProperties
+from Programma.ModelStructure.modelStructure import ModelStructure
 
 
 class Airline:
@@ -17,15 +17,15 @@ class Airline:
     def triplet(list_to_comb):
         return np.array(list(combinations(list_to_comb, 3)))
 
-    def make_airline_flight_list(self,df_airline,model):
+    def make_airline_flight_list(self, df_airline, model):
         flight_list = []
         for i in range(df_airline.shape[0]):
             line = df_airline.iloc[i]
-            flight_list.append(fl.Flight(line,self,model))
+            flight_list.append(fl.Flight(line, self, model))
 
         return np.array(flight_list)
 
-    def __init__(self, df_airline: pd.DataFrame, airline_index, model: modelStructure.ModelStructure):
+    def __init__(self, df_airline: pd.DataFrame, airline_index, model: ModelStructure):
 
         self.df = df_airline
 
@@ -47,7 +47,7 @@ class Airline:
 
         self.amalProperties = None
 
-    def set_model_properties(self, mP: modelProperties.ModelProperties):
+    def set_model_properties(self, mP):
         self.modelProperties = mP
 
     def set_amal_properties(self, amalProperties):

@@ -5,7 +5,7 @@ from Programma.Flight import flight as fl
 from Programma.Airline import airline as air
 
 
-class ModelProperties:
+class ModelAirline(air.Airline):
 
     @staticmethod
     def pairs(list_to_comb):
@@ -24,11 +24,5 @@ class ModelProperties:
         self.flight_pairs = self.pairs(airline.flights)
 
         self.flight_triplets = self.triplet(airline.flights)
-
-        flight: fl.Flight
-        for flight in airline.flights:
-            df_flight = airline.df[airline.df["flight"] == flight.name]
-            flight.set_priority(df_flight["priority"].values[0])
-            flight.set_preference(self.sum_priorities, self.priorityFunction)
 
 
