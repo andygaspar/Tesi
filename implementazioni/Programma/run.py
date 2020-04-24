@@ -12,25 +12,17 @@ df_init = df.iloc[0:20]
 
 
 
-
-
 model = mipModel.MipModel(df_init)
 
 model.run()
 #
 #
-# print(model.solution)
+print(model.solution)
 # print(model.solution.airline_balance)
 # print(model.initial_objective_value)
 # print(model.m.objective_value)
 # print(model.solution.offers)
 
-
-
-from Programma.Xpress_model import xpress_solver
-
-Xp_model = xpress_solver.XpressModel(df_init)
-Xp_model.run()
 
 
 

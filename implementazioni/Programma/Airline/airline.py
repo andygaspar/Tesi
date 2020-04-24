@@ -1,7 +1,10 @@
 import numpy as np
+import pandas as pd
 from itertools import combinations
 
 from Programma.Flight import flight as fl
+from Programma.ModelStructure import modelStructure
+from Programma.Mip import modelProperties
 
 
 class Airline:
@@ -22,21 +25,28 @@ class Airline:
 
         return np.array(flight_list)
 
-    def __init__(self, df_airline, airline_index, model):
+    def __init__(self, df_airline: pd.DataFrame, airline_index, model: modelStructure.ModelStructure):
 
-        self.name = df_airline["airline"].unique()[0]
+        self.df = df_airline
+
+        self.name = self.df["airline"].unique()[0]
 
         self.airline_index = airline_index
 
         self.num_flights = df_airline.shape[0]
 
-        self.sum_priorities = sum(df_airline["priority"])
+        self.sum_priorities = sum(self.df["priority"])
 
-        self.flights = self.make_airline_flight_list(df_airline,model)
+        self.flights = self.make_airline_flight_list(self.df, model)
 
         self.flight_pairs = self.pairs(self.flights)
 
         self.flight_triplets = self.triplet(self.flights)
+
+        self.modelProperties = None
+
+    def set_model_properties(self, mP: modelProperties.ModelProperties):
+        self.modelProperties = mP
 
     def __str__(self):
         return self.name

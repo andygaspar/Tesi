@@ -13,13 +13,11 @@ class ModelStructure:
             delays[flight.slot, j] = abs(self.gdp_schedule[j] - flight.eta)
         return delays
 
-    def __init__(self, int_df, f, model_name):
+    def __init__(self, int_df, model_name):
 
         self.epsilon = sys.float_info.min
 
         self.df = int_df
-
-        self.f = f
 
         self.slot_indexes = np.array(self.df["slot"])
 
@@ -40,8 +38,6 @@ class ModelStructure:
         self.solution_array = None
 
         self.solution = None
-
-        self.initial_objective_value = sum([self.score(flight,flight.slot) for flight in self.flights])
 
     def __str__(self):
         return str(self.airlines)

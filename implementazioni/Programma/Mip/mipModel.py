@@ -2,6 +2,8 @@ from Programma.Airline import airline as al
 from Programma.ModelStructure import modelStructure as mS
 from mip import *
 from Programma.Solution import solution as sol
+from Programma.Mip import modelProperties as modProp
+from Programma.Airline import airline as air
 
 import numpy as np
 import pandas as pd
@@ -29,21 +31,28 @@ class MipModel(mS.ModelStructure):
 
     def __init__(self, df_in, f=lambda x, y: x * y, model_name="model"):
 
-        super().__init__(df_in, f, model_name)
+        super().__init__(df_in, model_name)
 
         self.airlines_pairs = al.Airline.pairs(self.airlines)
-
+        self.f = f
         self.m = Model(model_name)
         self.x = None
         self.c = None
         self.m.threads = -1
         self.m.verbose = 0
 
+        airline: air.Airline
+        for airline in self.airlines:
+            airline.set_model_properties(modProp.ModelProperties(airline, self.f))
+
+        self.initial_objective_value = sum([self.score(flight, flight.slot) for flight in self.flights])
+
     def set_variables(self):
 
         self.x = np.array([[self.m.add_var(var_type=BINARY) for j in self.slot_indexes] for i in self.slot_indexes])
 
-        self.c = np.array([[self.m.add_var(var_type=BINARY) for i in airl.flight_pairs] for airl in self.airlines])
+        self.c = np.array(
+            [[self.m.add_var(var_type=BINARY) for i in airline.flight_pairs] for airline in self.airlines])
 
     def set_constraints(self):
 
@@ -118,7 +127,7 @@ class MipModel(mS.ModelStructure):
         start = time.time()
         self.m.optimize()
         end = time.time() - start
-        print("Simplex time ",end)
+        print("Simplex time ", end)
 
         print(self.m.status)
 
@@ -136,6 +145,3 @@ class MipModel(mS.ModelStructure):
             for j in self.slot_indexes:
                 solution_array[flight.slot, j] = x[flight.slot, j].x
         return solution_array
-
-
-

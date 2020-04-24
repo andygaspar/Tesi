@@ -25,12 +25,18 @@ class Flight:
 
         self.not_compatible_slots = np.setdiff1d(model.df["slot"], self.compatible_slots)
 
-        self.priority = line["priority"]
+        self.priority = None
 
-        self.preference = self.compute_preference(self.airline.num_flights, self.airline.sum_priorities, model.f)
+        self.preference = None
+
+    def set_preference(self, sum_priorities, f):
+        self.preference = self.compute_preference(self.airline.num_flights, sum_priorities, f)
 
     def compute_preference(self, num_flights, sum_priorities, f):
         return f(self.priority, num_flights) / sum_priorities
+
+    def set_priority(self, priority):
+        self.priority = priority
 
     def __str__(self):
         return self.name
@@ -52,5 +58,7 @@ class Flight:
                 return compatible_arrival_times, compatible_slots
             except IndexError:
                 raise IndexError("No available slot for flight ",self.name)
+
+
 
 
