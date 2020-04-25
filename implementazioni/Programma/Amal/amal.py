@@ -58,10 +58,8 @@ class Amal(mS.ModelStructure):
         flight: modFl.AmalFlight
         airline: air.AmalAirline
         for flight in self.flights:
-            if len(flight.airline.get_offers_for_flight(flight)) > 0:
-                print(len(self.x[flight.num]),flight.slot, flight.airline.get_offers_for_flight(flight))
-                self.m += xsum(self.x[flight.num][k] for k in
-                               range(len(flight.airline.get_offers_for_flight(flight)))) == 1
+            self.m += xsum(self.x[flight.num][k] for k in
+                           range(len(flight.airline.get_offers_for_flight(flight)))) == 1
 
         for flight in self.flights:
             self.m += self.x[flight.num][0] + self.z[flight.num][0] - \
@@ -69,20 +67,19 @@ class Amal(mS.ModelStructure):
 
         for flight in self.flights:
             for k in range(1, len(flight.airline.get_offer_slot_range(flight))):
-                self.m += self.x[flight.num][k] + self.z[flight.num][k] - \
+                print(flight)
+                self.m += self.x[flight.num][k] + self.z[flight.num][k] - self.z[flight.num][k-1] -\
                           xsum(self.y[flight.num][j] for j in flight.airline.get_offer_slot_range(flight)) == 0
 
         for j in self.slot_indexes:
-            self.m += xsum(self.y[i][j] for i in range(len(self.flights))) == 1
+            self.m += xsum(self.y[flight.num][j] for flight in self.flights
+                           if flight.num in flight.airline.get_offer_slot_range(flight)) == 1
 
     def set_objective(self):
         flight: modFl.AmalFlight
         self.m.objective = minimize(
-            xsum(self.x[flight.slot, j] * self.score(flight, j) for flight in self.flights for j in self.slot_indexes) \
-            + xsum(
-                self.c[self.index(self.airlines, air)][self.index(air.flight_pairs, j)] for airline in self.airlines for j
-                in
-                air.flight_pairs))
+            xsum(self.y[flight.num][j] * self.cost_function(flight, j)
+                 for flight in self.flights for j in self.slot_indexes))
 
     def run(self):
 
@@ -102,20 +99,20 @@ class Amal(mS.ModelStructure):
 
         print(self.m.status)
 
-        self.solution_array = self.make_solution_array(self.x)
+        self.solution_array = self.make_solution_array(self.y)
 
-        self.solution = sol.Solution(self)
+        print(self.solution_array)
 
-    def other_airlines_compatible_slots(self, flight):
-        others_slots = self.df[self.df["airline"] != flight.airline.name]["slot"].to_numpy()
-        return np.intersect1d(others_slots, flight.compatible_slots, assume_unique=True)
+        for i in range(self.solution_array.shape[0]):
+            flight = self.get_flight_by_slot_index(i)
+            if flight is not None:
+                print(flight, np.argwhere(self.solution_array[i] == 1))
+
+        # self.solution = sol.Solution(self)
 
     def make_solution_array(self, x):
         solution_array = np.zeros((self.slot_indexes.shape[0], self.slot_indexes.shape[0]))
         for flight in self.flights:
-            for j in self.slot_indexes:
-                solution_array[flight.slot, j] = x[flight.slot, j].x
+            for j in range(len(x[flight.num])):
+                solution_array[flight.slot, j] = x[flight.num][j].x
         return solution_array
-
-
-

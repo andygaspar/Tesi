@@ -17,7 +17,7 @@ class Flight:
 
         self.eta = line["eta"]
 
-        self.eta_slot = model.gdp_schedule[model.gdp_schedule <= self.eta][-1]
+        self.eta_slot = len(model.gdp_schedule[model.gdp_schedule <= self.eta]) - 1
 
         self.gdp_arrival = line["gdp schedule"]
 

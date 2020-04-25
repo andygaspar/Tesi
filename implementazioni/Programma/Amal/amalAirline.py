@@ -34,8 +34,6 @@ class AmalAirline(air.Airline):
 
         self.offerList = self.make_offer_list(model)
 
-        print(self.name, self.offerList)
-
     def get_offers_for_flight(self, flight):
 
         offer_for_flight_list = []
@@ -43,21 +41,22 @@ class AmalAirline(air.Airline):
         for offer in self.offerList:
             if offer.flightDown == flight:
                 offer_for_flight_list.append(offer)
-            if offer.flightUp == flight:
+            elif offer.flightUp == flight:
                 offer_for_flight_list.append(offer)
 
         return offer_for_flight_list
 
     def get_offer_slot_range(self, flight: modFl.AmalFlight):
 
-        airline_offer = self.get_offers_for_flight(flight)
-        default_offer = AmalOffer(flight, flight.slot, flight, flight.slot)
-        off_list = airline_offer + [default_offer]
+        off_list = self.get_offers_for_flight(flight)
+        first_slot = 1000000
         last_slot = 0
         for offer in off_list:
             if offer.flightDown == flight and offer.atMost > last_slot:
                 last_slot = offer.atMost
-        return range(flight.eta_slot, last_slot)
+            if offer.flightUp == flight and offer.atLeast < first_slot:
+                first_slot = offer.atLeast
+        return range(first_slot, last_slot + 1)
 
 
 """

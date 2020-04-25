@@ -13,13 +13,13 @@ df_init = df.iloc[0:30]
 
 
 
-model = mipModel.MipModel(df_init)
-
-model.run()
+# model = mipModel.MipModel(df_init)
+#
+# model.run()
 #
 #
-print(model.solution)
-
+#print(model.solution)
+print("*****+ AMAL *****************++")
 amal_model = amal.Amal(df_init, "1")
 amal_model.run()
 # print(model.solution.airline_balance)

@@ -42,6 +42,9 @@ class ModelStructure:
 
         self.solution = None
 
+    def cost_function(self, flight, j):
+        return flight.cost * self.delays[flight.slot, j]**2
+
     def __str__(self):
         return str(self.airlines)
 
@@ -53,6 +56,11 @@ class ModelStructure:
 
     def print_solution(self):
         print(self.solution_df)
+
+    def get_flight_by_slot_index(self, i):
+        for flight in self.flights:
+            if flight.slot == i:
+                return flight
 
     def find_match(self, i):
         for j in self.slot_indexes[self.slot_indexes != i]:
