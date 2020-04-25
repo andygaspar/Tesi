@@ -10,16 +10,17 @@ class ModelStructure:
             delays[flight.slot, j] = abs(self.gdp_schedule[j] - flight.eta)
         return delays
 
-    def print_gatto(self):
-        print("gatto")
+    @staticmethod
+    def delay_cost(flight, delay):
+        return flight.cost*delay**2
 
     def __init__(self, int_df):
 
         self.df = int_df
 
-        self.slot_indexes = np.array(self.df["slot"])
+        self.slot_indexes = self.df["slot"].to_numpy()
 
-        self.gdp_schedule = self.df["gdp schedule"]
+        self.gdp_schedule = self.df["gdp schedule"].to_numpy()
 
         from Programma.ModelStructure import airlineList as airList, flightList as fll
 
@@ -28,6 +29,8 @@ class ModelStructure:
         self.num_airlines = len(np.unique(self.df["airline"]))
 
         self.flights = fll.make_flight_list(self)
+
+        fll.assign_flight_num(self.flights)
 
         self.num_flights = len(self.flights)
 

@@ -7,6 +7,7 @@ class AmalOffer:
         self.atLeast = at_least
 
     def __repr__(self):
-        return "("+self.flightDown.name + ","+self.atMost + ";" + self.flightUp.name + "," + self.atLeast + ")"
+        return "("+self.flightDown.name + ","+str(self.atMost) + ";" \
+               + self.flightUp.name + "," + str(self.atLeast) + ")"
 
 

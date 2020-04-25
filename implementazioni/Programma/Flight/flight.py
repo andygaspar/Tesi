@@ -7,6 +7,8 @@ class Flight:
 
         self.slot = line["slot"]
 
+        self.num = None
+
         self.new_slot = None
 
         self.name = line["flight"]
@@ -14,6 +16,8 @@ class Flight:
         self.airline = airline
 
         self.eta = line["eta"]
+
+        self.eta_slot = model.gdp_schedule[model.gdp_schedule <= self.eta][-1]
 
         self.gdp_arrival = line["gdp schedule"]
 
@@ -25,12 +29,14 @@ class Flight:
 
         self.not_compatible_slots = np.setdiff1d(model.df["slot"], self.compatible_slots)
 
-
     def __str__(self):
         return self.name
 
     def __repr__(self):
         return self.name
+
+    def set_num(self, i):
+        self.num = i
 
     def compute_compatible_slots(self, df):
         try:

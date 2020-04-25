@@ -3,7 +3,6 @@ import pandas as pd
 from itertools import combinations
 
 from Programma.Flight import flight as fl
-# from Programma.Mip.modelProperties import ModelProperties
 from Programma.ModelStructure.modelStructure import ModelStructure
 
 
