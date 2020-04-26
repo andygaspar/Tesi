@@ -1,5 +1,4 @@
-import numpy as np
-import Programma.Solution.solution as sol
+import Programma.Mip.Solution.solution as sol
 import copy
 
 

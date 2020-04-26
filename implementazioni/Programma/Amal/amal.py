@@ -1,7 +1,5 @@
-from Programma.Airline import airline as al
 from Programma.ModelStructure import modelStructure as mS
 from mip import *
-from Programma.Solution import solution as sol
 from Programma.Amal import amalAirline as air
 from Programma.Amal import amalFlight as modFl
 
@@ -29,7 +27,7 @@ class Amal(mS.ModelStructure):
             j += 1
         return indexes
 
-    def __init__(self, df_in: pd.DataFrame, kind: str, model_name="amal"):
+    def __init__(self, df_in: pd.DataFrame, kind="1", model_name="amal"):
 
         self.airlineConstructor = air.AmalAirline
         self.flightConstructor = modFl.AmalFlight
@@ -48,9 +46,9 @@ class Amal(mS.ModelStructure):
         flight: modFl.AmalFlight
         airline: air.AmalAirline
         for flight in self.flights:
-            self.x.append([self.m.add_var(var_type=BINARY) for k in flight.airline.get_offers_for_flight(flight)])
+            self.x.append([self.m.add_var(var_type=BINARY) for k in flight.classes])
 
-            self.z.append([self.m.add_var(var_type=BINARY) for k in flight.airline.get_offers_for_flight(flight)])
+            self.z.append([self.m.add_var(var_type=BINARY) for k in flight.classes])
 
             self.y.append([self.m.add_var(var_type=BINARY) for j in self.slot_indexes])
 
@@ -58,22 +56,19 @@ class Amal(mS.ModelStructure):
         flight: modFl.AmalFlight
         airline: air.AmalAirline
         for flight in self.flights:
-            self.m += xsum(self.x[flight.num][k] for k in
-                           range(len(flight.airline.get_offers_for_flight(flight)))) == 1
+            self.m += xsum(self.x[flight.num][k] for k in range(len(flight.classes))) == 1
 
         for flight in self.flights:
             self.m += self.x[flight.num][0] + self.z[flight.num][0] - \
-                      xsum(self.y[flight.num][j] for j in flight.airline.get_offer_slot_range(flight)) == 0
+                      xsum(self.y[flight.num][j] for j in flight.class_range(0)) == 0
 
         for flight in self.flights:
-            for k in range(1, len(flight.airline.get_offer_slot_range(flight))):
-                print(flight)
-                self.m += self.x[flight.num][k] + self.z[flight.num][k] - self.z[flight.num][k-1] -\
-                          xsum(self.y[flight.num][j] for j in flight.airline.get_offer_slot_range(flight)) == 0
+            for k in range(1, len(flight.classes)):
+                self.m += self.x[flight.num][k] + self.z[flight.num][k] - self.z[flight.num][k-1] - \
+                          xsum(self.y[flight.num][j] for j in flight.class_range(k)) == 0
 
         for j in self.slot_indexes:
-            self.m += xsum(self.y[flight.num][j] for flight in self.flights
-                           if flight.num in flight.airline.get_offer_slot_range(flight)) == 1
+            self.m += xsum(self.y[flight.num][j] for flight in self.flights) == 1
 
     def set_objective(self):
         flight: modFl.AmalFlight
@@ -106,7 +101,11 @@ class Amal(mS.ModelStructure):
         for i in range(self.solution_array.shape[0]):
             flight = self.get_flight_by_slot_index(i)
             if flight is not None:
-                print(flight, np.argwhere(self.solution_array[i] == 1))
+                new_slot = np.argwhere(self.solution_array[i] == 1)[0][0]
+                if new_slot == flight.slot:
+                    print(flight, new_slot)
+                else:
+                    print(flight, new_slot, flight.slot)
 
         # self.solution = sol.Solution(self)
 

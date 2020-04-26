@@ -36,6 +36,8 @@ class ModelStructure:
 
         self.delays = self.compute_delays()
 
+        self.initial_total_costs = self.compute_costs(self.flights)
+
         self.empty_slots = self.df[int_df["flight"] == "Empty"]["slot"].to_numpy()
 
         self.solution_array = None
@@ -44,6 +46,10 @@ class ModelStructure:
 
     def cost_function(self, flight, j):
         return flight.cost * self.delays[flight.slot, j]**2
+
+    @staticmethod
+    def compute_costs(flights):
+        return sum([flight.cost for flight in flights])
 
     def __str__(self):
         return str(self.airlines)

@@ -24,6 +24,7 @@ class Airline:
 
         return np.array(flight_list)
 
+
     def __init__(self, df_airline: pd.DataFrame, airline_index, model: ModelStructure):
 
         self.df = df_airline
@@ -41,6 +42,10 @@ class Airline:
         self.flight_pairs = self.pairs(self.flights)
 
         self.flight_triplets = self.triplet(self.flights)
+
+        self.initialCosts = sum([flight.cost for flight in self.flights])
+
+        self.finalCosts = None
 
 
     def __str__(self):

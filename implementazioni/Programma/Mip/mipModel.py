@@ -1,12 +1,11 @@
 from Programma.ModelStructure import modelStructure as mS
 from mip import *
 import sys
-from Programma.Solution import solution as sol
+from Programma.Mip.Solution import solution as sol
 from Programma.Mip import modelAirline as air
 from Programma.Mip import modelFlight as modFl
 
 import numpy as np
-import pandas as pd
 
 import time
 
@@ -132,7 +131,7 @@ class MipModel(mS.ModelStructure):
         print(self.m.status)
 
         self.solution_array = self.make_solution_array(self.x)
-
+        # TO DO refactor solution
         self.solution = sol.Solution(self)
 
     def other_airlines_compatible_slots(self, flight):

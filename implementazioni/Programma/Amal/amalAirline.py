@@ -3,6 +3,7 @@ import pandas as pd
 from Programma.Amal.amalOffer import AmalOffer
 from Programma.Amal import amalFlight as modFl
 from Programma.Airline import airline as air
+from Programma.Amal import offerMaker as oM
 
 
 class AmalAirline(air.Airline):
@@ -15,24 +16,16 @@ class AmalAirline(air.Airline):
 
         return offer_cost < actual_cost
 
-    def make_offer_list(self, model):
-        if model.kind == "1":
-            offer_list = []
-            flight: modFl.AmalFlight
-            otherFlight: modFl.AmalFlight
-            for flight in self.flights:
-                default_offer = AmalOffer(flight, flight.slot, flight, flight.slot)
-                offer_list.append(default_offer)
-                for otherFlight in self.flights:
-                    if flight != otherFlight and self.convenient_offer(flight, otherFlight, model):
-                        offer_list.append(AmalOffer(otherFlight, model.slot_indexes[-1], flight, flight.eta_slot))
-            return offer_list
-
     def __init__(self, df_airline: pd.DataFrame, airline_index, model):
+
+        flight: modFl.AmalFlight
 
         super().__init__(df_airline, airline_index, model)
 
-        self.offerList = self.make_offer_list(model)
+        self.offerList = oM.make_offer_list(model, self)
+
+        for flight in self.flights:
+            flight.set_flight_offer_properties(self.get_offers_for_flight(flight))
 
     def get_offers_for_flight(self, flight):
 
@@ -40,23 +33,12 @@ class AmalAirline(air.Airline):
 
         for offer in self.offerList:
             if offer.flightDown == flight:
-                offer_for_flight_list.append(offer)
+                offer_for_flight_list.append(offer.atMost)
             elif offer.flightUp == flight:
-                offer_for_flight_list.append(offer)
+                offer_for_flight_list.append(offer.atLeast)
 
         return offer_for_flight_list
 
-    def get_offer_slot_range(self, flight: modFl.AmalFlight):
-
-        off_list = self.get_offers_for_flight(flight)
-        first_slot = 1000000
-        last_slot = 0
-        for offer in off_list:
-            if offer.flightDown == flight and offer.atMost > last_slot:
-                last_slot = offer.atMost
-            if offer.flightUp == flight and offer.atLeast < first_slot:
-                first_slot = offer.atLeast
-        return range(first_slot, last_slot + 1)
 
 
 """

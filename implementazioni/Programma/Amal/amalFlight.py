@@ -12,7 +12,19 @@ class AmalFlight(fl.Flight):
 
         self.currentDelay = self.gdp_arrival - self.eta
 
+        self.classes = None
 
+        self.slot_range = None
+
+    def set_flight_offer_properties(self, flight_offer_list):
+        self.classes = np.sort(flight_offer_list)
+        self.slot_range = range(self.classes[0], self.classes[-1] + 1)
+
+    def class_range(self, k):
+        if k == 0:
+            return range(self.eta_slot, self.classes[k]+1)
+
+        return range(self.classes[k-1]+1, self.classes[k]+1)
 
 
 
