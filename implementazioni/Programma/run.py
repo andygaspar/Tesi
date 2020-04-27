@@ -1,4 +1,4 @@
-
+from data import dfMaker
 import pandas as pd
 from Programma.Mip import mipModel
 from Programma.Amal import amal
@@ -13,14 +13,17 @@ df_init = df.iloc[0:30]
 
 print(df.airline.unique())
 
-model = mipModel.MipModel(df_init)
+df = dfMaker.df_maker(20, 3)
+print(df)
+
+model = mipModel.MipModel(df)
 
 model.run()
 #
 #
 #print(model.solution)
 print("*****+ AMAL *****************++")
-amal_model = amal.Amal(df_init, offerMakerFunType="1")
+amal_model = amal.Amal(df, offerMakerFunType="1")
 amal_model.run()
 # print(model.solution.airline_balance)
 # print(model.initial_objective_value)

@@ -26,20 +26,21 @@ def distribution_maker(num_flights, num_airlines, distribution="uniform"):
     dist = []
 
     if distribution == "uniform":
-        dist, loc = np.histogram(np.random.uniform(0, 1, 1000), bins=num_airlines)
+        h, loc = np.histogram(np.random.uniform(0, 1, 1000), bins=num_airlines)
+        dist = ((np.flip(np.sort(h)) / sum(h)) * num_flights).astype(int)
 
     if distribution == "few_high_few_low":
         f = lambda x: x ** 3 + 1
         base = np.linspace(-1, 1, num_airlines)
         custm = stats.rv_discrete(name='custm', values=(np.arange(num_airlines), f(base) / sum(f(base))))
-        h, l = np.histogram(custm.rvs(size=1000), bins=num_airlines)
+        h, loc = np.histogram(custm.rvs(size=1000), bins=num_airlines)
         dist = ((np.flip(np.sort(h)) / sum(h)) * num_flights).astype(int)
 
     if distribution == "few_low":
         f = lambda x: x ** 4 + 1
         base = np.linspace(-1, 1 / 4, num_airlines)
         custm = stats.rv_discrete(name='custm', values=(np.arange(num_airlines), f(base) / sum(f(base))))
-        h, l = np.histogram(custm.rvs(size=1000), bins=num_airlines)
+        h, loc = np.histogram(custm.rvs(size=1000), bins=num_airlines)
         dist = ((np.flip(np.sort(h)) / sum(h)) * num_flights).astype(int)
 
     if distribution == "few_high":
@@ -55,14 +56,14 @@ def distribution_maker(num_flights, num_airlines, distribution="uniform"):
         f = lambda x: x
         base = np.linspace(0, 1, num_airlines)
         custm = stats.rv_discrete(name='custm', values=(np.arange(num_airlines), f(base) / sum(f(base))))
-        h, l = np.histogram(custm.rvs(size=1000), bins=num_airlines)
+        h, loc = np.histogram(custm.rvs(size=1000), bins=num_airlines)
         dist = ((np.flip(np.sort(h)) / sum(h)) * num_flights).astype(int)
 
     if distribution == "hub":
         f = lambda x: x ** 10
         base = np.linspace(0, 1, num_airlines)
         custm = stats.rv_discrete(name='custm', values=(np.arange(num_airlines), f(base) / sum(f(base))))
-        h, l = np.histogram(custm.rvs(size=1000), bins=num_airlines)
+        h, loc = np.histogram(custm.rvs(size=1000), bins=num_airlines)
         dist = ((np.flip(np.sort(h)) / sum(h)) * num_flights).astype(int)
 
     dist = avoid_zero(dist, num_flights)
@@ -74,7 +75,7 @@ def df_maker(num_flights=20, num_airlines=3, distribution="uniform", capacity=1,
     dist = distribution_maker(num_flights, num_airlines, distribution)
     airline = [[string.ascii_uppercase[j] for i in range(dist[j])] for j in range(num_airlines)]
     airline = [val for sublist in airline for val in sublist]
-    airline = np.random.permutation(airline))
+    airline = np.random.permutation(airline)
     flights = ["F" + airline[i] + str(i + 1) for i in range(num_flights)]
 
     slot = np.arange(num_flights)

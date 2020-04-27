@@ -96,7 +96,6 @@ class Amal(mS.ModelStructure):
 
         self.solution_array = self.make_solution_array(self.y)
 
-        print(self.solution_array)
 
         for i in range(self.solution_array.shape[0]):
             flight = self.get_flight_by_slot_index(i)
