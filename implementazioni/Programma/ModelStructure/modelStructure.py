@@ -12,7 +12,7 @@ class ModelStructure:
 
     @staticmethod
     def delay_cost(flight, delay):
-        return flight.cost*delay**2
+        return flight.cost * delay ** 2
 
     def __init__(self, df_init, cost_kind):
 
@@ -22,8 +22,10 @@ class ModelStructure:
 
         self.gdp_schedule = self.df["gdp schedule"].to_numpy()
 
-        from Programma.ModelStructure import flightList as fll
+        from Programma.ModelStructure.Flight import flightList as fll
         from Programma.ModelStructure.Airline import airlineList as airList
+
+        self.cost_kind = cost_kind
 
         self.airlines = airList.make_airlines_list(self)
 
@@ -37,23 +39,29 @@ class ModelStructure:
 
         self.delays = self.compute_delays()
 
-        self.cost_kind = cost_kind
-
-        self.initial_total_costs = self.compute_costs(self.flights)
+        self.initial_total_costs = self.compute_costs(self.flights, "initial")
 
         self.empty_slots = self.df[self.df["flight"] == "Empty"]["slot"].to_numpy()
+
+        self.mipSolution = None
 
         self.solution_array = None
 
         self.solution = None
 
+        self.solutionDf = None
+
+        self.report = None
+
     def cost_function(self, flight, j):
         from Programma.ModelStructure.Costs.costs import cost_function
         return cost_function(self, flight, j)
 
-    @staticmethod
-    def compute_costs(flights):
-        return sum([flight.cost for flight in flights])
+    def compute_costs(self, flights, which):
+        if which == "initial":
+            return sum([self.cost_function(flight, flight.slot) for flight in flights])
+        if which == "final":
+            return sum([self.cost_function(flight, flight.new_slot) for flight in flights])
 
     def __str__(self):
         return str(self.airlines)
@@ -65,7 +73,7 @@ class ModelStructure:
         print(self.df)
 
     def print_solution(self):
-        print(self.solution_df)
+        print(self.solutionDf)
 
     def get_flight_by_slot_index(self, i):
         for flight in self.flights:
@@ -74,5 +82,7 @@ class ModelStructure:
 
     def find_match(self, i):
         for j in self.slot_indexes[self.slot_indexes != i]:
-            if self.solutionX[i.slot, j] == 1:
+            if self.mipSolution[i.slot, j] == 1:
                 return self.flights[j]
+
+

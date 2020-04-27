@@ -4,6 +4,7 @@ import sys
 from Programma.Mip.Solution import solution as sol
 from Programma.Mip import modelAirline as air
 from Programma.Mip import modelFlight as modFl
+from Programma.ModelStructure.Solution import solution
 
 import numpy as np
 
@@ -130,20 +131,14 @@ class MipModel(mS.ModelStructure):
 
         print(self.m.status)
 
-        self.solution_array = self.make_solution_array(self.x)
-        # TO DO refactor solution
-        self.solution = sol.Solution(self)
+        self.mipSolution = self.x
+        # solution.make_solution_array(self)
+        # self.solution = sol.Solution(self)
+        solution.make_solution(self)
 
     def other_airlines_compatible_slots(self, flight):
         others_slots = self.df[self.df["airline"] != flight.airline.name]["slot"].to_numpy()
         return np.intersect1d(others_slots, flight.compatible_slots, assume_unique=True)
-
-    def make_solution_array(self, x):
-        solution_array = np.zeros((self.slot_indexes.shape[0], self.slot_indexes.shape[0]))
-        for flight in self.flights:
-            for j in self.slot_indexes:
-                solution_array[flight.slot, j] = x[flight.slot, j].x
-        return solution_array
 
     def score(self, flight, j):
         return (flight.preference * self.delays[flight.slot, j] ** 2) / 2

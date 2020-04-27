@@ -6,24 +6,13 @@ from Programma.Amal import offerMaker as oM
 
 class AmalAirline(air.Airline):
 
-    @staticmethod
-    def convenient_offer(flight: modFl.AmalFlight, otherFlight: modFl.AmalFlight, model):
-        actual_cost = model.delay_cost(flight, flight.currentDelay) + \
-                      model.delay_cost(otherFlight, otherFlight.currentDelay)
-        offer_cost = model.delay_cost(otherFlight, model.gdp_schedule[-1] - otherFlight.eta)
-
-        return offer_cost < actual_cost
-
     def __init__(self, df_airline: pd.DataFrame, airline_index, model):
 
         flight: modFl.AmalFlight
 
         super().__init__(df_airline, airline_index, model)
 
-        self.offerList = oM.make_offer_list(model, self)
-
-        for flight in self.flights:
-            flight.set_flight_offer_properties(self.get_offers_for_flight(flight))
+        self.offerList = None
 
     def get_offers_for_flight(self, flight):
 
@@ -37,6 +26,12 @@ class AmalAirline(air.Airline):
 
         return offer_for_flight_list
 
+    def set_offers(self, model):
+
+        self.offerList = oM.make_offer_list(model, self)
+
+        for flight in self.flights:
+            flight.set_flight_offer_properties(self.get_offers_for_flight(flight))
 
 
 """
