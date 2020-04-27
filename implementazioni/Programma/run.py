@@ -11,16 +11,16 @@ df = pd.read_csv("../data/data_ruiz.csv")
 
 df_init = df.iloc[0:30]
 
+print(df.airline.unique())
 
+model = mipModel.MipModel(df_init)
 
-# model = mipModel.MipModel(df_init)
-#
-# model.run()
+model.run()
 #
 #
 #print(model.solution)
 print("*****+ AMAL *****************++")
-amal_model = amal.Amal(df_init, "1")
+amal_model = amal.Amal(df_init, offerMakerFunType="1")
 amal_model.run()
 # print(model.solution.airline_balance)
 # print(model.initial_objective_value)

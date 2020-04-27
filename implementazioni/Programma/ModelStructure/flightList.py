@@ -19,7 +19,7 @@ def get_flight(i, airlines):
 
 
 def assign_flight_num(flight_list):
-    from Programma.Flight.flight import Flight
+    from Programma.ModelStructure.Flight.flight import Flight
     flight: Flight
     i = 0
     for flight in flight_list:

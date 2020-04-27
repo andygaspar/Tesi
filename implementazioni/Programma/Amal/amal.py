@@ -27,12 +27,12 @@ class Amal(mS.ModelStructure):
             j += 1
         return indexes
 
-    def __init__(self, df_in: pd.DataFrame, kind="1", model_name="amal"):
+    def __init__(self, df_init: pd.DataFrame, cost_kind="quadratic", offerMakerFunType="1", model_name="amal"):
 
         self.airlineConstructor = air.AmalAirline
         self.flightConstructor = modFl.AmalFlight
-        self.kind = kind
-        super().__init__(df_in)
+        self.offerMakerFunType = offerMakerFunType
+        super().__init__(df_init=df_init, cost_kind=cost_kind)
 
         self.m = Model(model_name)
         self.x = []

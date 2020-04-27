@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from itertools import combinations
 
-from Programma.Flight import flight as fl
 from Programma.ModelStructure.modelStructure import ModelStructure
 
 

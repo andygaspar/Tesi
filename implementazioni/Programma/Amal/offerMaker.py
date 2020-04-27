@@ -6,7 +6,7 @@ def make_offer_list(model, airline):
     from Programma.Amal import amalAirline
 
     airline: amalAirline.AmalAirline
-    if model.kind == "1":
+    if model.offerMakerFunType == "1":
         offer_list = []
         flight: modFl.AmalFlight
         otherFlight: modFl.AmalFlight

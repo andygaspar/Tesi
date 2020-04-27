@@ -1,4 +1,4 @@
-from Programma.Airline import airline as al
+from Programma.ModelStructure.Airline import airline as al
 from Programma.ModelStructure import modelStructure as mS
 import xpress as xp
 from Programma.Mip.Solution import solution as sol

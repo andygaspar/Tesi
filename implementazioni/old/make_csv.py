@@ -47,4 +47,4 @@ for i in range(df.shape[0]):
 df_final["airline"]=airlines
 df_final
 
-df_final.to_csv("ruiz.csv")
+df_final.to_csv("ruiz_3.csv")

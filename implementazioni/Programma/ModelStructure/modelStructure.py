@@ -14,15 +14,16 @@ class ModelStructure:
     def delay_cost(flight, delay):
         return flight.cost*delay**2
 
-    def __init__(self, int_df):
+    def __init__(self, df_init, cost_kind):
 
-        self.df = int_df
+        self.df = df_init
 
         self.slot_indexes = self.df["slot"].to_numpy()
 
         self.gdp_schedule = self.df["gdp schedule"].to_numpy()
 
-        from Programma.ModelStructure import airlineList as airList, flightList as fll
+        from Programma.ModelStructure import flightList as fll
+        from Programma.ModelStructure.Airline import airlineList as airList
 
         self.airlines = airList.make_airlines_list(self)
 
@@ -36,16 +37,19 @@ class ModelStructure:
 
         self.delays = self.compute_delays()
 
+        self.cost_kind = cost_kind
+
         self.initial_total_costs = self.compute_costs(self.flights)
 
-        self.empty_slots = self.df[int_df["flight"] == "Empty"]["slot"].to_numpy()
+        self.empty_slots = self.df[self.df["flight"] == "Empty"]["slot"].to_numpy()
 
         self.solution_array = None
 
         self.solution = None
 
     def cost_function(self, flight, j):
-        return flight.cost * self.delays[flight.slot, j]**2
+        from Programma.ModelStructure.Costs.costs import cost_function
+        return cost_function(self, flight, j)
 
     @staticmethod
     def compute_costs(flights):

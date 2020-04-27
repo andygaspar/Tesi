@@ -1,8 +1,6 @@
-import numpy as np
 import pandas as pd
-from Programma.Amal.amalOffer import AmalOffer
 from Programma.Amal import amalFlight as modFl
-from Programma.Airline import airline as air
+from Programma.ModelStructure.Airline import airline as air
 from Programma.Amal import offerMaker as oM
 
 

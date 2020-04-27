@@ -28,12 +28,12 @@ class MipModel(mS.ModelStructure):
             j += 1
         return indexes
 
-    def __init__(self, df_in, f=lambda x, y: x * y, model_name="model"):
+    def __init__(self, df_init, f=lambda x, y: x * y, cost_kind="quadratic", model_name="model"):
 
         self.f = f
         self.airlineConstructor = air.ModelAirline
         self.flightConstructor = modFl.ModelFlight
-        super().__init__(df_in)
+        super().__init__(df_init=df_init, cost_kind=cost_kind)
 
         self.airlines_pairs = air.ModelAirline.pairs(self.airlines)
 

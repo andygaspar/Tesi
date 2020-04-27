@@ -1,5 +1,5 @@
 import numpy as np
-from Programma.Flight import flight as fl
+from Programma.ModelStructure.Flight import flight as fl
 
 
 class AmalFlight(fl.Flight):

@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 from itertools import combinations
-from Programma.Flight import flight as fl
-from Programma.Airline import airline as air
+from Programma.ModelStructure.Flight import flight as fl
+from Programma.ModelStructure.Airline import airline as air
 
 
 class ModelAirline(air.Airline):
