@@ -23,6 +23,7 @@ class Amal(mS.ModelStructure):
             airline.set_offers(self)
 
         self.m = Model(model_name)
+        self.offers = [offer for airline in self.airlines for offer in airline.offerList]
         self.x = []
         self.z = []
         self.y = []
@@ -39,6 +40,8 @@ class Amal(mS.ModelStructure):
             self.z.append([self.m.add_var(var_type=BINARY) for k in flight.classes])
 
             self.y.append([self.m.add_var(var_type=BINARY) for j in self.slot_indexes])
+
+        self.xo = [self.m.add_var(var_type=BINARY) for k in self.offers]
 
     def set_constraints(self):
         flight: modFl.AmalFlight
@@ -57,6 +60,13 @@ class Amal(mS.ModelStructure):
 
         for j in self.slot_indexes:
             self.m += xsum(self.y[flight.num][j] for flight in self.flights) == 1
+
+        for flight in self.flights:
+            for k in np.where(flight.classes[flight.classes > flight.slot])[0]:
+                self.m += self.x[flight.num][k] == xsum([self.xo[j] for j in self.get_down_set(flight, k)])
+
+            for k in np.where(flight.classes[flight.classes < flight.slot])[0]:
+                self.m += self.x[flight.num][k] == xsum([self.xo[j] for j in self.get_up_set(flight, k)])
 
     def set_objective(self):
         flight: modFl.AmalFlight
@@ -86,5 +96,28 @@ class Amal(mS.ModelStructure):
 
         solution.make_solution(self)
 
+    def get_down_set(self, flight, k):
+        from Programma.Amal.amalOffer import AmalOffer
+        offer: AmalOffer
+        down_offer_index_list = []
+        j = 0
+        for offer in self.offers:
+            if offer.flightDown == flight and offer.atMost == k:
+                down_offer_index_list.append(j)
+            j += 1
+
+        return down_offer_index_list
+
+    def get_up_set(self, flight, k):
+        from Programma.Amal.amalOffer import AmalOffer
+        offer: AmalOffer
+        down_offer_index_list = []
+        j = 0
+        for offer in self.offers:
+            if offer.flightUp == flight and offer.atLeast == k:
+                down_offer_index_list.append(j)
+            j += 1
+
+        return down_offer_index_list
 
 
