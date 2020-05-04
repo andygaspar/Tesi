@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from itertools import combinations
-from Programma.ModelStructure.Flight import flight as fl
+from Programma.Mip.modelFlight import ModelFlight
 from Programma.ModelStructure.Airline import airline as air
 
 
@@ -9,7 +9,9 @@ class ModelAirline(air.Airline):
 
     @staticmethod
     def pairs(list_to_comb):
-        return np.array(list(combinations(list_to_comb, 2)))
+        comb = np.array(list(combinations(list_to_comb, 2)))
+        offers = [pair for pair in comb if np.abs(pair[0].cost-pair[1].cost) > 0.40]
+        return offers
 
     @staticmethod
     def triplet(list_to_comb):
@@ -27,7 +29,7 @@ class ModelAirline(air.Airline):
 
         self.flight_triplets = self.triplet(self.flights)
 
-        flight: fl.Flight
+        flight: ModelFlight
         for flight in self.flights:
             df_flight = self.df[self.df["flight"] == flight.name]
             flight.set_priority(df_flight["priority"].values[0])

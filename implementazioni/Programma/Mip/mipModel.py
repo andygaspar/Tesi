@@ -2,6 +2,7 @@ from Programma.ModelStructure import modelStructure as mS
 from mip import *
 import sys
 from Programma.Mip.Solution import solution as sol
+from itertools import combinations
 from Programma.Mip import modelAirline as air
 from Programma.Mip import modelFlight as modFl
 from Programma.ModelStructure.Solution import solution
@@ -36,7 +37,7 @@ class MipModel(mS.ModelStructure):
         self.flightConstructor = modFl.ModelFlight
         super().__init__(df_init=df_init, cost_kind=cost_kind)
 
-        self.airlines_pairs = air.ModelAirline.pairs(self.airlines)
+        self.airlines_pairs = np.array(list(combinations(self.airlines, 2)))
 
         self.epsilon = sys.float_info.min
         self.m = Model(model_name)
@@ -49,7 +50,7 @@ class MipModel(mS.ModelStructure):
 
     def set_variables(self):
 
-        self.x = np.array([[self.m.add_var(var_type=BINARY) for j in self.slot_indexes] for i in self.slot_indexes])
+        self.x = np.array([[self.m.add_var(var_type=BINARY) for j in self.slotIndexes] for i in self.slotIndexes])
 
         self.c = np.array(
             [[self.m.add_var(var_type=BINARY) for i in airline.flight_pairs] for airline in self.airlines])
@@ -57,14 +58,14 @@ class MipModel(mS.ModelStructure):
     def set_constraints(self):
 
         for i in self.empty_slots:
-            for j in self.slot_indexes:
+            for j in self.slotIndexes:
                 self.m += self.x[i, j] == 0
 
         for flight in self.flights:
             self.m += xsum(self.x[flight.slot, j] for j in flight.compatible_slots) == 1
 
-        for j in self.slot_indexes:
-            self.m += xsum(self.x[i, j] for i in self.slot_indexes) <= 1
+        for j in self.slotIndexes:
+            self.m += xsum(self.x[i, j] for i in self.slotIndexes) <= 1
 
         for flight in self.flights:
             for j in flight.not_compatible_slots:
@@ -73,7 +74,7 @@ class MipModel(mS.ModelStructure):
         for flight in self.flights:
             for slot_to_swap in self.other_airlines_compatible_slots(flight):
                 self.m += self.x[flight.slot, slot_to_swap] <= xsum(
-                    [self.c[flight.airline.airline_index][j] for j in self.get_tuple(flight)])
+                    [self.c[flight.airline.index][j] for j in self.get_tuple(flight)])
 
         for flight in self.flights:
             for other_flight in flight.airline.flights:
@@ -107,7 +108,7 @@ class MipModel(mS.ModelStructure):
     def set_objective(self):
 
         self.m.objective = minimize(
-            xsum(self.x[flight.slot, j] * self.score(flight, j) for flight in self.flights for j in self.slot_indexes) \
+            xsum(self.x[flight.slot, j] * self.score(flight, j) for flight in self.flights for j in self.slotIndexes) \
             + xsum(
                 self.c[self.index(self.airlines, air)][self.index(air.flight_pairs, j)] for air in self.airlines for j
                 in

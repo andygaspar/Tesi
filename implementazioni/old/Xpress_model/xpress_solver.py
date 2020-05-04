@@ -38,7 +38,7 @@ class XpressModel(mS.ModelStructure):
 
     def set_variables(self):
 
-        self.x = np.array([[xp.var(vartype=xp.binary) for j in self.slot_indexes] for i in self.slot_indexes])
+        self.x = np.array([[xp.var(vartype=xp.binary) for j in self.slotIndexes] for i in self.slotIndexes])
 
         self.c = np.array([[xp.var(vartype=xp.binary) for i in airl.flight_pairs] for airl in self.airlines])
 
@@ -47,14 +47,14 @@ class XpressModel(mS.ModelStructure):
     def set_constraints(self):
 
         for i in self.empty_slots:
-            for j in self.slot_indexes:
+            for j in self.slotIndexes:
                 self.m.addConstraint(self.x[i, j] == 0)
 
         for flight in self.flights:
             self.m.addConstraint(xp.Sum(self.x[flight.slot, j] for j in flight.compatible_slots) == 1)
 
-        for j in self.slot_indexes:
-            self.m.addConstraint(xp.Sum(self.x[i, j] for i in self.slot_indexes) <= 1)
+        for j in self.slotIndexes:
+            self.m.addConstraint(xp.Sum(self.x[i, j] for i in self.slotIndexes) <= 1)
 
         for flight in self.flights:
             for j in flight.not_compatible_slots:
@@ -63,7 +63,7 @@ class XpressModel(mS.ModelStructure):
         for flight in self.flights:
             for slot_to_swap in self.other_airlines_compatible_slots(flight):
                 self.m.addConstraint(self.x[flight.slot, slot_to_swap] <= xp.Sum(
-                    [self.c[flight.airline.airline_index][j] for j in self.get_tuple(flight)]))
+                    [self.c[flight.airline.index][j] for j in self.get_tuple(flight)]))
 
         for flight in self.flights:
             for other_flight in flight.airline.flights:
@@ -97,7 +97,7 @@ class XpressModel(mS.ModelStructure):
     def set_objective(self):
 
         self.m.setObjective(
-            xp.Sum(self.x[flight.slot, j] * self.score(flight, j) for flight in self.flights for j in self.slot_indexes) \
+            xp.Sum(self.x[flight.slot, j] * self.score(flight, j) for flight in self.flights for j in self.slotIndexes) \
             + xp.Sum(
                 self.c[self.index(self.airlines, air)][self.index(air.flight_pairs, j)] for air in self.airlines for j
                 in
@@ -130,9 +130,9 @@ class XpressModel(mS.ModelStructure):
         return np.intersect1d(others_slots, flight.compatible_slots, assume_unique=True)
 
     def make_solution_array(self, x):
-        solution_array = np.zeros((self.slot_indexes.shape[0], self.slot_indexes.shape[0]))
+        solution_array = np.zeros((self.slotIndexes.shape[0], self.slotIndexes.shape[0]))
         for flight in self.flights:
-            for j in self.slot_indexes:
+            for j in self.slotIndexes:
                 solution_array[flight.slot, j] = x[flight.slot, j].x
         return solution_array
 

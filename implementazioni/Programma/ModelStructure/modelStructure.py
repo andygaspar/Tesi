@@ -5,8 +5,8 @@ from itertools import product
 class ModelStructure:
 
     def compute_delays(self):
-        delays = np.zeros((self.slot_indexes.shape[0], self.slot_indexes.shape[0]))
-        for flight, j in product(self.flights, self.slot_indexes):
+        delays = np.zeros((self.slotIndexes.shape[0], self.slotIndexes.shape[0]))
+        for flight, j in product(self.flights, self.slotIndexes):
             delays[flight.slot, j] = abs(self.gdp_schedule[j] - flight.eta)
         return delays
 
@@ -18,7 +18,7 @@ class ModelStructure:
 
         self.df = df_init
 
-        self.slot_indexes = self.df["slot"].to_numpy()
+        self.slotIndexes = self.df["slot"].to_numpy()
 
         self.gdp_schedule = self.df["gdp schedule"].to_numpy()
 
@@ -80,8 +80,13 @@ class ModelStructure:
             if flight.slot == i:
                 return flight
 
+    def get_flight_name(self, f_name):
+        for flight in self.flights:
+            if flight.name == f_name:
+                return flight
+
     def find_match(self, i):
-        for j in self.slot_indexes[self.slot_indexes != i]:
+        for j in self.slotIndexes[self.slotIndexes != i]:
             if self.mipSolution[i.slot, j] == 1:
                 return self.flights[j]
 

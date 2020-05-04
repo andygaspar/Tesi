@@ -22,8 +22,8 @@ class Solution:
     def make_solution_df(model):
         cols = ["slot", "flight", "airline", "gdp_schedule", "old_schedule", "initial eta", "cost", "old cost", "priority"]
         df = pd.DataFrame(columns=cols)
-        for j in model.slot_indexes:
-            for i in model.slot_indexes:
+        for j in model.slotIndexes:
+            for i in model.slotIndexes:
                 if model.solution_array[i, j] != 0:
                     flight = get_flight(i, model.flights)
                     row = dict(zip(cols,
@@ -39,14 +39,14 @@ class Solution:
         new_balance = np.zeros(model.airlines.shape[0])
         for airline in model.airlines:
             for flight in airline.flights:
-                old_balance[airline.airline_index] += flight.cost * model.delays[flight.slot, flight.slot]
-                new_balance[airline.airline_index] += flight.cost * model.delays[flight.slot, flight.new_slot]
+                old_balance[airline.index] += flight.cost * model.delays[flight.slot, flight.slot]
+                new_balance[airline.index] += flight.cost * model.delays[flight.slot, flight.new_slot]
         return pd.DataFrame({"airline": model.airlines, "new balance": new_balance, "old balance": old_balance})
 
     @staticmethod
     def update_flights_status(model):
-        for j in model.slot_indexes:
-            for i in model.slot_indexes:
+        for j in model.slotIndexes:
+            for i in model.slotIndexes:
                 if model.solution_array[i, j] != 0:
                     flight = get_flight(i, model.flights)
                     flight.new_slot = j

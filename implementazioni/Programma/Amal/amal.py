@@ -39,7 +39,7 @@ class Amal(mS.ModelStructure):
 
             self.z.append([self.m.add_var(var_type=BINARY) for k in flight.classes])
 
-            self.y.append([self.m.add_var(var_type=BINARY) for j in self.slot_indexes])
+            self.y.append([self.m.add_var(var_type=BINARY) for j in self.slotIndexes])
 
         self.xo = [self.m.add_var(var_type=BINARY) for k in self.offers]
 
@@ -58,7 +58,7 @@ class Amal(mS.ModelStructure):
                 self.m += self.x[flight.num][k] + self.z[flight.num][k] - self.z[flight.num][k-1] - \
                           xsum(self.y[flight.num][j] for j in flight.class_range(k)) == 0
 
-        for j in self.slot_indexes:
+        for j in self.slotIndexes:
             self.m += xsum(self.y[flight.num][j] for flight in self.flights) == 1
 
         for flight in self.flights:
@@ -72,7 +72,7 @@ class Amal(mS.ModelStructure):
         flight: modFl.AmalFlight
         self.m.objective = minimize(
             xsum(self.y[flight.num][j] * self.cost_function(flight, j)
-                 for flight in self.flights for j in self.slot_indexes))
+                 for flight in self.flights for j in self.slotIndexes))
 
     def run(self):
 

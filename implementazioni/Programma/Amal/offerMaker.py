@@ -3,7 +3,7 @@ def convenient_offer(flight, otherFlight, model):
     model: ModelStructure
     actual_cost = model.cost_function(flight, flight.slot) \
                   + model.cost_function(otherFlight, otherFlight.slot)
-    offer_cost = model.cost_function(otherFlight, model.slot_indexes[-1])
+    offer_cost = model.cost_function(otherFlight, model.slotIndexes[-1])
 
     if offer_cost < actual_cost:
         print("")
@@ -26,7 +26,7 @@ def make_offer_list(model, airline):
             offer_list.append(default_offer)
             for otherFlight in airline.flights:
                 if flight != otherFlight and convenient_offer(flight, otherFlight, model):
-                    offer_list.append(AmalOffer(otherFlight, model.slot_indexes[-1], flight, flight.eta_slot))
+                    offer_list.append(AmalOffer(otherFlight, model.slotIndexes[-1], flight, flight.eta_slot))
         return offer_list
 
 """
