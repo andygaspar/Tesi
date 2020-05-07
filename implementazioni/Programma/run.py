@@ -6,7 +6,7 @@ from Programma.UDPP import udppModel
 
 # df = pd.read_csv("../data/data_ruiz.csv")
 
-df_amal = dfMaker.df_maker(50, 5, distribution="few_high")
+df_amal = dfMaker.df_maker(30, 5, distribution="few_high")
 df_UDPP = df_amal.copy(deep=True)
 print(df_amal)
 
