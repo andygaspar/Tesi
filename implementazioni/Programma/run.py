@@ -12,10 +12,10 @@ print(df_amal)
 
 amal_model = amal.Amal(df_amal, offerMakerFunType="1")
 amal_model.run()
-
-udpp_model = udppModel.UDPPModel(df_UDPP)
-
-model = mipModel.MipModel(udpp_model.get_new_df())
-model.run()
+#
+# udpp_model = udppModel.UDPPModel(df_UDPP)
+#
+# model = mipModel.MipModel(udpp_model.get_new_df())
+# model.run()
 
 

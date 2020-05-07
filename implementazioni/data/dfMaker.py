@@ -76,7 +76,7 @@ def df_maker(num_flights=20, num_airlines=3, distribution="uniform", capacity=1,
     airline = [[string.ascii_uppercase[j] for i in range(dist[j])] for j in range(num_airlines)]
     airline = [val for sublist in airline for val in sublist]
     airline = np.random.permutation(airline)
-    flights = ["F" + airline[i] + str(i + 1) for i in range(num_flights)]
+    flights = ["F" + airline[i] + str(i) for i in range(num_flights)]
 
     slot = np.arange(num_flights)
     eta = slot * capacity
