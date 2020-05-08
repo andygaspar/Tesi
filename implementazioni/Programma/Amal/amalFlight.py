@@ -17,7 +17,7 @@ class AmalFlight(fl.Flight):
         self.slot_range = None
 
     def set_flight_offer_properties(self, flight_offer_list):
-        self.classes = np.sort(flight_offer_list)
+        self.classes = np.unique(np.sort(flight_offer_list))
         self.slot_range = range(self.classes[0], self.classes[-1] + 1)
 
     def class_range(self, k):

@@ -62,15 +62,11 @@ class Amal(mS.ModelStructure):
             self.m += xsum(self.y[flight.num][j] for flight in self.flights) == 1
 
         for flight in self.flights:
-            print(flight,flight.classes)
-            for k in range(len(flight.classes)):
-                print(flight, flight.classes[k])
-                self.m += self.x[flight.num][k] == xsum(self.xo[j] for j in self.get_offers_for_flight(flight, k))
-            # for k in np.where(flight.classes > flight.slot)[0]:
-            #     self.m += self.x[flight.num][k] == xsum([self.xo[j] for j in self.get_down_set(flight, k)])
-            #
-            # for k in np.where(flight.classes < flight.slot)[0]:
-            #     self.m += self.x[flight.num][k] == xsum([self.xo[j] for j in self.get_up_set(flight, k)])
+            for k in np.where(flight.classes > flight.slot)[0]:
+                self.m += self.x[flight.num][k] == xsum([self.xo[j] for j in self.get_down_set(flight, k)])
+
+            for k in np.where(flight.classes < flight.slot)[0]:
+                self.m += self.x[flight.num][k] == xsum([self.xo[j] for j in self.get_up_set(flight, k)])
 
     def set_objective(self):
         flight: modFl.AmalFlight
@@ -106,7 +102,7 @@ class Amal(mS.ModelStructure):
         down_offer_index_list = []
         j = 0
         for offer in self.offers:
-            if offer.flightDown == flight and offer.atMost == flight.classes[k]:
+            if offer.flightDown == flight and offer.flightUp != flight and offer.atMost == flight.classes[k]:
                 down_offer_index_list.append(j)
             j += 1
 
@@ -118,25 +114,11 @@ class Amal(mS.ModelStructure):
         up_offer_index_list = []
         j = 0
         for offer in self.offers:
-            if offer.flightUp == flight and offer.atLeast == flight.classes[k]:
+            if offer.flightUp == flight and offer.flightDown != flight and offer.atLeast == flight.classes[k]:
                 up_offer_index_list.append(j)
             j += 1
 
         return up_offer_index_list
 
-    def get_offers_for_flight(self, flight, k):
-        from Programma.Amal.amalOffer import AmalOffer
-        offer: AmalOffer
-        offer_index_list = []
-        j = 0
-        for offer in self.offers:
-            if offer.flightUp == flight and offer.atLeast == flight.classes[k]:
-                offer_index_list.append(j)
-                print(offer)
-            elif offer.flightDown == flight and offer.atMost == flight.classes[k]:
-                offer_index_list.append(j)
-                print(offer)
-            j += 1
-        return offer_index_list
 
 

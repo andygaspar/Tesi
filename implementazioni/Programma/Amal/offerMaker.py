@@ -24,6 +24,7 @@ def make_offer_list(model, airline):
         for flight in airline.flights:
             default_offer = AmalOffer(flight, flight.slot, flight, flight.slot)
             offer_list.append(default_offer)
+
             for otherFlight in airline.flights:
                 if flight != otherFlight and convenient_offer(flight, otherFlight, model):
                     offer_list.append(AmalOffer(otherFlight, model.slotIndexes[-1], flight, flight.eta_slot))
