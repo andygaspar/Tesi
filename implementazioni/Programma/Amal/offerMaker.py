@@ -1,9 +1,18 @@
-def convenient_offer(flight, otherFlight, model):
+
+
+def remove_flight(flight_list, flight):
+    new_list = []
+    for f in flight_list:
+        if f != flight:
+            new_list.append(f)
+    return new_list
+
+
+def convenient_offer(flight, f_offer, otherFlight, of_offer, model):
     from Programma.ModelStructure.modelStructure import ModelStructure
     model: ModelStructure
-    actual_cost = model.cost_function(flight, flight.slot) \
-                  + model.cost_function(otherFlight, otherFlight.slot)
-    offer_cost = model.cost_function(otherFlight, model.slotIndexes[-1])
+    actual_cost = model.cost_function(flight, flight.slot) + model.cost_function(otherFlight, otherFlight.slot)
+    offer_cost = model.cost_function(flight, f_offer) + model.cost_function(otherFlight, of_offer)
 
     if offer_cost < actual_cost:
         print("")
@@ -17,18 +26,28 @@ def make_offer_list(model, airline):
 
     airline: amalAirline.AmalAirline
 
-    if model.offerMakerFunType == "1":
-        offer_list = []
-        flight: modFl.AmalFlight
-        otherFlight: modFl.AmalFlight
-        for flight in airline.flights:
-            default_offer = AmalOffer(flight, flight.slot, flight, flight.slot)
-            offer_list.append(default_offer)
+    offer_list = []
+    flight: modFl.AmalFlight
+    otherFlight: modFl.AmalFlight
+    for flight in airline.flights:
+        default_offer = AmalOffer(flight, flight.slot, flight, flight.slot)
+        offer_list.append(default_offer)
+        other_flights = remove_flight(airline.flights, flight)
 
-            for otherFlight in airline.flights:
-                if flight != otherFlight and convenient_offer(flight, otherFlight, model):
-                    offer_list.append(AmalOffer(otherFlight, model.slotIndexes[-1], flight, flight.eta_slot))
-        return offer_list
+        for otherFlight in other_flights:
+            if model.offerMakerFunType == "1":
+
+                flight_offer = flight.eta_slot
+                exchange_offer = model.slotIndexes[-1]
+                if convenient_offer(flight, flight_offer, otherFlight, exchange_offer, model):
+                    offer_list.append(AmalOffer(otherFlight, exchange_offer, flight, flight_offer))
+
+
+            if model.offerMakerFunType == "2":
+
+                if convenient_offer(flight, flight_offer, otherFlight, exchange_offer, model):
+                    offer_list.append(AmalOffer(otherFlight, exchange_offer, flight, flight_offer))
+    return offer_list
 
 """
     def from_csv(self, df_airline):

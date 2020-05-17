@@ -15,6 +15,7 @@ class UDPPAirline(Airline):
 
         self.modelFlightList = None
         self.slotIndexes = model.slotIndexes
+        self.AUslots = np.array([flight.slot for flight in self.flights])
 
         self.m = self.m = Model(self.name)
         self.x = None
@@ -91,3 +92,77 @@ class UDPPAirline(Airline):
                 # print(ysol, "    ", [flight.slot for flight in self.flights])
 
         # print("\n\n*****")
+
+
+
+    def UDPPLocal_1(self):
+        print(self.num_flights)
+        self.x = np.array([[self.m.add_var(var_type=BINARY) for j in self.flights] for i in self.flights])
+
+        self.y = np.array([[self.m.add_var(var_type=BINARY) for j in self.slotIndexes] for i in self.flights])
+
+        flight: UDPPFlight
+
+        self.m += xsum(self.x[0, k] for k in range(self.num_flights)) == 1
+
+        # slot constraint
+        for k in range(self.num_flights - 1):
+            self.m += xsum(self.x[flight.localNum, k] for flight in self.flights) + \
+                      xsum(self.y[flight.localNum, self.AUslots[k]] for flight in self.flights) \
+                      <= 1
+
+            self.m += xsum(self.y[flight.localNum, j] for flight in self.flights for j in range(self.AUslots[k])) <= \
+                      xsum(self.x[i, j] for i in range(k) for j in range(k, self.num_flights)) \
+
+        # last slot
+        self.m += xsum(self.x[flight.localNum, self.num_flights - 1] for flight in self.flights) == 1
+
+        # not earlier than AU first flight
+        self.m += xsum(self.y[flight.localNum, j] for flight in self.flights for j in range(self.flights[0].slot)) == 0
+
+        for flight in self.flights[1:]:
+            # flight assignment
+            self.m += xsum(self.y[flight.localNum, j] for j in range(flight.eta_slot, flight.slot)) + \
+                      xsum(self.x[flight.localNum, k] for k in range(flight.localNum, self.num_flights)) == 1
+
+            self.m += xsum(self.y[flight.localNum, j] for j in self.slotIndexes) + \
+                      xsum(self.x[flight.localNum, k] for k in range(self.num_flights)) == 1
+
+
+
+        from Programma.ModelStructure.modelStructure import ModelStructure
+        self.model: ModelStructure
+
+        self.m.objective = minimize(
+            xsum(self.y[flight.localNum][j] * self.model.cost_function(flight, j)
+                 for flight in self.flights for j in self.slotIndexes) +
+            xsum(self.x[flight.localNum][k] * self.model.cost_function(flight, self.flights[k].num)
+                 for flight in self.flights for k in range(self.num_flights)))
+
+        self.m.optimize()
+
+        print(self.m.status)
+
+        for flight in self.flights:
+            xsol = "*"
+            ysol = "*"
+
+            for k in range(self.num_flights):
+                if self.x[flight.localNum, k].x != 0:
+                    xsol = self.flights[k].slot
+                    flight.UDPPsolution = self.flights[k].slot
+
+            for j in self.slotIndexes:
+                if self.y[flight.localNum, j].x != 0:
+                    ysol = self.slotIndexes[j]
+                    flight.UDPPsolution = self.slotIndexes[j]
+            print(flight, flight.slot, xsol, ysol)
+
+            # if ysol not in [flight.slot for flight in self.flights] and ysol != "*":
+            #     print("******************************************** !!!!!!")
+            #     print(ysol, "    ", [flight.slot for flight in self.flights])
+
+        print("\n\n*****")
+
+
+

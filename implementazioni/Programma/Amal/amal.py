@@ -96,6 +96,14 @@ class Amal(mS.ModelStructure):
 
         solution.make_solution(self)
 
+        offers = []
+        for j in range(len(self.offers)):
+            if self.xo[j].x == 1:
+                offers.append(self.offers[j])
+
+        for offer in offers:
+            print(offer)
+
     def get_down_set(self, flight, k):
         from Programma.Amal.amalOffer import AmalOffer
         offer: AmalOffer
