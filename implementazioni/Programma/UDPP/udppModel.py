@@ -17,7 +17,7 @@ class UDPPModel(ModelStructure):
         airline: UDPPAirline
         for airline in self.airlines:
             airline.setLocalFlightList(self.flights)
-            airline.UDPPLocal_1()
+            airline.UDPPLocal()
 
         flight: UDPPFlight
         df_UDPP: pd.DataFrame

@@ -38,9 +38,9 @@ class MaxBenefitModel(mS.ModelStructure):
             self.m += xsum(self.x[flight.num, slot] for flight in self.flights) <= 1
 
         for airline in self.airlines:
-            xsum(self.cost_function(flight, flight.slot) for flight in airline.flights) <= \
-            xsum(self.x[flight.num, j] * self.cost_function(flight, j) for flight in airline.flights for j in
-                 self.slotIndexes)
+            self.m += xsum(self.cost_function(flight, flight.slot) for flight in airline.flights) <= \
+                      xsum(self.x[flight.num, j] * self.cost_function(flight, j)
+                           for flight in airline.flights for j in self.slotIndexes)
 
     def set_objective(self):
         flight: modFl.Flight
