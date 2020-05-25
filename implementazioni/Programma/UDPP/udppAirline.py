@@ -62,6 +62,9 @@ class UDPPAirline(Airline):
 
             self.m += xsum(self.y[flight.localNum, self.AUslots[k]] for flight in self.flights) == 0
 
+            self.m += xsum(self.y[i, j] for i in range(k, self.num_flights) for j in range(self.AUslots[k])) <= \
+                      xsum(self.x[i, kk] for i in range(k+1) for kk in range(k, self.num_flights))
+
             self.m += xsum(self.y[flight.localNum, j] for flight in self.flights for j in self.slot_range(k)) \
                       == self.z[k]
 
