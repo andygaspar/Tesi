@@ -121,16 +121,16 @@ class MipModel(mS.ModelStructure):
         start = time.time()
         self.set_constraints()
         end = time.time() - start
-        print("Constraints setting time ", end)
+        #print("Constraints setting time ", end)
 
         self.set_objective()
 
         start = time.time()
         self.m.optimize()
         end = time.time() - start
-        print("Simplex time ", end)
+        #print("Simplex time ", end)
 
-        print(self.m.status)
+        #print(self.m.status)
 
         self.mipSolution = self.x
         # solution.make_solution_array(self)

@@ -98,7 +98,7 @@ class UDPPAirline(Airline):
 
         self.m.optimize()
 
-        print(self.m.status)
+        #print(self.m.status)
 
         for flight in self.flights:
             xsol = "*"
@@ -113,7 +113,7 @@ class UDPPAirline(Airline):
                 if self.y[flight.localNum, j].x != 0:
                     ysol = self.slotIndexes[j]
                     flight.UDPPsolution = self.slotIndexes[j]
-            print(flight, xsol, ysol, "     ", flight.cost, flight.eta_slot)
+            #print(flight, xsol, ysol, "     ", flight.cost, flight.eta_slot)
 
             # if ysol not in [flight.slot for flight in self.flights] and ysol != "*":
             # print("******************************************** !!!!!!")

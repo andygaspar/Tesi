@@ -8,28 +8,44 @@ import numpy as np
 
 # df = pd.read_csv("../data/data_ruiz.csv")
 
+total_initial = []
+total_max_ben = []
+total_udpp = []
+total_model = []
 
 
-df_max = dfMaker.df_maker(70, 10, distribution="uniform")
-df_amal = df_max.copy(deep=True)
-df_UDPP = df_amal.copy(deep=True)
+for i in range(10):
+    print("iterazione ******** ",i)
+    df_max = dfMaker.df_maker(50, 10, distribution="increasing")
+    df_amal = df_max.copy(deep=True)
+    df_UDPP = df_amal.copy(deep=True)
 
-print(df_max)
+    #print(df_max)
 
-max_model = max_benefit.MaxBenefitModel(df_max)
-max_model.run()
+    max_model = max_benefit.MaxBenefitModel(df_max)
+    max_model.run()
 
-amal_model = amal.Amal(df_amal, offerMakerFunType="1")
-amal_model.run()
+    #amal_model = amal.Amal(df_amal, offerMakerFunType="1")
+    #amal_model.run()
 
-udpp_model = udppModel.UDPPModel(df_UDPP)
+    udpp_model = udppModel.UDPPModel(df_UDPP)
 
+    model = mipModel.MipModel(udpp_model.get_new_df())
+    model.run()
 
+    total_initial.append(max_model.report["initial costs"][0])
+    total_max_ben.append(max_model.report["final costs"][0])
+    total_udpp.append(udpp_model.report["final costs"][0])
+    total_model.append(model.report["final costs"][0])
 
-model = mipModel.MipModel(udpp_model.get_new_df())
-model.run()
+import matplotlib.pyplot as plt
 
-
+plt.plot(total_initial, label="inital")
+plt.plot(total_max_ben, label="max benefit")
+plt.plot(total_udpp, label="udpp")
+plt.plot(total_model, label="model")
+plt.legend()
+plt.show()
 
 
 
