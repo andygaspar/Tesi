@@ -8,6 +8,7 @@ from Programma.Mip import modelFlight as modFl
 from Programma.ModelStructure.Solution import solution
 
 import numpy as np
+import pandas as pd
 
 import time
 
@@ -30,11 +31,12 @@ class MipModel(mS.ModelStructure):
             j += 1
         return indexes
 
-    def __init__(self, df_init, f=lambda x, y: x * y, cost_kind="quadratic", model_name="model"):
+    def __init__(self, df_init, alpha=1, cost_kind="quadratic", model_name="model"):
 
-        self.f = f
+        self.f = lambda x, y: x * (y**alpha)
         self.airlineConstructor = air.ModelAirline
         self.flightConstructor = modFl.ModelFlight
+        self.offers = None
         super().__init__(df_init=df_init, cost_kind=cost_kind)
 
         self.airlines_pairs = np.array(list(combinations(self.airlines, 2)))
@@ -93,16 +95,16 @@ class MipModel(mS.ModelStructure):
                               (2 - self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] -
                                self.c[self.index(self.airlines, airl_pair[1])][self.index(fl_pair_b, pairB)]) * 100000
 
-                    self.m += xsum(self.x[i.slot, j.slot] * self.score(i, j.slot) for i in pairA for j in pairB) - \
+                    self.m += xsum(self.x[i.slot, j.slot] * self.delay_cost(i, j.slot) for i in pairA for j in pairB) - \
                               (2 - self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] -
                                self.c[self.index(self.airlines, airl_pair[1])][self.index(fl_pair_b, pairB)]) * 100000 \
-                              <= xsum(self.x[i.slot, j.slot] * self.score(i, i.slot) for i in pairA for j in pairB) - \
+                              <= xsum(self.x[i.slot, j.slot] * self.delay_cost(i, i.slot) for i in pairA for j in pairB) - \
                               self.epsilon
 
-                    self.m += xsum(self.x[i.slot, j.slot] * self.score(i, j.slot) for i in pairB for j in pairA) - \
+                    self.m += xsum(self.x[i.slot, j.slot] * self.delay_cost(i, j.slot) for i in pairB for j in pairA) - \
                               (2 - self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] -
                                self.c[self.index(self.airlines, airl_pair[1])][self.index(fl_pair_b, pairB)]) * 100000 \
-                              <= xsum(self.x[i.slot, j.slot] * self.score(i, i.slot) for i in pairB for j in pairA) - \
+                              <= xsum(self.x[i.slot, j.slot] * self.delay_cost(i, i.slot) for i in pairB for j in pairA) - \
                               self.epsilon
 
     def set_objective(self):
@@ -133,9 +135,13 @@ class MipModel(mS.ModelStructure):
         #print(self.m.status)
 
         self.mipSolution = self.x
+
+
         # solution.make_solution_array(self)
         # self.solution = sol.Solution(self)
         solution.make_solution(self)
+
+        self.offer_solution_maker()
 
     def other_airlines_compatible_slots(self, flight):
         others_slots = self.df[self.df["airline"] != flight.airline.name]["slot"].to_numpy()
@@ -143,3 +149,17 @@ class MipModel(mS.ModelStructure):
 
     def score(self, flight, j):
         return (flight.preference * self.delays[flight.slot, j] ** 2) / 2
+
+
+    def offer_solution_maker(self):
+
+        flight: modFl.ModelFlight
+        airline_names = ["total"] + [airline.name for airline in self.airlines]
+        offers = [sum([1 for flight in self.flights if flight.slot != flight.new_slot])/2]
+        for airline in self.airlines:
+            offers.append(sum([1 for flight in airline.flights if flight.slot != flight.new_slot])/2)
+
+        offers = np.array(offers).astype(int)
+        self.offers = pd.DataFrame({"airline": airline_names, "offers": offers})
+
+

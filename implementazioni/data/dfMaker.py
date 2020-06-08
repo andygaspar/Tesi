@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import string
 from scipy import stats
 import pandas as pd
@@ -82,6 +83,15 @@ def df_maker(num_flights=20, num_airlines=3, distribution="uniform", capacity=1,
     eta = slot * capacity
     gdp = slot * new_capacity
     priority = np.random.uniform(0.5, 2, num_flights)
+    priority = []
+    for i in range(num_flights):
+        m = random.choice([0, 1])
+        if m == 0:
+            priority.append(np.random.normal(0.7, 0.1))
+        else:
+            priority.append(np.random.normal(1.5, 0.1))
+
+    priority = np.abs(priority)
     cost = priority
 
     return pd.DataFrame(

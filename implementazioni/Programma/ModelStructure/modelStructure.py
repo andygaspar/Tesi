@@ -12,7 +12,7 @@ class ModelStructure:
 
     @staticmethod
     def delay_cost(flight, delay):
-        return flight.cost * delay ** 2
+        return (flight.cost * delay ** 2)
 
     def __init__(self, df_init, cost_kind):
 
@@ -54,8 +54,8 @@ class ModelStructure:
         self.report = None
 
     def cost_function(self, flight, j):
-        from Programma.ModelStructure.Costs.costs import cost_function
-        return cost_function(self, flight, j)
+        from Programma.ModelStructure.Costs.costs import cost_function as cf
+        return cf(self, flight, j)
 
     def compute_costs(self, flights, which):
         if which == "initial":

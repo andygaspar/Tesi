@@ -1,3 +1,5 @@
+
+import time
 from data import dfMaker
 import pandas as pd
 from Programma.Mip import mipModel
@@ -8,44 +10,82 @@ import numpy as np
 
 # df = pd.read_csv("../data/data_ruiz.csv")
 
+
+
 total_initial = []
 total_max_ben = []
 total_udpp = []
 total_model = []
 
+simulations = pd.DataFrame(columns=["run", "airline", " num flights", "initial", "max_reduction", "udpp", "model", "offers"])
 
-for i in range(10):
-    print("iterazione ******** ",i)
-    df_max = dfMaker.df_maker(50, 10, distribution="increasing")
-    df_amal = df_max.copy(deep=True)
+num_airlines = 15
+num_fligths = 40
+
+for i in range(1):
+    t = time.time()
+    print("iterazione ******** ", i)
+    df = dfMaker.df_maker(num_fligths, num_airlines, distribution="hub")
+
+    df_amal = df.copy(deep=True)
     df_UDPP = df_amal.copy(deep=True)
 
-    #print(df_max)
+    #print(df)
 
-    max_model = max_benefit.MaxBenefitModel(df_max)
+    max_model = max_benefit.MaxBenefitModel(df)
     max_model.run()
+    print("max benefit")
 
     #amal_model = amal.Amal(df_amal, offerMakerFunType="1")
     #amal_model.run()
 
     udpp_model = udppModel.UDPPModel(df_UDPP)
 
-    model = mipModel.MipModel(udpp_model.get_new_df())
+    print("udpp")
+
+    model = mipModel.MipModel(udpp_model.get_new_df(),0)
     model.run()
 
-    total_initial.append(max_model.report["initial costs"][0])
-    total_max_ben.append(max_model.report["final costs"][0])
-    total_udpp.append(udpp_model.report["final costs"][0])
-    total_model.append(model.report["final costs"][0])
+    print("model")
 
-import matplotlib.pyplot as plt
+    # total_initial.append(max_model.report["initial costs"][0])
+    # total_max_ben.append(max_model.report["final costs"][0])
+    # total_udpp.append(udpp_model.report["final costs"][0])
+    # total_model.append(model.report["final costs"][0])
 
-plt.plot(total_initial, label="inital")
-plt.plot(total_max_ben, label="max benefit")
-plt.plot(total_udpp, label="udpp")
-plt.plot(total_model, label="model")
-plt.legend()
-plt.show()
+    mmr = model.report
+    udppr = udpp_model.report
+    omr = model.report
+    offer = model.offers
+
+    simulations = simulations.append(pd.Series([i, "total", num_fligths, mmr["initial costs"][0],
+                                      mmr["final costs"][0], udppr["final costs"][0],
+                                     omr["final costs"][0], offer["offers"][0]], index=simulations. columns),
+                                     ignore_index=True)
+
+    for airline in mmr["airline"][1:]:
+        air_num_flights = df[df["airline"] == airline].shape[0]
+        simulations = simulations.append(pd.Series([i, airline, air_num_flights,
+                                                    mmr[mmr["airline"] == airline]["initial costs"].values[0],
+                                                    mmr[mmr["airline"] == airline]["final costs"].values[0],
+                                                    udppr[udppr["airline"] == airline]["final costs"].values[0],
+                                                    omr[omr["airline"] == airline]["final costs"].values[0],
+                                                    offer[offer["airline"] == airline]["offers"].values[0]],
+                                                   index=simulations.columns),
+                                         ignore_index=True)
+    print(offer[offer["airline"] == "total"])
+    print(time.time()-t)
+print(simulations)
+simulations.to_csv("../results/increasing_50_1.csv", index=False)
+
+# import matplotlib.pyplot as plt
+#
+# plt.plot(total_initial, label="inital")
+# plt.plot(total_max_ben, label="max benefit")
+# plt.plot(total_udpp, label="udpp")
+# plt.plot(total_model, label="model")
+# plt.legend()
+# plt.show()
 
 
 
