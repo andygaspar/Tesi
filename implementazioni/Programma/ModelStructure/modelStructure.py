@@ -12,7 +12,7 @@ class ModelStructure:
 
     @staticmethod
     def delay_cost(flight, delay):
-        return (flight.cost * delay ** 2)
+        return (flight.cost * delay ** 2)/2
 
     def __init__(self, df_init, cost_kind):
 

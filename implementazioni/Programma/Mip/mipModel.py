@@ -6,6 +6,7 @@ from itertools import combinations
 from Programma.Mip import modelAirline as air
 from Programma.Mip import modelFlight as modFl
 from Programma.ModelStructure.Solution import solution
+from Programma.ModelStructure.Costs.costs import cost_function as cf
 
 import numpy as np
 import pandas as pd
@@ -57,6 +58,8 @@ class MipModel(mS.ModelStructure):
         self.c = np.array(
             [[self.m.add_var(var_type=BINARY) for i in airline.flight_pairs] for airline in self.airlines])
 
+        print(sum([len(var) for var in self.c]))
+
     def set_constraints(self):
 
         for i in self.empty_slots:
@@ -83,29 +86,31 @@ class MipModel(mS.ModelStructure):
                 if flight != other_flight:
                     self.m += self.x[flight.slot, other_flight.slot] == 0
 
+        k = 0
         for airl_pair in self.airlines_pairs:
             fl_pair_a = airl_pair[0].flight_pairs
             fl_pair_b = airl_pair[1].flight_pairs
             for pairA in fl_pair_a:
                 for pairB in fl_pair_b:
-                    self.m += xsum(self.x[i.slot, j.slot] for i in pairA for j in pairB) + \
-                              xsum(self.x[i.slot, j.slot] for i in pairB for j in pairA) >= \
-                              (self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] +
-                               self.c[self.index(self.airlines, airl_pair[1])][self.index(fl_pair_b, pairB)]) * 2 - \
-                              (2 - self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] -
+                    self.m += xsum(self.x[i.slot, j.slot] for i in pairA for j in pairB) - \
+                              xsum(self.x[i.slot, j.slot] for i in pairB for j in pairA) >=\
+                              -(2 - self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] -
                                self.c[self.index(self.airlines, airl_pair[1])][self.index(fl_pair_b, pairB)]) * 100000
 
-                    self.m += xsum(self.x[i.slot, j.slot] * self.delay_cost(i, j.slot) for i in pairA for j in pairB) - \
+                    self.m += xsum(self.x[i.slot, j.slot] * cf(self, i, j.slot) for i in pairA for j in pairB) - \
                               (2 - self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] -
                                self.c[self.index(self.airlines, airl_pair[1])][self.index(fl_pair_b, pairB)]) * 100000 \
-                              <= xsum(self.x[i.slot, j.slot] * self.delay_cost(i, i.slot) for i in pairA for j in pairB) - \
+                              <= xsum(self.x[i.slot, j.slot] * cf(self, i, i.slot) for i in pairA for j in pairB) - \
                               self.epsilon
 
-                    self.m += xsum(self.x[i.slot, j.slot] * self.delay_cost(i, j.slot) for i in pairB for j in pairA) - \
+                    self.m += xsum(self.x[i.slot, j.slot] * cf(self, i, j.slot) for i in pairB for j in pairA) - \
                               (2 - self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] -
                                self.c[self.index(self.airlines, airl_pair[1])][self.index(fl_pair_b, pairB)]) * 100000 \
-                              <= xsum(self.x[i.slot, j.slot] * self.delay_cost(i, i.slot) for i in pairB for j in pairA) - \
+                              <= xsum(self.x[i.slot, j.slot] * cf(self, i, i.slot) for i in pairB for j in pairA) - \
                               self.epsilon
+
+                    k += 1
+        print(k)
 
     def set_objective(self):
 

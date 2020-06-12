@@ -19,20 +19,19 @@ total_model = []
 
 simulations = pd.DataFrame(columns=["run", "airline", " num flights", "initial", "max_reduction", "udpp", "model", "offers"])
 
-num_airlines = 15
-num_fligths = 40
-
+num_airlines = 5
+num_fligths = 20
 for i in range(1):
     t = time.time()
     print("iterazione ******** ", i)
-    df = dfMaker.df_maker(num_fligths, num_airlines, distribution="hub")
-
+    df = dfMaker.df_maker(num_fligths, num_airlines, distribution="uniform")
+    df_max = df.copy(deep=True)
     df_amal = df.copy(deep=True)
     df_UDPP = df_amal.copy(deep=True)
 
     #print(df)
 
-    max_model = max_benefit.MaxBenefitModel(df)
+    max_model = max_benefit.MaxBenefitModel(df_max)
     max_model.run()
     print("max benefit")
 
@@ -47,6 +46,11 @@ for i in range(1):
     model.run()
 
     print("model")
+
+    model1 = mipModel.MipModel(df, 0)
+    model1.run()
+    print("con base")
+    print(model1.offers)
 
     # total_initial.append(max_model.report["initial costs"][0])
     # total_max_ben.append(max_model.report["final costs"][0])
@@ -76,7 +80,7 @@ for i in range(1):
     print(offer[offer["airline"] == "total"])
     print(time.time()-t)
 print(simulations)
-simulations.to_csv("../results/increasing_50_1.csv", index=False)
+#simulations.to_csv("../results/increasing_50_1.csv", index=False)
 
 # import matplotlib.pyplot as plt
 #

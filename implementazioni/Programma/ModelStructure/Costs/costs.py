@@ -7,4 +7,4 @@ def cost_function(model: ModelStructure, flight: Flight, j):
         return flight.cost * model.delays[flight.slot, j]
 
     if model.cost_kind == "quadratic":
-        return flight.cost * model.delays[flight.slot, j] ** 2
+        return (flight.cost * model.delays[flight.slot, j] ** 2)/2

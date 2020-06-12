@@ -65,5 +65,5 @@ def make_solution(model, udpp=False):
     model: ModelStructure
     make_df_solution(model, udpp)
     make_performance_df(model)
-    print(model.df)
+    #print(model.df)
     print(model.report)
