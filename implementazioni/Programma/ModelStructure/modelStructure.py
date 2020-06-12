@@ -54,8 +54,8 @@ class ModelStructure:
         self.report = None
 
     def cost_function(self, flight, j):
-        from Programma.ModelStructure.Costs.costs import cost_function
-        return cost_function(self, flight, j)
+        from Programma.ModelStructure.Costs.costs import cost_function as cf
+        return cf(self, flight, j)
 
     def compute_costs(self, flights, which):
         if which == "initial":
