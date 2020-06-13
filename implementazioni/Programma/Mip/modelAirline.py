@@ -10,7 +10,7 @@ class ModelAirline(air.Airline):
     @staticmethod
     def pairs(list_to_comb):
         comb = np.array(list(combinations(list_to_comb, 2)))
-        offers = [pair for pair in comb]
+        offers = [pair for pair in comb if np.abs(pair[0].priority-pair[1].priority) > 0.2]
         return offers
 
     @staticmethod

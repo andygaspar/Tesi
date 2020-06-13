@@ -19,8 +19,9 @@ total_model = []
 
 simulations = pd.DataFrame(columns=["run", "airline", " num flights", "initial", "max_reduction", "udpp", "model", "offers"])
 
-num_airlines = 5
-num_fligths = 20
+num_airlines = 12
+num_fligths = 50
+np.random.seed(2)
 for i in range(1):
     t = time.time()
     print("iterazione ******** ", i)
@@ -29,7 +30,7 @@ for i in range(1):
     df_amal = df.copy(deep=True)
     df_UDPP = df_amal.copy(deep=True)
 
-    #print(df)
+    print(df)
 
     max_model = max_benefit.MaxBenefitModel(df_max)
     max_model.run()
@@ -42,44 +43,49 @@ for i in range(1):
 
     print("udpp")
 
-    model = mipModel.MipModel(udpp_model.get_new_df(),0)
+    print(udpp_model.get_new_df()[["flight", "new slot", "new arrival", "eta slot", "cost"]])
+    model = mipModel.MipModel(udpp_model.get_new_df(), 0)
     model.run()
+    print(model.offers)
+
+    print(model.df)
 
     print("model")
 
+
     model1 = mipModel.MipModel(df, 0)
     model1.run()
-    print("con base")
-    print(model1.offers)
+    # print("con base")
+    # print(model1.offers)
 
     # total_initial.append(max_model.report["initial costs"][0])
     # total_max_ben.append(max_model.report["final costs"][0])
     # total_udpp.append(udpp_model.report["final costs"][0])
     # total_model.append(model.report["final costs"][0])
 
-    mmr = model.report
-    udppr = udpp_model.report
-    omr = model.report
-    offer = model.offers
+    # mmr = model.report
+    # udppr = udpp_model.report
+    # omr = model.report
+    # offer = model.offers
+    #
+    # simulations = simulations.append(pd.Series([i, "total", num_fligths, mmr["initial costs"][0],
+    #                                   mmr["final costs"][0], udppr["final costs"][0],
+    #                                  omr["final costs"][0], offer["offers"][0]], index=simulations. columns),
+    #                                  ignore_index=True)
 
-    simulations = simulations.append(pd.Series([i, "total", num_fligths, mmr["initial costs"][0],
-                                      mmr["final costs"][0], udppr["final costs"][0],
-                                     omr["final costs"][0], offer["offers"][0]], index=simulations. columns),
-                                     ignore_index=True)
-
-    for airline in mmr["airline"][1:]:
-        air_num_flights = df[df["airline"] == airline].shape[0]
-        simulations = simulations.append(pd.Series([i, airline, air_num_flights,
-                                                    mmr[mmr["airline"] == airline]["initial costs"].values[0],
-                                                    mmr[mmr["airline"] == airline]["final costs"].values[0],
-                                                    udppr[udppr["airline"] == airline]["final costs"].values[0],
-                                                    omr[omr["airline"] == airline]["final costs"].values[0],
-                                                    offer[offer["airline"] == airline]["offers"].values[0]],
-                                                   index=simulations.columns),
-                                         ignore_index=True)
-    print(offer[offer["airline"] == "total"])
+    # for airline in mmr["airline"][1:]:
+    #     air_num_flights = df[df["airline"] == airline].shape[0]
+    #     simulations = simulations.append(pd.Series([i, airline, air_num_flights,
+    #                                                 mmr[mmr["airline"] == airline]["initial costs"].values[0],
+    #                                                 mmr[mmr["airline"] == airline]["final costs"].values[0],
+    #                                                 udppr[udppr["airline"] == airline]["final costs"].values[0],
+    #                                                 omr[omr["airline"] == airline]["final costs"].values[0],
+    #                                                 offer[offer["airline"] == airline]["offers"].values[0]],
+    #                                                index=simulations.columns),
+    #                                      ignore_index=True)
+    # print(offer[offer["airline"] == "total"])
     print(time.time()-t)
-print(simulations)
+# print(simulations)
 #simulations.to_csv("../results/increasing_50_1.csv", index=False)
 
 # import matplotlib.pyplot as plt

@@ -93,8 +93,9 @@ def df_maker(num_flights=20, num_airlines=3, distribution="uniform", capacity=1,
 
     priority = np.abs(priority)
     cost = priority
+    num = range(num_flights)
 
     return pd.DataFrame(
         {"slot": slot, "flight": flights, "eta": eta, "gdp schedule": gdp, "priority": priority, "airline": airline,
-         "cost": cost})
+         "cost": cost, "num": num})
 

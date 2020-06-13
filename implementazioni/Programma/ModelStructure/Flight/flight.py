@@ -7,7 +7,7 @@ class Flight:
 
         self.slot = line["slot"]
 
-        self.num = None
+        self.num = line["num"]
 
         self.new_slot = None
 
