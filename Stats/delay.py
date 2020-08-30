@@ -5,26 +5,36 @@ import matplotlib.pyplot as plt
 
 
 
-plt.rcParams["figure.figsize"]=(15,10)
+plt.rcParams["figure.figsize"]=(20,15)
 plt.rcParams["font.size"]=20
 
 
 
 #en route....
 
-years=np.array([i for i in range(2011,2020)])
+years=np.array([i for i in range(2013,2019)])
 
-enroute_delay=np.array([11238639,6004683,5005985,5806501,7167424,8665163,9282426,18957977,16310891])
+enroute_delay=np.array([5005985,5806501,7167424,8665163,9282426,18957977])
 
-flights=np.array([9868661,9633979,9529503,9699825,9854487,10117411,10514510,10905314,10208076])
+flights=np.array([7387558, 7430020, 7579885, 7857741, 8095934, 8323657])
 
-plt.plot(years,enroute_delay)
+plt.plot(years,flights,linewidth=3)
 plt.xticks(years)
+plt.yticks(np.arange(7.3,8.7,0.2)*1_000_000)
 plt.annotate('Datasource: Eurocontrol', (0,0), (300,-30), fontsize=20,
              xycoords='axes fraction', textcoords='offset points', va='top')
-plt.title("EN-ROUTE DELAY")
-plt.savefig("enroute_delay.png",bbox_inches="tight")
+plt.title("flights")
+#plt.savefig("flights.png",bbox_inches="tight")
 
+
+years=[str(i) for i in range(2013,2019)]
+to_plot=[838920866, 876859730, 918249055, 972532157, 1043072331, 1105945753 ]
+plt.plot(range(2013,2019),to_plot,linewidth=3)
+plt.annotate('Datasource: Eurostat', (0,0), (300,-30), fontsize=20,
+             xycoords='axes fraction', textcoords='offset points', va='top')
+plt.yticks(np.arange(0.7,1.4,0.15)*1_000_000_000)
+plt.xticks(range(2013,2019))
+plt.savefig("passengers.png",bbox_inches='tight')
 
 
 
@@ -33,7 +43,7 @@ plt.xticks(years)
 plt.annotate('Datasource: Eurocontrol', (0,0), (300,-30), fontsize=20,
              xycoords='axes fraction', textcoords='offset points', va='top')
 plt.title("FLIGHTS EN-ROUTE DELAYED")
-plt.savefig("enroute_fligths.png",bbox_inches="tight")
+#plt.savefig("enroute_fligths.png",bbox_inches="tight")
 
 
 

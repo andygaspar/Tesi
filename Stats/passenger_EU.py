@@ -38,23 +38,24 @@ df["Value"]=new_vals
 
 
 to_plot=df[df["GEO"]=="European Union - 27 countries (2007-2013)"]
-to_plot
+to_plot=to_plot[7:]
 
 countries=np.unique(df["GEO"].to_numpy())
 for i in countries:
     print(i)
+np.arange(7,8.6,0.2)
 
-
-plt.rcParams["figure.figsize"]=(15,10)
+plt.rcParams["figure.figsize"]=(20,15)
 plt.rcParams["font.size"]=20
 
-years=[str(i) for i in range(2007,2019)]
-
-plt.plot(range(2007,2019),to_plot["Value"])
+years=[str(i) for i in range(2013,2019)]
+to_plot=[838920866, 876859730, 918249055, 972532157, 1043072331, 1105945753 ]
+plt.plot(range(2013,2019),to_plot,linewidth=3)
 plt.annotate('Datasource: Eurostat', (0,0), (300,-30), fontsize=20,
              xycoords='axes fraction', textcoords='offset points', va='top')
-plt.xticks(range(2007,2019))
-plt.savefig("passengers.png",bbox_inches='tight')
+plt.yticks(np.arange(0.7,1.4,0.15)*1_000_000_000)
+plt.xticks(range(2013,2019))
+#plt.savefig("passengers.png",bbox_inches='tight')
 
 
 
@@ -110,7 +111,7 @@ plt.plot(range(2007,2019),to_plot["Value"])
 plt.annotate('Datasource: Eurostat', (0,0), (300,-30), fontsize=20,
              xycoords='axes fraction', textcoords='offset points', va='top')
 plt.xticks(range(2007,2019))
-plt.savefig("flights.png",bbox_inches='tight')
+#plt.savefig("flights.png",bbox_inches='tight')
 
 
 
@@ -195,11 +196,11 @@ sum(df_ok[df_ok["TIME"]=="2018"]["Value"])
 
 
 df=pd.read_csv("flights/avia_paoc_1_Data.csv")
-df[df["TIME"]=="2019M01"]
 df=df.iloc[:13260]
-df
-df[df["TIME"]=="2005"]
+df.iloc[:1000]
+df[df["TIME"]==2005]
 df=df.iloc[6120:]
+d
 df=df[df["Value"]!=':']
 vals=df["Value"].to_numpy()
 new_vals=np.array([])
@@ -238,7 +239,7 @@ for i in range(df_ok.shape[0]):
         df_month=df_month.append(df_ok.iloc[i])
 
 
-
+df_month
 time=df_month["TIME"]
 df_month
 
@@ -272,6 +273,11 @@ plt.annotate('Datasource: Eurostat', (0,0), (300,-30), fontsize=20,
              xycoords='axes fraction', textcoords='offset points', va='top')
 plt.savefig("month average.png",bbox_inches="tight")
 
+
+ù
+
+
+df
 
 
 

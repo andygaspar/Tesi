@@ -10,8 +10,8 @@ def make_solution_array(model):
 
     solution_array = np.zeros((model.slotIndexes.shape[0], model.slotIndexes.shape[0]))
     for flight in model.flights:
-        for j in range(len(model.mipSolution[flight.num])):
-            solution_array[flight.slot, j] = model.mipSolution[flight.num][j].x
+        for j in range(len(model.mipSolution[flight.slot])):
+            solution_array[flight.slot, j] = model.mipSolution[flight.slot][j].x
     model.solution_array = solution_array
 
 
@@ -22,7 +22,7 @@ def update_flights(model):
     flight: Flight
 
     for flight in model.flights:
-        flight.new_slot = np.argwhere(model.solution_array[flight.num])[0][0]
+        flight.new_slot = np.argwhere(model.solution_array[flight.slot])[0][0]
         flight.new_arrival = model.gdp_schedule[flight.new_slot]
 
 
@@ -66,4 +66,4 @@ def make_solution(model, udpp=False):
     make_df_solution(model, udpp)
     make_performance_df(model)
     #print(model.df)
-    print(model.report)
+    # print(model.report)

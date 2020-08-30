@@ -118,6 +118,9 @@ class UDPPAirline(Airline):
             # if ysol not in [flight.slot for flight in self.flights] and ysol != "*":
             # print("******************************************** !!!!!!")
             # print(ysol, "    ", [flight.slot for flight in self.flights])
+        # print(self.flights)
+        # for flight in self.flights:
+        #     print(flight, flight.slot, flight.UDPPsolution)
 
 
 

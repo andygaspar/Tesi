@@ -66,6 +66,7 @@ def distribution_maker(num_flights, num_airlines, distribution="uniform"):
         custm = stats.rv_discrete(name='custm', values=(np.arange(num_airlines), f(base) / sum(f(base))))
         h, loc = np.histogram(custm.rvs(size=1000), bins=num_airlines)
         dist = ((np.flip(np.sort(h)) / sum(h)) * num_flights).astype(int)
+        dist = np.array([15, 5, 4, 4, 3, 3, 2, 2, 2, 2])
 
     dist = avoid_zero(dist, num_flights)
     dist = fill_missing_flights(dist, num_flights, num_airlines)
@@ -74,7 +75,14 @@ def distribution_maker(num_flights, num_airlines, distribution="uniform"):
 
 def df_maker(num_flights=20, num_airlines=3, distribution="uniform", capacity=1, new_capacity=2):
     dist = distribution_maker(num_flights, num_airlines, distribution)
-    airline = [[string.ascii_uppercase[j] for i in range(dist[j])] for j in range(num_airlines)]
+    len_ascii = len(string.ascii_uppercase)
+    if num_airlines <= len_ascii:
+        airline = [[string.ascii_uppercase[j] for i in range(dist[j])] for j in range(num_airlines)]
+    else:
+        airline = [[string.ascii_uppercase[j] for i in range(dist[j])] for j in range(len_ascii)]
+        airline += [[string.ascii_lowercase[j-len_ascii] for i in range(dist[j])] for j in
+                    range(len(string.ascii_uppercase), num_airlines)]
+
     airline = [val for sublist in airline for val in sublist]
     airline = np.random.permutation(airline)
     flights = ["F" + airline[i] + str(i) for i in range(num_flights)]
