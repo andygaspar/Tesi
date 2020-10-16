@@ -27,7 +27,7 @@ class Airline:
 
         self.flights = self.make_airline_flight_list(model)
 
-        self.initialCosts = sum([flight.cost for flight in self.flights])
+        #self.initialCosts = sum([flight.cost for flight in self.flights])
 
         self.finalCosts = None
 

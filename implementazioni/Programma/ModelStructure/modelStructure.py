@@ -7,12 +7,14 @@ class ModelStructure:
     def compute_delays(self):
         delays = np.zeros((self.slotIndexes.shape[0], self.slotIndexes.shape[0]))
         for flight, j in product(self.flights, self.slotIndexes):
-            delays[flight.slot, j] = abs(self.gdp_schedule[j] - flight.eta)
+            delays[flight.num, j] = (self.gdp_schedule[j] - flight.eta)
+
+        delays = np.where(delays < 0, 0, delays)
         return delays
 
     @staticmethod
     def delay_cost(flight, delay):
-        return flight.cost * delay ** 2
+        return (flight.cost * delay ** 2)/2
 
     def __init__(self, df_init, cost_kind):
 
@@ -33,7 +35,7 @@ class ModelStructure:
 
         self.flights = fll.make_flight_list(self)
 
-        fll.assign_flight_num(self.flights)
+        #fll.assign_flight_num(self.flights)
 
         self.num_flights = len(self.flights)
 

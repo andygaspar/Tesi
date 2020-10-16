@@ -62,10 +62,10 @@ class Amal(mS.ModelStructure):
             self.m += xsum(self.y[flight.num][j] for flight in self.flights) == 1
 
         for flight in self.flights:
-            for k in np.where(flight.classes[flight.classes > flight.slot])[0]:
+            for k in np.where(flight.classes > flight.slot)[0]:
                 self.m += self.x[flight.num][k] == xsum([self.xo[j] for j in self.get_down_set(flight, k)])
 
-            for k in np.where(flight.classes[flight.classes < flight.slot])[0]:
+            for k in np.where(flight.classes < flight.slot)[0]:
                 self.m += self.x[flight.num][k] == xsum([self.xo[j] for j in self.get_up_set(flight, k)])
 
     def set_objective(self):
@@ -96,13 +96,21 @@ class Amal(mS.ModelStructure):
 
         solution.make_solution(self)
 
+        offers = []
+        for j in range(len(self.offers)):
+            if self.xo[j].x == 1:
+                offers.append(self.offers[j])
+
+        for offer in offers:
+            print(offer)
+
     def get_down_set(self, flight, k):
         from Programma.Amal.amalOffer import AmalOffer
         offer: AmalOffer
         down_offer_index_list = []
         j = 0
         for offer in self.offers:
-            if offer.flightDown == flight and offer.atMost == k:
+            if offer.flightDown == flight and offer.flightUp != flight and offer.atMost == flight.classes[k]:
                 down_offer_index_list.append(j)
             j += 1
 
@@ -111,13 +119,14 @@ class Amal(mS.ModelStructure):
     def get_up_set(self, flight, k):
         from Programma.Amal.amalOffer import AmalOffer
         offer: AmalOffer
-        down_offer_index_list = []
+        up_offer_index_list = []
         j = 0
         for offer in self.offers:
-            if offer.flightUp == flight and offer.atLeast == k:
-                down_offer_index_list.append(j)
+            if offer.flightUp == flight and offer.flightDown != flight and offer.atLeast == flight.classes[k]:
+                up_offer_index_list.append(j)
             j += 1
 
-        return down_offer_index_list
+        return up_offer_index_list
+
 
 

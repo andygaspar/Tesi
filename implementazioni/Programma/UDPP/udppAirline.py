@@ -15,6 +15,7 @@ class UDPPAirline(Airline):
 
         self.modelFlightList = None
         self.slotIndexes = model.slotIndexes
+        self.AUslots = np.array([flight.slot for flight in self.flights])
 
         self.m = self.m = Model(self.name)
         self.x = None
@@ -30,9 +31,21 @@ class UDPPAirline(Airline):
 
         self.modelFlightList = flight_list
 
+    def slot_range(self, k):
+        return range(self.AUslots[k] + 1, self.AUslots[k+1])
+
+    def eta_limit(self, flight: UDPPFlight):
+        i = 0
+        for slot in self.AUslots:
+            if slot >= flight.eta_slot:
+                return i
+            i += 1
+
     def UDPPLocal(self):
 
         self.x = np.array([[self.m.add_var(var_type=BINARY) for j in self.slotIndexes] for i in self.flights])
+
+        self.z = np.array([self.m.add_var(var_type=INTEGER) for i in self.flights])
 
         self.y = np.array([[self.m.add_var(var_type=BINARY) for j in self.slotIndexes] for i in self.flights])
 
@@ -41,11 +54,26 @@ class UDPPAirline(Airline):
         self.m += xsum(self.x[0, k] for k in range(self.num_flights)) == 1
 
         # slot constraint
+        for j in self.slotIndexes:
+            self.m += xsum(self.y[flight.localNum, j] for flight in self.flights) <= 1
+
         for k in range(self.num_flights - 1):
-            self.m += xsum(self.x[flight.localNum, k] for flight in self.flights) + \
-                      xsum(self.y[flight.localNum, j] for flight in self.flights
-                           for j in range(self.flights[k].slot, self.flights[k + 1].slot)) \
-                      <= 1
+            self.m += xsum(self.x[flight.localNum, k] for flight in self.flights) <= 1
+
+            self.m += xsum(self.y[flight.localNum, self.AUslots[k]] for flight in self.flights) == 0
+
+            self.m += xsum(self.y[i, j] for i in range(k, self.num_flights) for j in range(self.AUslots[k])) <= \
+                      xsum(self.x[i, kk] for i in range(k+1) for kk in range(k, self.num_flights))
+
+            self.m += xsum(self.y[flight.localNum, j] for flight in self.flights for j in self.slot_range(k)) \
+                      == self.z[k]
+
+            self.m += xsum(self.y[flight.localNum, j] for flight in self.flights for j in range(self.AUslots[k])) <= \
+                      xsum(self.x[i, j] for i in range(k) for j in range(k, self.num_flights))
+
+            for i in range(k+1):
+                self.m += (1 - xsum(self.x[flight.localNum, i] for flight in self.flights))*1000 \
+                          >= self.z[k] - (k-i)
 
         # last slot
         self.m += xsum(self.x[flight.localNum, self.num_flights - 1] for flight in self.flights) == 1
@@ -53,7 +81,8 @@ class UDPPAirline(Airline):
         for flight in self.flights[1:]:
             # flight assignment
             self.m += xsum(self.y[flight.localNum, j] for j in range(flight.eta_slot, flight.slot)) + \
-                      xsum(self.x[flight.localNum, k] for k in range(flight.localNum, self.num_flights)) == 1
+                      xsum(self.x[flight.localNum, k] for k in
+                           range(self.eta_limit(flight), self.num_flights)) == 1
 
         # not earlier than its first flight
         self.m += xsum(self.y[flight.localNum, j] for flight in self.flights for j in range(self.flights[0].slot)) == 0
@@ -69,7 +98,7 @@ class UDPPAirline(Airline):
 
         self.m.optimize()
 
-        # print(self.m.status)
+        #print(self.m.status)
 
         for flight in self.flights:
             xsol = "*"
@@ -84,10 +113,11 @@ class UDPPAirline(Airline):
                 if self.y[flight.localNum, j].x != 0:
                     ysol = self.slotIndexes[j]
                     flight.UDPPsolution = self.slotIndexes[j]
-            # print(flight, flight.slot, xsol, ysol)
+            #print(flight, xsol, ysol, "     ", flight.cost, flight.eta_slot)
 
             # if ysol not in [flight.slot for flight in self.flights] and ysol != "*":
-                # print("******************************************** !!!!!!")
-                # print(ysol, "    ", [flight.slot for flight in self.flights])
+            # print("******************************************** !!!!!!")
+            # print(ysol, "    ", [flight.slot for flight in self.flights])
 
-        # print("\n\n*****")
+
+
