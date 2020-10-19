@@ -58,15 +58,15 @@ class ModelStructure:
 
         self.report = None
 
-    def cost_function(self, flight, j):
+    def cost_function(self, flight, slot):
         from Programma.ModelStructure.Costs.costs import cost_function as cf
-        return cf(self, flight, j)
+        return cf(self, flight, slot)
 
     def compute_costs(self, flights, which):
         if which == "initial":
             return sum([self.cost_function(flight, flight.slot) for flight in flights])
         if which == "final":
-            return sum([self.cost_function(flight, flight.new_slot) for flight in flights])
+            return sum([self.cost_function(flight, flight.newSlot) for flight in flights])
 
     def __str__(self):
         return str(self.airlines)

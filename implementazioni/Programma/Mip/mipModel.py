@@ -163,9 +163,9 @@ class MipModel(mS.ModelStructure):
 
         flight: modFl.ModelFlight
         airline_names = ["total"] + [airline.name for airline in self.airlines]
-        offers = [sum([1 for flight in self.flights if flight.slot != flight.new_slot]) / 2]
+        offers = [sum([1 for flight in self.flights if flight.slot != flight.newSlot]) / 2]
         for airline in self.airlines:
-            offers.append(sum([1 for flight in airline.flights if flight.slot != flight.new_slot]) / 2)
+            offers.append(sum([1 for flight in airline.flights if flight.slot != flight.newSlot]) / 2)
 
         offers = np.array(offers).astype(int)
         self.offers = pd.DataFrame({"airline": airline_names, "offers": offers})

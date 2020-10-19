@@ -1,15 +1,16 @@
 import numpy as np
+from Programma.ModelStructure.Slot.slot import Slot
 
 
 class Flight:
 
     def __init__(self, line, airline, model):
 
-        self.slot = line["slot"]
+        self.slot = Slot(line["slot"], line["gdp schedule"])
 
         self.num = line["num"]
 
-        self.new_slot = None
+        self.newSlot = None
 
         self.name = line["flight"]
 

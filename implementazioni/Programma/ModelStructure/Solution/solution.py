@@ -22,8 +22,8 @@ def update_flights(model):
     flight: Flight
 
     for flight in model.flights:
-        flight.new_slot = np.argwhere(model.solution_array[flight.num])[0][0]
-        flight.new_arrival = model.gdp_schedule[flight.new_slot]
+        flight.newSlot = np.argwhere(model.solution_array[flight.num])[0][0]
+        flight.new_arrival = model.gdp_schedule[flight.newSlot]
 
 
 def make_performance_df(model):
@@ -51,7 +51,7 @@ def make_df_solution(model, udpp):
         make_solution_array(model)
         update_flights(model)
 
-    new_slot = [flight.new_slot for flight in model.flights]
+    new_slot = [flight.newSlot.index for flight in model.flights]
     new_arrival = [flight.new_arrival for flight in model.flights]
     eta_slot = [flight.eta_slot for flight in model.flights]
     model.df["new slot"] = new_slot

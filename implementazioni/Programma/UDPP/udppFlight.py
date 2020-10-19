@@ -10,7 +10,7 @@ class UDPPFlight(Flight):
 
         self.UDPPLocalSlot = None
 
-        self.UDPPsolution = None
+        self.UDPPlocalSolution = None
 
     def set_local_num(self, i):
         self.localNum = i

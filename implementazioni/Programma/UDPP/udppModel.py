@@ -3,6 +3,8 @@ import pandas as pd
 from Programma.ModelStructure.modelStructure import ModelStructure
 from Programma.UDPP.udppAirline import UDPPAirline
 from Programma.UDPP.udppFlight import UDPPFlight
+from Programma.UDPP.udppLocal import UDPPlocal
+from Programma.UDPP.udppMerge import UDPPmerge
 from Programma.ModelStructure.Solution import solution
 
 
@@ -17,11 +19,14 @@ class UDPPModel(ModelStructure):
         airline: UDPPAirline
         for airline in self.airlines:
             airline.setLocalFlightList(self.flights)
-            airline.UDPPLocal()
+            UDPPlocal(airline, self.slots)
 
+        # UDPPmerge(self.flights, self.slots)
         flight: UDPPFlight
         df_UDPP: pd.DataFrame
-        UDPP_solution = [flight.UDPPsolution for flight in self.flights]
+
+
+        UDPP_solution = [flight.UDPPlocalSolution.index for flight in self.flights]
         self.df["UDPPpremerge"] = UDPP_solution
         df_UDPP = self.df.sort_values(by=["UDPPpremerge", "eta"])
 
@@ -30,8 +35,9 @@ class UDPPModel(ModelStructure):
             flight = self.get_flight_name(line["flight"])
             if i < flight.eta_slot:
                 print("************************************", flight, i, " earlier than eta")
-            flight.new_slot = i
-            flight.new_arrival = self.gdp_schedule[i]
+            flight.newSlot = self.slots[i]
+            flight.new_arrival =  flight.newSlot.time #self.gdp_schedule[i]
+
 
         solution.make_solution(self, udpp=True)
 

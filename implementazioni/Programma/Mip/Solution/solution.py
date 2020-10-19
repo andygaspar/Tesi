@@ -40,7 +40,7 @@ class Solution:
         for airline in model.airlines:
             for flight in airline.flights:
                 old_balance[airline.index] += flight.cost * model.delays[flight.slot, flight.slot]
-                new_balance[airline.index] += flight.cost * model.delays[flight.slot, flight.new_slot]
+                new_balance[airline.index] += flight.cost * model.delays[flight.slot, flight.newSlot]
         return pd.DataFrame({"airline": model.airlines, "new balance": new_balance, "old balance": old_balance})
 
     @staticmethod
@@ -49,7 +49,7 @@ class Solution:
             for i in model.slotIndexes:
                 if model.solution_array[i, j] != 0:
                     flight = get_flight(i, model.flights)
-                    flight.new_slot = j
+                    flight.newSlot = j
                     flight.new_arrival = model.gdp_schedule[j]
 
     def __repr__(self):
