@@ -27,6 +27,8 @@ class UDPPAirline(Airline):
         for i in range(len(self.flights)):
             self.flights[i].set_local_num(i)
 
+
+
     def setLocalFlightList(self, flight_list):
 
         self.modelFlightList = flight_list

@@ -1,5 +1,6 @@
 import numpy as np
 from itertools import product
+from Programma.ModelStructure.Slot import slotList as sl
 
 
 class ModelStructure:
@@ -23,6 +24,8 @@ class ModelStructure:
         self.slotIndexes = self.df["slot"].to_numpy()
 
         self.gdp_schedule = self.df["gdp schedule"].to_numpy()
+
+        self.slots = sl.make_slots(self.df)
 
         from Programma.ModelStructure.Flight import flightList as fll
         from Programma.ModelStructure.Airline import airlineList as airList
