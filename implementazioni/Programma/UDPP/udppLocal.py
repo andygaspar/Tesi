@@ -4,16 +4,30 @@ from Programma.UDPP.udppFlight import UDPPFlight
 
 
 def costo_provvisorio(f):
-    return (f.cost * (f.slot.time-f.eta)**2 )/ 2
+    return (f.cost * (f.slot.time - f.eta) ** 2) / 2
+
 
 def costo_provvisorio_finale(f):
-    return (f.cost * (f.UDPPlocalSolution.time-f.eta)**2 )/ 2
+    return (f.cost * (f.UDPPlocalSolution.time - f.eta) ** 2) / 2
+
 
 def costo(f, slot):
-    return (f.cost * (slot.time-f.eta)**2 )/ 2
+    return (f.cost * (slot.time - f.eta) ** 2) / 2
+
+
+def slot_range(k, AUslots):
+    return range(AUslots[k].index + 1, AUslots[k + 1].index)
+
+
+def eta_limit_slot(flight, AUslots):
+    i = 0
+    for slot in AUslots:
+        if slot.index >= flight.eta_slot:
+            return i
+        i += 1
+
 
 def UDPPlocal(airline, slots):
-
     m = Model(name)
     m.threads = -1
     m.verbose = 0
@@ -38,18 +52,18 @@ def UDPPlocal(airline, slots):
         m += xsum(y[flight.localNum, airline.AUslots[k].index] for flight in airline.flights) == 0
 
         m += xsum(y[i, j] for i in range(k, airline.num_flights) for j in range(airline.AUslots[k].index)) <= \
-                     xsum(x[i, kk] for i in range(k + 1) for kk in range(k, airline.num_flights))
+             xsum(x[i, kk] for i in range(k + 1) for kk in range(k, airline.num_flights))
 
-        m += xsum(y[flight.localNum, j] for flight in airline.flights for j in airline.slot_range(k)) \
-                     == z[k]
+        m += xsum(y[flight.localNum, j] for flight in airline.flights for j in slot_range(k, airline.AUslots)) \
+             == z[k]
 
         m += xsum(
             y[flight.localNum, j] for flight in airline.flights for j in range(airline.AUslots[k].index)) <= \
-                     xsum(x[i, j] for i in range(k) for j in range(k, airline.num_flights))
+             xsum(x[i, j] for i in range(k) for j in range(k, airline.num_flights))
 
         for i in range(k + 1):
             m += (1 - xsum(x[flight.localNum, i] for flight in airline.flights)) * 1000 \
-                         >= z[k] - (k - i)
+                 >= z[k] - (k - i)
 
     # last slot
     m += xsum(x[flight.localNum, airline.num_flights - 1] for flight in airline.flights) == 1
@@ -57,8 +71,8 @@ def UDPPlocal(airline, slots):
     for flight in airline.flights[1:]:
         # flight assignment
         m += xsum(y[flight.localNum, j] for j in range(flight.eta_slot, flight.slot.index)) + \
-                     xsum(x[flight.localNum, k] for k in
-                          range(airline.eta_limit(flight), airline.num_flights)) == 1
+             xsum(x[flight.localNum, k] for k in
+                  range(eta_limit_slot(flight, airline.AUslots), airline.num_flights)) == 1
 
     # not earlier than its first flight
     m += xsum(
@@ -68,7 +82,7 @@ def UDPPlocal(airline, slots):
     airline.model: ModelStructure
 
     m.objective = minimize(
-        xsum(y[flight.localNum][j.index] * costo(flight, slot)
+        xsum(y[flight.localNum][slot.index] * costo(flight, slot)
              for flight in airline.flights for slot in slots) +
         xsum(x[flight.localNum][k] * costo(flight, airline.AUslots[k])
              for flight in airline.flights for k in range(airline.num_flights)))
@@ -77,6 +91,7 @@ def UDPPlocal(airline, slots):
 
     # print(m.status)
 
+    protection = False
     for flight in airline.flights:
         xsol = "*"
         ysol = "*"
@@ -90,12 +105,20 @@ def UDPPlocal(airline, slots):
             if y[flight.localNum, slot.index].x != 0:
                 ysol = slots[j.index]
                 flight.UDPPlocalSolution = slot
+                # print("**************************")
+                protection = True
         # print(flight, xsol, ysol, "     ", flight.cost, flight.eta_slot)
 
         # if ysol not in [flight.slot for flight in flights] and ysol != "*":
         # print("******************************************** !!!!!!")
         # print(ysol, "    ", [flight.slot for flight in flights])
 
-    print(airline, sum([costo_provvisorio(f) for f in airline.flights]), sum([costo_provvisorio_finale(f) for f in airline.flights]))
-    for f in airline.flights:
-        print(f.slot.time, f.UDPPlocalSolution.time, f.cost, f.eta)
+    # if sum([costo_provvisorio(f) for f in airline.flights]) < sum([costo_provvisorio_finale(f) for f in airline.flights]):
+    #     print("\n\nPROBLEMA           MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
+    #     print(airline, sum([costo_provvisorio(f) for f in airline.flights]), sum([costo_provvisorio_finale(f) for f in airline.flights]))
+    #     for f in airline.flights:
+    #         print(f.slot.time, f.UDPPlocalSolution.time, f.cost, f.eta)
+    #
+    # if protection == True:
+    #     for f in airline.flights:
+    #         print(f.slot.time, f.UDPPlocalSolution.time, f.cost, f.eta)

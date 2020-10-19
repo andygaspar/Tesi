@@ -1,4 +1,4 @@
-import Programma.Mip.Solution.solution as sol
+import Programma.Istop.Solution.solution as sol
 import copy
 
 

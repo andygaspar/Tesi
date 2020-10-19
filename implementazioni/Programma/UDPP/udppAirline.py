@@ -14,24 +14,8 @@ class UDPPAirline(Airline):
         self.model = model
 
         self.modelFlightList = None
-        self.slotIndexes = model.slotIndexes
 
 
 
-        for i in range(len(self.flights)):
-            self.flights[i].set_local_num(i)
 
-    def setLocalFlightList(self, flight_list):
-
-        self.modelFlightList = flight_list
-
-    def slot_range(self, k):
-        return range(self.AUslots[k].index + 1, self.AUslots[k+1].index)
-
-    def eta_limit(self, flight: UDPPFlight):
-        i = 0
-        for slot in self.AUslots:
-            if slot.index >= flight.eta_slot:
-                return i
-            i += 1
 

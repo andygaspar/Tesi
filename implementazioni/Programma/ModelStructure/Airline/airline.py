@@ -27,10 +27,12 @@ class Airline:
 
         self.flights = self.make_airline_flight_list(model)
 
-        #self.initialCosts = sum([flight.cost for flight in self.flights])
         self.AUslots = np.array([flight.slot for flight in self.flights])
 
         self.finalCosts = None
+
+        for i in range(len(self.flights)):
+            self.flights[i].set_local_num(i)
 
     def __str__(self):
         return self.name

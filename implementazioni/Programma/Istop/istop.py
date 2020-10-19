@@ -1,10 +1,10 @@
 from Programma.ModelStructure import modelStructure as mS
 from mip import *
 import sys
-from Programma.Mip.Solution import solution as sol
+from Programma.Istop.Solution import solution as sol
 from itertools import combinations
-from Programma.Mip import modelAirline as air
-from Programma.Mip import modelFlight as modFl
+from Programma.Istop import modelAirline as air
+from Programma.Istop import modelFlight as modFl
 from Programma.ModelStructure.Solution import solution
 from Programma.ModelStructure.Costs.costs import cost_function as cf
 
@@ -14,7 +14,7 @@ import pandas as pd
 import time
 
 
-class MipModel(mS.ModelStructure):
+class Istop(mS.ModelStructure):
 
     @staticmethod
     def index(array, elem):

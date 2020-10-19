@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from itertools import combinations
-from Programma.Mip.modelFlight import ModelFlight
+from Programma.Istop.modelFlight import ModelFlight
 from Programma.ModelStructure.Airline import airline as air
 
 

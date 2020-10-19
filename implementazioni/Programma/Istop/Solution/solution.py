@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from Programma.Mip.Solution import offer as ol
+from Programma.Istop.Solution import offer as ol
 
 
 # kind of duplication of function in flightList

@@ -30,6 +30,14 @@ class Flight:
 
         self.not_compatible_slots = np.setdiff1d(model.df["slot"], self.compatible_slots)
 
+        self.localNum = None
+
+        # UDPP attributes ***************
+
+        self.UDPPLocalSlot = None
+
+        self.UDPPlocalSolution = None
+
     def __str__(self):
         return self.name
 
@@ -38,6 +46,9 @@ class Flight:
 
     def set_num(self, i):
         self.num = i
+
+    def set_local_num(self, i):
+        self.localNum = i
 
     def compute_compatible_slots(self, df):
         try:
@@ -52,8 +63,4 @@ class Flight:
                 compatible_slots = df[df["slot"] >= second_comp_slot]["slot"].to_numpy()
                 return compatible_arrival_times, compatible_slots
             except IndexError:
-                raise IndexError("No available slot for flight ",self.name)
-
-
-
-
+                raise IndexError("No available slot for flight ", self.name)

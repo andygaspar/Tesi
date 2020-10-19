@@ -1,6 +1,6 @@
 from data import dfMaker
 import pandas as pd
-from Programma.Mip import mipModel
+from Programma.Istop import istop
 from Programma.Amal import amal
 from Programma.UDPP import udppModel
 

@@ -18,25 +18,24 @@ class UDPPModel(ModelStructure):
 
         airline: UDPPAirline
         for airline in self.airlines:
-            airline.setLocalFlightList(self.flights)
             UDPPlocal(airline, self.slots)
 
-        # UDPPmerge(self.flights, self.slots)
+        UDPPmerge(self.flights, self.slots)
         flight: UDPPFlight
         df_UDPP: pd.DataFrame
 
 
-        UDPP_solution = [flight.UDPPlocalSolution.index for flight in self.flights]
-        self.df["UDPPpremerge"] = UDPP_solution
-        df_UDPP = self.df.sort_values(by=["UDPPpremerge", "eta"])
-
-        for i in range(df_UDPP.shape[0]):
-            line = df_UDPP.iloc[i]
-            flight = self.get_flight_name(line["flight"])
-            if i < flight.eta_slot:
-                print("************************************", flight, i, " earlier than eta")
-            flight.newSlot = self.slots[i]
-            flight.new_arrival =  flight.newSlot.time #self.gdp_schedule[i]
+        # UDPP_solution = [flight.UDPPlocalSolution.index for flight in self.flights]
+        # self.df["UDPPpremerge"] = UDPP_solution
+        # df_UDPP = self.df.sort_values(by=["UDPPpremerge", "eta"])
+        #
+        # for i in range(df_UDPP.shape[0]):
+        #     line = df_UDPP.iloc[i]
+        #     flight = self.get_flight_name(line["flight"])
+        #     if i < flight.eta_slot:
+        #         print("************************************", flight, i, " earlier than eta")
+        #     flight.newSlot = self.slots[i]
+        #     flight.new_arrival =  flight.newSlot.time #self.gdp_schedule[i]
 
 
         solution.make_solution(self, udpp=True)
