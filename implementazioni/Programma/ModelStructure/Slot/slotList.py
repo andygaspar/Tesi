@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 
-def make_slots(df: pd.DataFrame):
+def make_slots_list(df: pd.DataFrame):
     slots = []
     slotIndexes = df["slot"].to_numpy()
 

@@ -1,12 +1,14 @@
 import numpy as np
-from Programma.ModelStructure.Slot.slot import Slot
+from typing import List
+
+from Programma.ModelStructure.Slot import slot as sl
 
 
 class Flight:
 
-    def __init__(self, line, airline, model):
+    def __init__(self, line, airline, slots: List[sl.Slot]):
 
-        self.slot = Slot(line["slot"], line["gdp schedule"])
+        self.slot = slots[line["slot"]]
 
         self.num = line["num"]
 
@@ -18,7 +20,7 @@ class Flight:
 
         self.eta = line["eta"]
 
-        self.eta_slot = len(model.gdp_schedule[model.gdp_schedule <= self.eta]) - 1
+        self.eta_slot = len([slot for slot in slots if slot.time <= self.eta]) - 1
 
         self.gdp_arrival = line["gdp schedule"]
 
@@ -26,9 +28,7 @@ class Flight:
 
         self.cost = line["cost"]
 
-        self.compatible_arrival_time, self.compatible_slots = self.compute_compatible_slots(model.df)
-
-        self.not_compatible_slots = np.setdiff1d(model.df["slot"], self.compatible_slots)
+        self.compatible_slots = self.compute_compatible_slots(slots)
 
         self.localNum = None
 
@@ -50,17 +50,14 @@ class Flight:
     def set_local_num(self, i):
         self.localNum = i
 
-    def compute_compatible_slots(self, df):
+    def compute_compatible_slots(self, slots: List[sl.Slot]):
         try:
-            second_comp_slot = df[df["gdp schedule"] > self.eta].iloc[0]["slot"]
-            compatible_arrival_times = df[df["slot"] >= second_comp_slot - 1]["gdp schedule"].to_numpy()
-            compatible_slots = df[df["slot"] >= second_comp_slot - 1]["slot"].to_numpy()
-            return compatible_arrival_times, compatible_slots
+            compatible_slots = []
+            for slot in slots:
+                if slot.time > self.eta:
+                    compatible_slots.append(slot)
+            if compatible_slots[0].index > 0:
+                compatible_slots.insert(0, slots[compatible_slots[0].index-1])
+            return compatible_slots
         except IndexError:
-            try:
-                second_comp_slot = df[df["gdp schedule"] == self.eta].iloc[0]["slot"]
-                compatible_arrival_times = df[df["slot"] >= second_comp_slot]["gdp schedule"].to_numpy()
-                compatible_slots = df[df["slot"] >= second_comp_slot]["slot"].to_numpy()
-                return compatible_arrival_times, compatible_slots
-            except IndexError:
-                raise IndexError("No available slot for flight ", self.name)
+            raise IndexError("No available slot for flight ", self.name)

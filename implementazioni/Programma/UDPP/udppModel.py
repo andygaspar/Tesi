@@ -1,27 +1,25 @@
 import numpy as np
 import pandas as pd
 from Programma.ModelStructure.modelStructure import ModelStructure
-from Programma.UDPP.udppAirline import UDPPAirline
-from Programma.UDPP.udppFlight import UDPPFlight
 from Programma.UDPP.udppLocal import UDPPlocal
 from Programma.UDPP.udppMerge import UDPPmerge
 from Programma.ModelStructure.Solution import solution
+from Programma.ModelStructure.Airline import airline as air
+from Programma.ModelStructure.Flight import flight as fl
 
 
 class UDPPModel(ModelStructure):
 
-    def __init__(self, df_init, cost_kind="quadratic"):
+    def __init__(self, df_init: pd.DataFrame, cost_kind: str ="quadratic"):
 
-        self.airlineConstructor = UDPPAirline
-        self.flightConstructor = UDPPFlight
         super().__init__(df_init=df_init, cost_kind=cost_kind)
 
-        airline: UDPPAirline
+        airline: air.Airline
         for airline in self.airlines:
             UDPPlocal(airline, self.slots)
 
         UDPPmerge(self.flights, self.slots)
-        flight: UDPPFlight
+        flight: fl.Flight
         df_UDPP: pd.DataFrame
 
 

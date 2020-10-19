@@ -23,7 +23,7 @@ def update_flights(model):
 
     for flight in model.flights:
         flight.newSlot = np.argwhere(model.solution_array[flight.num])[0][0]
-        flight.new_arrival = model.gdp_schedule[flight.newSlot]
+        flight.new_arrival = model.slotTimeGrid[flight.newSlot]
 
 
 def make_performance_df(model):

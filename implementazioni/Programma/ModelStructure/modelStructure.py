@@ -1,6 +1,8 @@
 import numpy as np
+import pandas as pd
 from itertools import product
 from Programma.ModelStructure.Slot import slotList as sl
+from Programma.ModelStructure.Airline import airline as air
 
 
 class ModelStructure:
@@ -8,7 +10,7 @@ class ModelStructure:
     def compute_delays(self):
         delays = np.zeros((self.slotIndexes.shape[0], self.slotIndexes.shape[0]))
         for flight, j in product(self.flights, self.slotIndexes):
-            delays[flight.num, j] = (self.gdp_schedule[j] - flight.eta)
+            delays[flight.num, j] = (self.slotTimeGrid[j] - flight.eta)
 
         delays = np.where(delays < 0, 0, delays)
         return delays
@@ -17,22 +19,22 @@ class ModelStructure:
     def delay_cost(flight, delay):
         return (flight.cost * delay ** 2)/2
 
-    def __init__(self, df_init, cost_kind):
+    def __init__(self, df_init: pd.DataFrame, cost_kind: str):
 
         self.df = df_init
 
         self.slotIndexes = self.df["slot"].to_numpy()
 
-        self.gdp_schedule = self.df["gdp schedule"].to_numpy()
+        self.slotTimeGrid = self.df["gdp schedule"].to_numpy()
 
-        self.slots = sl.make_slots(self.df)
+        self.slots = sl.make_slots_list(self.df)
 
         from Programma.ModelStructure.Flight import flightList as fll
         from Programma.ModelStructure.Airline import airlineList as airList
 
         self.cost_kind = cost_kind
 
-        self.airlines = airList.make_airlines_list(self)
+        self.airlines = airList.make_airlines_list(self.df, self.slots)
 
         self.num_airlines = len(np.unique(self.df["airline"]))
 

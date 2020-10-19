@@ -1,7 +1,8 @@
 from mip import *
 import numpy as np
-from Programma.UDPP.udppFlight import UDPPFlight
-
+from Programma.ModelStructure.Airline import airline as air
+from Programma.ModelStructure.Flight import flight as fl
+from Programma.ModelStructure.Slot import slot as sl
 
 def costo_provvisorio(f):
     return (f.cost * (f.slot.time - f.eta) ** 2) / 2
@@ -15,11 +16,11 @@ def costo(f, slot):
     return (f.cost * (slot.time - f.eta) ** 2) / 2
 
 
-def slot_range(k, AUslots):
+def slot_range(k: int, AUslots: List[sl.Slot]):
     return range(AUslots[k].index + 1, AUslots[k + 1].index)
 
 
-def eta_limit_slot(flight, AUslots):
+def eta_limit_slot(flight: fl.Flight, AUslots: List[sl.Slot]):
     i = 0
     for slot in AUslots:
         if slot.index >= flight.eta_slot:
@@ -27,7 +28,7 @@ def eta_limit_slot(flight, AUslots):
         i += 1
 
 
-def UDPPlocal(airline, slots):
+def UDPPlocal(airline: air.Airline, slots: List[sl.Slot]):
     m = Model(name)
     m.threads = -1
     m.verbose = 0
@@ -38,7 +39,7 @@ def UDPPlocal(airline, slots):
 
     y = np.array([[m.add_var(var_type=BINARY) for j in slots] for i in airline.flights])
 
-    flight: UDPPFlight
+    flight: fl.Flight
 
     m += xsum(x[0, k] for k in range(airline.num_flights)) == 1
 
