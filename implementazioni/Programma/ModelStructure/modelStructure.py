@@ -44,7 +44,8 @@ class ModelStructure:
 
         self.report = None
 
-    def compute_costs(self, flights, which):
+    @staticmethod
+    def compute_costs(flights, which):
         if which == "initial":
             return sum([flight.costFun(flight, flight.slot) for flight in flights])
         if which == "final":
@@ -86,5 +87,3 @@ class ModelStructure:
             for flight in self.flights:
                 flight.set_cost_fun(costFun[i])
                 i += 1
-
-
