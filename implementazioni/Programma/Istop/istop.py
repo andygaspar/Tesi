@@ -62,7 +62,7 @@ class Istop(mS.ModelStructure):
 
     def set_constraints(self):
 
-        for i in self.empty_slots:
+        for i in self.emptySlots:
             for j in self.slotIndexes:
                 self.m += self.x[i, j] == 0
 

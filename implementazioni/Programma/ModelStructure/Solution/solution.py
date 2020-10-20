@@ -12,7 +12,7 @@ def make_solution_array(model):
     for flight in model.flights:
         for j in range(len(model.mipSolution[flight.num])):
             solution_array[flight.slot, j] = model.mipSolution[flight.num][j].x
-    model.solution_array = solution_array
+    model.solutionArray = solution_array
 
 
 def update_flights(model):
@@ -22,7 +22,7 @@ def update_flights(model):
     flight: Flight
 
     for flight in model.flights:
-        flight.newSlot = np.argwhere(model.solution_array[flight.num])[0][0]
+        flight.newSlot = np.argwhere(model.solutionArray[flight.num])[0][0]
         flight.new_arrival = model.slotTimeGrid[flight.newSlot]
 
 
@@ -34,7 +34,7 @@ def make_performance_df(model):
     airline: Airline
     flight: Flight
     airline_names = ["total"] + [airline.name for airline in model.airlines]
-    initial_costs = [model.initial_total_costs]
+    initial_costs = [model.initialTotalCosts]
     final_costs = [model.compute_costs(model.flights, "final")]
     for airline in model.airlines:
         initial_costs.append(model.compute_costs(airline.flights, "initial"))

@@ -24,7 +24,7 @@ class Solution:
         df = pd.DataFrame(columns=cols)
         for j in model.slotIndexes:
             for i in model.slotIndexes:
-                if model.solution_array[i, j] != 0:
+                if model.solutionArray[i, j] != 0:
                     flight = get_flight(i, model.flights)
                     row = dict(zip(cols,
                                    [j, flight.name, flight.airline.name, model.slotTimeGrid[j], flight.gdp_arrival,
@@ -47,7 +47,7 @@ class Solution:
     def update_flights_status(model):
         for j in model.slotIndexes:
             for i in model.slotIndexes:
-                if model.solution_array[i, j] != 0:
+                if model.solutionArray[i, j] != 0:
                     flight = get_flight(i, model.flights)
                     flight.newSlot = j
                     flight.new_arrival = model.slotTimeGrid[j]

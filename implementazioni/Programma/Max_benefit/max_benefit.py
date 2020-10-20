@@ -12,7 +12,7 @@ import time
 
 class MaxBenefitModel(mS.ModelStructure):
 
-    def __init__(self, df_init: pd.DataFrame, cost_kind="quadratic", offerMakerFunType="1", model_name="amal"):
+    def __init__(self, df_init: pd.DataFrame, cost_kind="quadratic", model_name="Max Benefit"):
 
         self.airlineConstructor = air.Airline
         self.flightConstructor = modFl.Flight

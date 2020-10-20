@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List
+from typing import List, Callable
 
 from Programma.ModelStructure.Slot import slot as sl
 
@@ -28,6 +28,8 @@ class Flight:
 
         self.cost = line["cost"]
 
+        self.costFun = None
+
         self.compatible_slots = self.compute_compatible_slots(slots)
 
         self.localNum = None
@@ -49,6 +51,9 @@ class Flight:
 
     def set_local_num(self, i):
         self.localNum = i
+
+    def set_cost_fun(self, costFun: Callable):
+        self.costFun = costFun
 
     def compute_compatible_slots(self, slots: List[sl.Slot]):
         try:

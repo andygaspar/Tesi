@@ -4,16 +4,12 @@ from Programma.ModelStructure.Airline import airline as air
 from Programma.ModelStructure.Flight import flight as fl
 from Programma.ModelStructure.Slot import slot as sl
 
-def costo_provvisorio(f):
-    return (f.cost * (f.slot.time - f.eta) ** 2) / 2
+# def costo_provvisorio(f):
+#     return (f.cost * (f.slot.time - f.eta) ** 2) / 2
 
 
-def costo_provvisorio_finale(f):
-    return (f.cost * (f.UDPPlocalSolution.time - f.eta) ** 2) / 2
-
-
-def costo(f, slot):
-    return (f.cost * (slot.time - f.eta) ** 2) / 2
+# def costo_provvisorio_finale(f):
+#     return (f.cost * (f.UDPPlocalSolution.time - f.eta) ** 2) / 2
 
 
 def slot_range(k: int, AUslots: List[sl.Slot]):
@@ -83,9 +79,9 @@ def UDPPlocal(airline: air.Airline, slots: List[sl.Slot]):
     airline.model: ModelStructure
 
     m.objective = minimize(
-        xsum(y[flight.localNum][slot.index] * costo(flight, slot)
+        xsum(y[flight.localNum][slot.index] * flight.costFun(flight, slot)
              for flight in airline.flights for slot in slots) +
-        xsum(x[flight.localNum][k] * costo(flight, airline.AUslots[k])
+        xsum(x[flight.localNum][k] * flight.costFun(flight, airline.AUslots[k])
              for flight in airline.flights for k in range(airline.num_flights)))
 
     m.optimize()
