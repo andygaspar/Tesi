@@ -27,7 +27,7 @@ class Solution:
                 if model.solutionArray[i, j] != 0:
                     flight = get_flight(i, model.flights)
                     row = dict(zip(cols,
-                                   [j, flight.name, flight.airline.name, model.slotTimeGrid[j], flight.gdp_arrival,
+                                   [j, flight.name, flight.airline.name, model.slotTimeGrid[j], flight.fpfs,
                                     flight.eta, flight.cost * model.delays[i, j],
                                     flight.cost * model.delays[i, i], flight.priority]))
                     df = df.append(row, ignore_index=True)

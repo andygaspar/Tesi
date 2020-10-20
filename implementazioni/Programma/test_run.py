@@ -8,6 +8,7 @@ from Programma.UDPP import udppModel
 
 # df = pd.read_csv("../data/data_ruiz.csv")
 df = dfMaker.df_maker(30, 5, distribution="uniform")
+
 df_max = df.copy(deep=True)
 df_UDPP = df_max.copy(deep=True)
 
@@ -17,12 +18,11 @@ costFun = CostFuns().costFun["quadratic"]
 # max_model.run()
 #
 #
-# udpp_model = udppModel.UDPPModel(df_UDPP, costFun)
+udpp_model = udppModel.UDPPModel(df_UDPP, costFun)
 
-# print(udpp_model.get_new_df()[["flight", "new slot", "new arrival", "eta slot", "cost"]])
 
-# model = istop.Istop(udpp_model.get_new_df())
-model = istop.Istop(df, costFun)
+model = istop.Istop(udpp_model.get_new_df(), costFun)
+# model = istop.Istop(df, costFun)
 model.run()
 
 model.print_solution()

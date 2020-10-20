@@ -146,7 +146,7 @@ class Istop(mS.ModelStructure):
         self.set_objective()
 
         # start = time.time()
-        # self.m.optimize()
+        self.m.optimize()
         # end = time.time() - start
         # print("Simplex time ", end)
         #
@@ -154,7 +154,7 @@ class Istop(mS.ModelStructure):
         #
         # self.mipSolution = self.x
         #
-        # solution.make_solution(self)
+        solution.make_solution(self)
         #
         # self.offer_solution_maker()
 

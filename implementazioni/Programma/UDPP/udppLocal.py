@@ -19,7 +19,7 @@ def slot_range(k: int, AUslots: List[sl.Slot]):
 def eta_limit_slot(flight: fl.Flight, AUslots: List[sl.Slot]):
     i = 0
     for slot in AUslots:
-        if slot.index >= flight.etaSlot:
+        if slot >= flight.etaSlot:
             return i
         i += 1
 
@@ -37,52 +37,49 @@ def UDPPlocal(airline: air.Airline, slots: List[sl.Slot]):
 
     flight: fl.Flight
 
-    m += xsum(x[0, k] for k in range(airline.num_flights)) == 1
+    m += xsum(x[0, k] for k in range(airline.numFlights)) == 1
 
     # slot constraint
     for j in slots:
         m += xsum(y[flight.localNum, j.index] for flight in airline.flights) <= 1
 
-    for k in range(airline.num_flights - 1):
+    for k in range(airline.numFlights - 1):
         m += xsum(x[flight.localNum, k] for flight in airline.flights) <= 1
 
         m += xsum(y[flight.localNum, airline.AUslots[k].index] for flight in airline.flights) == 0
 
-        m += xsum(y[i, j] for i in range(k, airline.num_flights) for j in range(airline.AUslots[k].index)) <= \
-             xsum(x[i, kk] for i in range(k + 1) for kk in range(k, airline.num_flights))
+        m += xsum(y[i, j] for i in range(k, airline.numFlights) for j in range(airline.AUslots[k].index)) <= \
+             xsum(x[i, kk] for i in range(k + 1) for kk in range(k, airline.numFlights))
 
         m += xsum(y[flight.localNum, j] for flight in airline.flights for j in slot_range(k, airline.AUslots)) \
              == z[k]
 
         m += xsum(
             y[flight.localNum, j] for flight in airline.flights for j in range(airline.AUslots[k].index)) <= \
-             xsum(x[i, j] for i in range(k) for j in range(k, airline.num_flights))
+             xsum(x[i, j] for i in range(k) for j in range(k, airline.numFlights))
 
         for i in range(k + 1):
             m += (1 - xsum(x[flight.localNum, i] for flight in airline.flights)) * 1000 \
                  >= z[k] - (k - i)
 
     # last slot
-    m += xsum(x[flight.localNum, airline.num_flights - 1] for flight in airline.flights) == 1
+    m += xsum(x[flight.localNum, airline.numFlights - 1] for flight in airline.flights) == 1
 
     for flight in airline.flights[1:]:
         # flight assignment
-        m += xsum(y[flight.localNum, j] for j in range(flight.etaSlot, flight.slot.index)) + \
+        m += xsum(y[flight.localNum, j] for j in range(flight.etaSlot.index, flight.slot.index)) + \
              xsum(x[flight.localNum, k] for k in
-                  range(eta_limit_slot(flight, airline.AUslots), airline.num_flights)) == 1
+                  range(eta_limit_slot(flight, airline.AUslots), airline.numFlights)) == 1
 
     # not earlier than its first flight
     m += xsum(
         y[flight.localNum, j] for flight in airline.flights for j in range(airline.flights[0].slot.index)) == 0
 
-    from Programma.ModelStructure.modelStructure import ModelStructure
-    airline.model: ModelStructure
-
     m.objective = minimize(
         xsum(y[flight.localNum][slot.index] * flight.costFun(flight, slot)
              for flight in airline.flights for slot in slots) +
         xsum(x[flight.localNum][k] * flight.costFun(flight, airline.AUslots[k])
-             for flight in airline.flights for k in range(airline.num_flights)))
+             for flight in airline.flights for k in range(airline.numFlights)))
 
     m.optimize()
 
@@ -93,7 +90,7 @@ def UDPPlocal(airline: air.Airline, slots: List[sl.Slot]):
         xsol = "*"
         ysol = "*"
 
-        for k in range(airline.num_flights):
+        for k in range(airline.numFlights):
             if x[flight.localNum, k].x != 0:
                 xsol = airline.flights[k].slot
                 flight.UDPPlocalSolution = airline.flights[k].slot

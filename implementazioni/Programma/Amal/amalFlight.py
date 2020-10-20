@@ -10,7 +10,7 @@ class AmalFlight(fl.Flight):
 
         self.priority = line["priority"]
 
-        self.currentDelay = self.gdp_arrival - self.eta
+        self.currentDelay = self.fpfs - self.eta
 
         self.classes = None
 

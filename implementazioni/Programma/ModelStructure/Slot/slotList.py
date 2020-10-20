@@ -7,9 +7,10 @@ def make_slots_list(df: pd.DataFrame):
     slots = []
     slotIndexes = df["slot"].to_numpy()
 
-    gdp_schedule = df["gdp schedule"].to_numpy()
+    slotTimes = df["time"].to_numpy()
+    slotTimes.sort()
 
     for i in range(len(slotIndexes)):
-        slots.append(Slot(i, gdp_schedule[i]))
+        slots.append(Slot(i, slotTimes[i]))
 
     return np.array(slots)

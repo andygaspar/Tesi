@@ -81,7 +81,7 @@ def df_maker(num_flights=20, num_airlines=3, distribution="uniform", capacity=1,
 
     slot = np.arange(num_flights)
     eta = slot * capacity
-    gdp = slot * new_capacity
+    fpfs = slot * new_capacity
     priority = np.random.uniform(0.5, 2, num_flights)
     priority = []
     for i in range(num_flights):
@@ -96,6 +96,6 @@ def df_maker(num_flights=20, num_airlines=3, distribution="uniform", capacity=1,
     num = range(num_flights)
 
     return pd.DataFrame(
-        {"slot": slot, "flight": flights, "eta": eta, "gdp schedule": gdp, "priority": priority, "airline": airline,
-         "cost": cost, "num": num})
+        {"slot": slot, "flight": flights, "eta": eta, "fpfs": fpfs, "time": fpfs, "priority": priority,
+         "airline": airline, "cost": cost, "num": num})
 

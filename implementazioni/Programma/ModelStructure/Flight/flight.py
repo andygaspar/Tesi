@@ -22,7 +22,7 @@ class Flight:
 
         self.etaSlot = slots[len([slot for slot in slots if slot.time <= self.eta]) - 1]
 
-        self.gdp_arrival = line["gdp schedule"]
+        self.fpfs = line['fpfs']
 
         self.new_arrival = None
 

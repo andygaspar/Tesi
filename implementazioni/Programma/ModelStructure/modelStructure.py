@@ -14,10 +14,6 @@ class ModelStructure:
 
         self.df = df_init
 
-        # self.slotIndexes = self.df["slot"].to_numpy()
-        #
-        # self.slotTimeGrid = self.df["gdp schedule"].to_numpy()
-
         self.slots = sl.make_slots_list(self.df)
 
         self.airlines = airList.make_airlines_list(self.df, self.slots, airline_ctor)
@@ -63,12 +59,12 @@ class ModelStructure:
     def print_solution(self):
         print(self.solutionDf)
 
-    def get_flight_by_slot_index(self, i):
+    def get_flight_by_slot(self, slot: sl.Slot):
         for flight in self.flights:
-            if flight.slot == i:
+            if flight.slot == slot:
                 return flight
 
-    def get_flight_name(self, f_name):
+    def get_flight_from_name(self, f_name):
         for flight in self.flights:
             if flight.name == f_name:
                 return flight
