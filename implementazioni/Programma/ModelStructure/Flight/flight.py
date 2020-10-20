@@ -24,8 +24,6 @@ class Flight:
 
         self.fpfs = line['fpfs']
 
-        self.new_arrival = None
-
         self.cost = line["cost"]
 
         self.costFun = None

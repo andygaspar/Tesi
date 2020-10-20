@@ -21,9 +21,6 @@ class UDPPModel(ModelStructure):
             UDPPlocal(airline, self.slots)
 
         UDPPmerge(self.flights, self.slots)
-        flight: fl.Flight
-        df_UDPP: pd.DataFrame
-
         solution.make_solution(self, udpp=True)
 
     def get_new_df(self):

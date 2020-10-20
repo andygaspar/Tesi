@@ -76,8 +76,13 @@ class MaxBenefitModel(mS.ModelStructure):
 
         solution.make_solution(self)
 
+        for flight in self.flights:
+            if flight.eta > flight.newSlot.time:
+                print("********************** danno *********************************",
+                      flight, flight.eta, flight.newSlot.time)
+
     def assign_flights(self, mipSolution):
         for flight in self.flights:
             for slot in self.slots:
-                if mipSolution[flight.localNum, slot.index].x != 0:
+                if mipSolution[flight.slot.index, slot.index].x != 0:
                     flight.newSlot = slot
