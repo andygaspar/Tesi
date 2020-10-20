@@ -25,15 +25,13 @@ class IstopAirline(air.Airline):
 
         self.sum_priorities = sum(self.df["priority"])
 
-        self.priorityFunction = None
-
         self.flight_pairs = self.pairs(self.flights)
 
         self.flight_triplets = self.triplet(self.flights)
 
-    def set_preferences(self, prefernece_function: Callable):
+    def set_preferences(self, priorityFunction):
         flight: IstopFlight
         for flight in self.flights:
             df_flight = self.df[self.df["flight"] == flight.name]
             flight.set_priority(df_flight["priority"].values[0])
-            flight.set_preference(self.sum_priorities, self.priorityFunction)
+            flight.set_preference(self.sum_priorities, priorityFunction)

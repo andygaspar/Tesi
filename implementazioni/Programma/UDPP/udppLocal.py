@@ -19,7 +19,7 @@ def slot_range(k: int, AUslots: List[sl.Slot]):
 def eta_limit_slot(flight: fl.Flight, AUslots: List[sl.Slot]):
     i = 0
     for slot in AUslots:
-        if slot.index >= flight.eta_slot:
+        if slot.index >= flight.etaSlot:
             return i
         i += 1
 
@@ -67,7 +67,7 @@ def UDPPlocal(airline: air.Airline, slots: List[sl.Slot]):
 
     for flight in airline.flights[1:]:
         # flight assignment
-        m += xsum(y[flight.localNum, j] for j in range(flight.eta_slot, flight.slot.index)) + \
+        m += xsum(y[flight.localNum, j] for j in range(flight.etaSlot, flight.slot.index)) + \
              xsum(x[flight.localNum, k] for k in
                   range(eta_limit_slot(flight, airline.AUslots), airline.num_flights)) == 1
 

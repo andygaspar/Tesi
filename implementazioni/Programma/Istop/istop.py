@@ -36,11 +36,14 @@ class Istop(mS.ModelStructure):
 
     def __init__(self, df_init, costFun: Union[Callable, List[Callable]], alpha=1, model_name="model"):
 
-        self.f = lambda x, y: x * (y ** alpha)
+        self.preference_function = lambda x, y: x * (y ** alpha)
         # self.airlineConstructor = air.IstopAirline
         # self.flightConstructor = modFl.IstopFlight
         self.offers = None
         super().__init__(df_init=df_init, costFun=costFun, airline_ctor=air.IstopAirline)
+        airline: air.IstopAirline
+        for airline in self.airlines:
+            airline.set_preferences(self.preference_function)
 
         self.airlines_pairs = np.array(list(combinations(self.airlines, 2)))
 
@@ -97,26 +100,26 @@ class Istop(mS.ModelStructure):
             for pairA in fl_pair_a:
                 for pairB in fl_pair_b:
                     self.condition(pairA, pairB)
-                    self.m += xsum(self.x[i.slot, j.slot] for i in pairA for j in pairB) - \
-                              xsum(self.x[i.slot, j.slot] for i in pairB for j in pairA) >= \
+                    self.m += xsum(self.x[i.slot.index, j.slot.index] for i in pairA for j in pairB) - \
+                              xsum(self.x[i.slot.index, j.slot.index] for i in pairB for j in pairA) >= \
                               -(2 - self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] -
                                 self.c[self.index(self.airlines, airl_pair[1])][self.index(fl_pair_b, pairB)]) * 100000
 
-                    self.m += - xsum(self.x[i.slot, j.slot] for i in pairA for j in pairB) + \
-                              xsum(self.x[i.slot, j.slot] for i in pairB for j in pairA) >= \
+                    self.m += - xsum(self.x[i.slot.index, j.slot.index] for i in pairA for j in pairB) + \
+                              xsum(self.x[i.slot.index, j.slot.index] for i in pairB for j in pairA) >= \
                               -(2 - self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] -
                                 self.c[self.index(self.airlines, airl_pair[1])][self.index(fl_pair_b, pairB)]) * 100000
 
-                    self.m += xsum(self.x[i.slot, j.slot] * cf(self, i, j.slot) for i in pairA for j in pairB) - \
+                    self.m += xsum(self.x[i.slot.index, j.slot.index] * i.costFun(i, j.slot) for i in pairA for j in pairB) - \
                               (2 - self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] -
                                self.c[self.index(self.airlines, airl_pair[1])][self.index(fl_pair_b, pairB)]) * 100000 \
-                              <= xsum(self.x[i.slot, j.slot] * cf(self, i, i.slot) for i in pairA for j in pairB) - \
+                              <= xsum(self.x[i.slot.index, j.slot.index] * i.costFun(i, i.slot) for i in pairA for j in pairB) - \
                               self.epsilon
 
-                    self.m += xsum(self.x[i.slot, j.slot] * cf(self, i, j.slot) for i in pairB for j in pairA) - \
+                    self.m += xsum(self.x[i.slot.index, j.slot.index] * i.costFun(i, j.slot) for i in pairB for j in pairA) - \
                               (2 - self.c[self.index(self.airlines, airl_pair[0])][self.index(fl_pair_a, pairA)] -
                                self.c[self.index(self.airlines, airl_pair[1])][self.index(fl_pair_b, pairB)]) * 100000 \
-                              <= xsum(self.x[i.slot, j.slot] * cf(self, i, i.slot) for i in pairB for j in pairA) - \
+                              <= xsum(self.x[i.slot.index, j.slot.index] * i.costFun(i, i.slot) for i in pairB for j in pairA) - \
                               self.epsilon
 
                     k += 1
@@ -125,7 +128,7 @@ class Istop(mS.ModelStructure):
     def set_objective(self):
 
         self.m.objective = minimize(
-            xsum(self.x[flight.slot, j] * self.score(flight, j) for flight in self.flights for j in self.slotIndexes) \
+            xsum(self.x[flight.slot.index, j.index] * self.score(flight, j) for flight in self.flights for j in self.slots) \
             + xsum(
                 self.c[self.index(self.airlines, air)][self.index(air.flight_pairs, j)] for air in self.airlines for j
                 in
@@ -185,48 +188,48 @@ class Istop(mS.ModelStructure):
         B0 = pairB[0]
         B1 = pairB[1]
 
-        initial_costA = cf(self, A0, A0.slot) + cf(self, A1, A1.slot)
-        initial_costB = cf(self, B0, B0.slot) + cf(self, B1, B1.slot)
+        initial_costA = A0.costFun(A0, A0.slot) + A1.costFun(A1, A1.slot)
+        initial_costB = B0.costFun(B0, B0.slot) + B1.costFun(B1, B1.slot)
 
-        offA1 = initial_costA - cf(self, A0, B0.slot) - cf(self, A1, B1.slot)
-        offA2 = initial_costA - cf(self, A0, B1.slot) - cf(self, A1, B0.slot)
-        offB1 = initial_costB - cf(self, B0, A0.slot) - cf(self, B1, A1.slot)
-        offB2 = initial_costB - cf(self, B0, A1.slot) - cf(self, B1, A0.slot)
+        offA1 = initial_costA - A0.costFun(A0, B0.slot) - A1.costFun(A1, B1.slot)
+        offA2 = initial_costA - A0.costFun(A0, B1.slot) - A1.costFun(A1, B0.slot)
+        offB1 = initial_costB - B0.costFun(B0, A0.slot) - B1.costFun(B1, A1.slot)
+        offB2 = initial_costB - B0.costFun(B0, A1.slot) - B1.costFun(B1, A0.slot)
 
-        if offA1 > 0 and offB1 > 0 and A0.eta_slot <= B0.slot and B0.eta_slot <= A0.slot and \
-                A1.eta_slot <= B1.slot and B1.eta_slot <= A1.slot:
+        if offA1 > 0 and offB1 > 0 and A0.etaSlot <= B0.slot and B0.etaSlot <= A0.slot and \
+                A1.etaSlot <= B1.slot and B1.etaSlot <= A1.slot:
             print(A0, A0.slot, "<->", B0.slot, B0)
             print(A1, A1.slot, "<->", B1.slot, B1)
-            print(A0, self.delays[A0.num, A0.slot], self.delays[A0.num, B0.slot])
-            print(B0, self.delays[B0.num, B0.slot], self.delays[B0.num, A0.slot])
-            print(A1, self.delays[A1.num, A1.slot], self.delays[A1.num, B1.slot])
-            print(B1, self.delays[B1.num, B1.slot], self.delays[B1.num, A1.slot])
-            print(offA1, offB1,"\n")
+            print(A0, A0.delay(A0.slot), A0.delay(B0.slot))
+            print(B0, B0.delay(B0.slot), B0.delay(A0.slot))
+            print(A1, A1.delay(A1.slot), A1.delay(B1.slot))
+            print(B1, B1.delay(B1.slot), B1.delay(A1.slot))
+            print(offA1, offB1, "\n")
 
-        if offA2 > 0 and offB2 > 0 and A0.eta_slot <= B1.slot and B1.eta_slot <= A0.slot and \
-                A1.eta_slot <= B0.slot and B0.eta_slot <= A1.slot:
+        if offA2 > 0 and offB2 > 0 and A0.etaSlot <= B1.slot and B1.etaSlot <= A0.slot and \
+                A1.etaSlot <= B0.slot and B0.etaSlot <= A1.slot:
             print(A0, A0.slot, "<->", B1.slot, B1)
             print(A1, A1.slot, "<->", B0.slot, B0)
-            print(A0, self.delays[A0.num, A0.slot], self.delays[A0.num, B1.slot])
-            print(B0, self.delays[B0.num, B0.slot], self.delays[B0.num, A1.slot])
-            print(A1, self.delays[A1.num, A1.slot], self.delays[A1.num, B0.slot])
-            print(B1, self.delays[B1.num, B1.slot], self.delays[B1.num, A0.slot])
-            print(offA2, offB2,"\n")
+            print(A0, A0.delay(A0.slot), A0.delay(B1.slot))
+            print(B0, B0.delay(B0.slot), B0.delay(A1.slot))
+            print(A1, A1.delay(A1.slot), A1.delay(B0.slot))
+            print(B1, B1.delay(B1.slot), B1.delay(A0.slot))
+            print(offA2, offB2, "\n")
 
-        if offA1 > 0 and offB2 > 0 and A0.eta_slot <= B0.slot and B0.eta_slot <= A1.slot and \
-                A1.eta_slot <= B1.slot and B1.eta_slot <= A0.slot:
+        if offA1 > 0 and offB2 > 0 and A0.etaSlot <= B0.slot and B0.etaSlot <= A1.slot and \
+                A1.etaSlot <= B1.slot and B1.etaSlot <= A0.slot:
             print(A0, A0.slot, "->", B0.slot, B0, "->", A1, A1.slot, "->", B1.slot, B1)
-            print(A0, self.delays[A0.num, A0.slot], self.delays[A0.num, B0.slot])
-            print(B0, self.delays[B0.num, B0.slot], self.delays[B0.num, A1.slot])
-            print(A1, self.delays[A1.num, A1.slot], self.delays[A1.num, B1.slot])
-            print(B1, self.delays[B1.num, B1.slot], self.delays[B1.num, A0.slot])
+            print(A0, A0.delay(A0.slot), A0.delay(B0.slot))
+            print(B0, B0.delay(B0.slot), B0.delay(A1.slot))
+            print(A1, A1.delay(A1.slot), A1.delay(B1.slot))
+            print(B1, B1.delay(B1.slot), B1.delay(A0.slot))
             print(offA1, offB2, "\n")
 
-        if offA2 > 0 and offB1 > 0 and A0.eta_slot <= B1.slot and B1.eta_slot <= A0.slot and \
-                A1.eta_slot <= B0.slot and B0.eta_slot <= A1.slot:
+        if offA2 > 0 and offB1 > 0 and A0.etaSlot <= B1.slot and B1.etaSlot <= A0.slot and \
+                A1.etaSlot <= B0.slot and B0.etaSlot <= A1.slot:
             print(A0, A0.slot, "<->", B1.slot, B1, "->", A1, A1.slot, "->", B0.slot, B0)
-            print(A0, self.delays[A0.num, A0.slot], self.delays[A0.num, B1.slot])
-            print(B0, self.delays[B0.num, B0.slot], self.delays[B0.num, A0.slot])
-            print(A1, self.delays[A1.num, A1.slot], self.delays[A1.num, B0.slot])
-            print(B1, self.delays[B1.num, B1.slot], self.delays[B1.num, A1.slot])
+            print(A0, A0.delay(A0.slot), A0.delay(B1.slot))
+            print(B0, B0.delay(B0.slot), B0.delay(A0.slot))
+            print(A1, A1.delay(A1.slot), A1.delay(B0.slot))
+            print(B1, B1.delay(B1.slot), B1.delay(A1.slot))
             print(offA2, offB1, "\n")

@@ -25,7 +25,7 @@ class Airline:
 
         self.index = airline_index
 
-        self.num_flights = df_airline.shape[0]
+        self.numFlights = df_airline.shape[0]
 
         self.flights = self.make_airline_flight_list(slots, flight_ctor)
 

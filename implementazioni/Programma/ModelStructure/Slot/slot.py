@@ -19,3 +19,6 @@ class Slot:
 
     def __lt__(self, other: Slot):
         return self.time < other.time
+
+    def __le__(self, other: Slot):
+        return self.time <= other.time

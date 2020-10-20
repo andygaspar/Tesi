@@ -37,7 +37,7 @@ def make_offer_list(model, airline):
         for otherFlight in other_flights:
             if model.offerMakerFunType == "1":
 
-                flight_offer = flight.eta_slot
+                flight_offer = flight.etaSlot
                 exchange_offer = model.slotIndexes[-1]
                 if convenient_offer(flight, flight_offer, otherFlight, exchange_offer, model):
                     offer_list.append(AmalOffer(otherFlight, exchange_offer, flight, flight_offer))

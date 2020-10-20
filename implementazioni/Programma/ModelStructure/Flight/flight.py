@@ -20,7 +20,7 @@ class Flight:
 
         self.eta = line["eta"]
 
-        self.eta_slot = len([slot for slot in slots if slot.time <= self.eta]) - 1
+        self.etaSlot = slots[len([slot for slot in slots if slot.time <= self.eta]) - 1]
 
         self.gdp_arrival = line["gdp schedule"]
 
@@ -84,4 +84,8 @@ class Flight:
             if slot not in self.compatibleSlots:
                 notCompatibleSlots.append(slot)
         return notCompatibleSlots
+
+
+
+
 

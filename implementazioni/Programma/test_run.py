@@ -24,3 +24,5 @@ costFun = CostFuns().costFun["quadratic"]
 # model = istop.Istop(udpp_model.get_new_df())
 model = istop.Istop(df, costFun)
 model.run()
+
+model.print_solution()
