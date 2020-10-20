@@ -1,6 +1,7 @@
+from __future__ import annotations
 import numpy as np
 import pandas as pd
-from typing import List
+from typing import List, Callable
 from itertools import combinations
 from Programma.ModelStructure.Flight.flight import Flight
 from Programma.ModelStructure.Slot.slot import Slot
@@ -8,15 +9,15 @@ from Programma.ModelStructure.Slot.slot import Slot
 
 class Airline:
 
-    def make_airline_flight_list(self, slots: List[Slot]):
+    def make_airline_flight_list(self, slots: List[Slot], flight_ctor: Callable):
         flight_list = []
         for i in range(self.df.shape[0]):
             line = self.df.iloc[i]
-            flight_list.append(Flight(line, self, slots))
+            flight_list.append(flight_ctor(line, self, slots))
 
         return np.array(flight_list)
 
-    def __init__(self, df_airline: pd.DataFrame, airline_index: int, slots: List[Slot]):
+    def __init__(self, df_airline: pd.DataFrame, airline_index: int, slots: List[Slot], flight_ctor: Callable = Flight):
 
         self.df = df_airline
 
@@ -26,7 +27,7 @@ class Airline:
 
         self.num_flights = df_airline.shape[0]
 
-        self.flights = self.make_airline_flight_list(slots)
+        self.flights = self.make_airline_flight_list(slots, flight_ctor)
 
         self.AUslots = np.array([flight.slot for flight in self.flights])
 
@@ -40,3 +41,7 @@ class Airline:
 
     def __repr__(self):
         return self.name
+
+    def __eq__(self, other: Airline):
+        return self.index == other.index
+

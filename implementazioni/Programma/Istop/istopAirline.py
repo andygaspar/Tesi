@@ -1,11 +1,13 @@
+from typing import Callable
+
 import numpy as np
 import pandas as pd
 from itertools import combinations
-from Programma.Istop.modelFlight import ModelFlight
+from Programma.Istop.istopFlight import IstopFlight
 from Programma.ModelStructure.Airline import airline as air
 
 
-class ModelAirline(air.Airline):
+class IstopAirline(air.Airline):
 
     @staticmethod
     def pairs(list_to_comb):
@@ -17,19 +19,20 @@ class ModelAirline(air.Airline):
     def triplet(list_to_comb):
         return np.array(list(combinations(list_to_comb, 3)))
 
-    def __init__(self, df_airline: pd.DataFrame, airline_index, model):
+    def __init__(self, df_airline: pd.DataFrame, airline_index, slots):
 
-        super().__init__(df_airline, airline_index, model)
+        super().__init__(df_airline=df_airline, airline_index=airline_index, slots=slots, flight_ctor=IstopFlight)
 
         self.sum_priorities = sum(self.df["priority"])
 
-        self.priorityFunction = model.f
+        self.priorityFunction = None
 
         self.flight_pairs = self.pairs(self.flights)
 
         self.flight_triplets = self.triplet(self.flights)
 
-        flight: ModelFlight
+    def set_preferences(self, prefernece_function: Callable):
+        flight: IstopFlight
         for flight in self.flights:
             df_flight = self.df[self.df["flight"] == flight.name]
             flight.set_priority(df_flight["priority"].values[0])

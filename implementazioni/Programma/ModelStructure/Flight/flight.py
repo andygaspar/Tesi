@@ -30,7 +30,9 @@ class Flight:
 
         self.costFun = None
 
-        self.compatible_slots = self.compute_compatible_slots(slots)
+        self.compatibleSlots = self.compute_compatible_slots(slots)
+
+        self.notCompatibleSlots = self.compute_not_compatible_slots(slots)
 
         self.localNum = None
 
@@ -39,6 +41,12 @@ class Flight:
         self.UDPPLocalSlot = None
 
         self.UDPPlocalSolution = None
+
+        # ISTOP attributes  *************
+
+        self.priority = line["priority"]
+
+        self.preference = None
 
     def __str__(self):
         return self.name
@@ -55,6 +63,9 @@ class Flight:
     def set_cost_fun(self, costFun: Callable):
         self.costFun = costFun
 
+    def delay(self, slot: sl.Slot):
+        return slot.time - self.eta
+
     def compute_compatible_slots(self, slots: List[sl.Slot]):
         try:
             compatible_slots = []
@@ -66,3 +77,11 @@ class Flight:
             return compatible_slots
         except IndexError:
             raise IndexError("No available slot for flight ", self.name)
+
+    def compute_not_compatible_slots(self, slots):
+        notCompatibleSlots = []
+        for slot in slots:
+            if slot not in self.compatibleSlots:
+                notCompatibleSlots.append(slot)
+        return notCompatibleSlots
+

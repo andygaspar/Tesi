@@ -1,7 +1,7 @@
 from Programma.ModelStructure.Flight import flight as fl
 
 
-class ModelFlight(fl.Flight):
+class IstopFlight(fl.Flight):
 
     def __init__(self, line, airline, model):
 

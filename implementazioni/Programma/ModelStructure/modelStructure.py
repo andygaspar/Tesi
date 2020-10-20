@@ -10,17 +10,17 @@ from Programma.ModelStructure.Airline import airlineList as airList
 
 class ModelStructure:
 
-    def __init__(self, df_init: pd.DataFrame, costFun: Union[Callable, List[Callable]]):
+    def __init__(self, df_init: pd.DataFrame, costFun: Union[Callable, List[Callable]], airline_ctor=air.Airline):
 
         self.df = df_init
 
-        self.slotIndexes = self.df["slot"].to_numpy()
-
-        self.slotTimeGrid = self.df["gdp schedule"].to_numpy()
+        # self.slotIndexes = self.df["slot"].to_numpy()
+        #
+        # self.slotTimeGrid = self.df["gdp schedule"].to_numpy()
 
         self.slots = sl.make_slots_list(self.df)
 
-        self.airlines = airList.make_airlines_list(self.df, self.slots)
+        self.airlines = airList.make_airlines_list(self.df, self.slots, airline_ctor)
 
         self.numAirlines = len(np.unique(self.df["airline"]))
 

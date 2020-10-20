@@ -1,12 +1,14 @@
+from typing import Callable
+
 from Programma.ModelStructure import modelStructure as mS
 from mip import *
 import sys
 from Programma.Istop.Solution import solution as sol
 from itertools import combinations
-from Programma.Istop import modelAirline as air
-from Programma.Istop import modelFlight as modFl
+from Programma.Istop import istopAirline as air
+from Programma.Istop import istopFlight as modFl
 from Programma.ModelStructure.Solution import solution
-from Programma.ModelStructure.Costs.costs import cost_function as cf
+# from Programma.ModelStructure.Costs.costs import cost_function as cf
 
 import numpy as np
 import pandas as pd
@@ -32,13 +34,13 @@ class Istop(mS.ModelStructure):
             j += 1
         return indexes
 
-    def __init__(self, df_init, alpha=1, cost_kind="quadratic", model_name="model"):
+    def __init__(self, df_init, costFun: Union[Callable, List[Callable]], alpha=1, model_name="model"):
 
         self.f = lambda x, y: x * (y ** alpha)
-        self.airlineConstructor = air.ModelAirline
-        self.flightConstructor = modFl.ModelFlight
+        # self.airlineConstructor = air.IstopAirline
+        # self.flightConstructor = modFl.IstopFlight
         self.offers = None
-        super().__init__(df_init=df_init, cost_kind=cost_kind)
+        super().__init__(df_init=df_init, costFun=costFun, airline_ctor=air.IstopAirline)
 
         self.airlines_pairs = np.array(list(combinations(self.airlines, 2)))
 
@@ -49,11 +51,12 @@ class Istop(mS.ModelStructure):
         self.m.threads = -1
         self.m.verbose = 0
 
-        self.initial_objective_value = sum([self.score(flight, flight.slot) for flight in self.flights])
+
+        # self.initial_objective_value = sum([self.score(flight, flight.slot) for flight in self.flights])
 
     def set_variables(self):
 
-        self.x = np.array([[self.m.add_var(var_type=BINARY) for j in self.slotIndexes] for i in self.slotIndexes])
+        self.x = np.array([[self.m.add_var(var_type=BINARY) for j in self.slots] for i in self.slots])
 
         self.c = np.array(
             [[self.m.add_var(var_type=BINARY) for i in airline.flight_pairs] for airline in self.airlines])
@@ -62,30 +65,30 @@ class Istop(mS.ModelStructure):
 
     def set_constraints(self):
 
-        for i in self.emptySlots:
-            for j in self.slotIndexes:
-                self.m += self.x[i, j] == 0
+        for eSlot in self.emptySlots:
+            for slot in self.slots:
+                self.m += self.x[eSlot.index, slot.index] == 0
 
         for flight in self.flights:
-            self.m += xsum(self.x[flight.slot, j] for j in flight.compatible_slots) == 1
+            self.m += xsum(self.x[flight.slot.index, slot.index] for slot in flight.compatibleSlots) == 1
 
-        for j in self.slotIndexes:
-            self.m += xsum(self.x[i, j] for i in self.slotIndexes) <= 1
-
-        for flight in self.flights:
-            for j in flight.not_compatible_slots:
-                self.m += self.x[flight.slot, j] == 0
+        for j in self.slots:
+            self.m += xsum(self.x[i.index, j.index] for i in self.slots) <= 1
 
         for flight in self.flights:
+            for j in flight.notCompatibleSlots:
+                self.m += self.x[flight.slot.index, j.index] == 0
 
-            self.m += xsum(self.x[flight.slot, slot_to_swap] for slot_to_swap in
+        for flight in self.flights:
+
+            self.m += xsum(self.x[flight.slot.index, slot_to_swap.index] for slot_to_swap in
                            self.other_airlines_compatible_slots(flight))\
                       <= xsum([self.c[flight.airline.index][j] for j in self.get_tuple(flight)])
 
         for flight in self.flights:
             for other_flight in flight.airline.flights:
                 if flight != other_flight:
-                    self.m += self.x[flight.slot, other_flight.slot] == 0
+                    self.m += self.x[flight.slot.index, other_flight.slot.index] == 0
 
         k = 0
         for airl_pair in self.airlines_pairs:
@@ -153,15 +156,20 @@ class Istop(mS.ModelStructure):
         # self.offer_solution_maker()
 
     def other_airlines_compatible_slots(self, flight):
-        others_slots = self.df[self.df["airline"] != flight.airline.name]["slot"].to_numpy()
-        return np.intersect1d(others_slots, flight.compatible_slots, assume_unique=True)
+        others_slots = []
+        for airline in self.airlines:
+            if airline != flight.airline:
+                others_slots.extend(airline.AUslots)
+        otherAirlinesCompatibleSlots = []
 
-    def score(self, flight, j):
-        return (flight.preference * self.delays[flight.slot, j] ** 2) / 2
+        return np.intersect1d(others_slots, flight.compatibleSlots, assume_unique=True)
+
+    def score(self, flight, slot):
+        return (flight.preference * flight.delay(slot) ** 2) / 2
 
     def offer_solution_maker(self):
 
-        flight: modFl.ModelFlight
+        flight: modFl.IstopFlight
         airline_names = ["total"] + [airline.name for airline in self.airlines]
         offers = [sum([1 for flight in self.flights if flight.slot != flight.newSlot]) / 2]
         for airline in self.airlines:

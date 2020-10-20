@@ -8,10 +8,10 @@ def make_solution_array(model):
     model: ModelStructure
     flight: Flight
 
-    solution_array = np.zeros((model.slotIndexes.shape[0], model.slotIndexes.shape[0]))
+    solution_array = np.zeros((model.slots.shape[0], model.slots.shape[0]))
     for flight in model.flights:
         for j in range(len(model.mipSolution[flight.num])):
-            solution_array[flight.slot, j] = model.mipSolution[flight.num][j].x
+            solution_array[flight.slot.index, j] = model.mipSolution[flight.num][j].x
     model.solutionArray = solution_array
 
 
@@ -47,9 +47,9 @@ def make_performance_df(model):
 def make_df_solution(model, udpp):
     from Programma.ModelStructure.modelStructure import ModelStructure
     model: ModelStructure
-    if udpp == False:
-        make_solution_array(model)
-        update_flights(model)
+    # if udpp == False:
+    #     make_solution_array(model)
+    #     update_flights(model)
 
     new_slot = [flight.newSlot.index for flight in model.flights]
     new_arrival = [flight.new_arrival for flight in model.flights]
