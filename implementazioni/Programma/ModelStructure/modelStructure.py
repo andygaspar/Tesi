@@ -30,13 +30,11 @@ class ModelStructure:
 
         self.emptySlots = self.df[self.df["flight"] == "Empty"]["slot"].to_numpy()
 
-        self.mipSolution = None
+        # self.mipSolution = None
 
-        self.solutionArray = None
+        # self.solutionArray = None
 
         self.solution = None
-
-        self.solutionDf = None
 
         self.report = None
 
@@ -47,6 +45,13 @@ class ModelStructure:
         if which == "final":
             return sum([flight.costFun(flight, flight.newSlot) for flight in flights])
 
+    @staticmethod
+    def compute_delays(flights, which):
+        if which == "initial":
+            return sum([flight.slot.time-flight.eta for flight in flights])
+        if which == "final":
+            return sum([flight.newSlot.time-flight.eta for flight in flights])
+
     def __str__(self):
         return str(self.airlines)
 
@@ -56,8 +61,9 @@ class ModelStructure:
     def print_schedule(self):
         print(self.df)
 
-    def print_solution(self):
-        print(self.solutionDf)
+    def print_performance(self):
+        print(self.solution)
+        print(self.report)
 
     def get_flight_by_slot(self, slot: sl.Slot):
         for flight in self.flights:
@@ -68,11 +74,6 @@ class ModelStructure:
         for flight in self.flights:
             if flight.name == f_name:
                 return flight
-
-    def find_match(self, i):
-        for j in self.slotIndexes[self.slotIndexes != i]:
-            if self.mipSolution[i.slot, j] == 1:
-                return self.flights[j]
 
     def set_flights_cost_functions(self, costFun):
         if isinstance(costFun, Callable):
