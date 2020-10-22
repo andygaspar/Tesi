@@ -68,6 +68,7 @@ class Istop(mS.ModelStructure):
         self.c = None
         self.m.threads = -1
         self.m.verbose = 0
+        self.status = True
 
         self.matches = []
         self.couples = []
@@ -154,29 +155,38 @@ class Istop(mS.ModelStructure):
             xsum(self.x[flight.slot.index, j.index] * self.score(flight, j)
                  for flight in self.flights for j in self.slots))
 
-    def run(self):
+    def run(self, timing=False):
 
         self.set_variables()
 
         start = time.time()
         self.set_constraints()
         end = time.time() - start
-        # print("Constraints setting time ", end)
+
+        if timing:
+            print("Constraints setting time ", end)
 
         self.set_objective()
 
         start = time.time()
         self.m.optimize()
         end = time.time() - start
-        # print("Simplex time ", end)
+
+        if timing:
+            print("Simplex time ", end)
 
         print(self.m.status)
+
+        if self.status == OptimizationStatus.INFEASIBLE:
+
+            self.status = False
+
         print(len(self.matches))
         mipSolution = self.x
         self.assign_flights(mipSolution)
         solution.make_solution(self)
 
-        self.offer_solution_maker()
+        # self.offer_solution_maker()
 
 
         # for i in self.slots:

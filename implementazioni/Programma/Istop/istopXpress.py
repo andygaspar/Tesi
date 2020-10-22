@@ -10,13 +10,14 @@ from Programma.Istop import istopFlight as modFl
 from Programma.ModelStructure.Solution import solution
 from Programma.ModelStructure.Slot.slot import Slot
 
-
 import numpy as np
 import pandas as pd
 
 import time
 import xpress as xp
+
 xp.controls.outputlog = 0
+
 
 class IstopXpress(mS.ModelStructure):
 
@@ -64,8 +65,6 @@ class IstopXpress(mS.ModelStructure):
 
         self.airlines_pairs = np.array(list(combinations(self.airlines, 2)))
 
-
-
         self.epsilon = sys.float_info.min
         self.m = xp.problem()
 
@@ -105,8 +104,6 @@ class IstopXpress(mS.ModelStructure):
         print("preprocess concluded.  number of couples: *******  ", len(self.c))
         self.m.addVariable(self.x, self.c)
 
-
-
     def set_constraints(self):
 
         for i in self.emptySlots:
@@ -127,8 +124,8 @@ class IstopXpress(mS.ModelStructure):
 
         for flight in self.flights_in_matches:
             self.m.addConstraint(xp.Sum(self.x[flight.slot.index, slot_to_swap.index] for slot_to_swap in
-                           [s for s in self.slots if s != flight.slot]) \
-                      == xp.Sum([self.c[j] for j in self.get_match_for_flight(flight)]))
+                                        [s for s in self.slots if s != flight.slot]) \
+                                 == xp.Sum([self.c[j] for j in self.get_match_for_flight(flight)]))
 
         for flight in self.flights:
             for other_flight in flight.airline.flights:
@@ -141,19 +138,20 @@ class IstopXpress(mS.ModelStructure):
             pairB = match[1]
 
             self.m.addConstraint(xp.Sum(self.x[i.slot.index, j.slot.index] for i in pairA for j in pairB) + \
-                      xp.Sum(self.x[i.slot.index, j.slot.index] for i in pairB for j in pairA) >= \
-                      (self.c[k]) * 4)
+                                 xp.Sum(self.x[i.slot.index, j.slot.index] for i in pairB for j in pairA) >= \
+                                 (self.c[k]) * 4)
 
+            self.m.addConstraint(
+                xp.Sum(self.x[i.slot.index, j.slot.index] * i.costFun(i, j.slot) for i in pairA for j in pairB) - \
+                (1 - self.c[k]) * 100000 \
+                <= xp.Sum(self.x[i.slot.index, j.slot.index] * i.costFun(i, i.slot) for i in pairA for j in pairB) - \
+                self.epsilon)
 
-            self.m.addConstraint(xp.Sum(self.x[i.slot.index, j.slot.index] * i.costFun(i, j.slot) for i in pairA for j in pairB) - \
-                      (1-self.c[k]) * 100000 \
-                      <= xp.Sum(self.x[i.slot.index, j.slot.index] * i.costFun(i, i.slot) for i in pairA for j in pairB) - \
-                      self.epsilon)
-
-            self.m.addConstraint(xp.Sum(self.x[i.slot.index, j.slot.index] * i.costFun(i, j.slot) for i in pairB for j in pairA) - \
-                      (1-self.c[k]) * 100000 \
-                      <= xp.Sum(self.x[i.slot.index, j.slot.index] * i.costFun(i, i.slot) for i in pairB for j in pairA) - \
-                      self.epsilon)
+            self.m.addConstraint(
+                xp.Sum(self.x[i.slot.index, j.slot.index] * i.costFun(i, j.slot) for i in pairB for j in pairA) - \
+                (1 - self.c[k]) * 100000 \
+                <= xp.Sum(self.x[i.slot.index, j.slot.index] * i.costFun(i, i.slot) for i in pairB for j in pairA) - \
+                self.epsilon)
 
             k += 1
 
@@ -161,33 +159,31 @@ class IstopXpress(mS.ModelStructure):
 
         self.m.setObjective(
             xp.Sum(self.x[flight.slot.index, j.index] * self.score(flight, j)
-                 for flight in self.flights for j in self.slots),  sense=xp.minimize)
+                   for flight in self.flights for j in self.slots), sense=xp.minimize)
 
-
-    def run(self):
+    def run(self, timing=False):
 
         self.set_variables()
 
         start = time.time()
         self.set_constraints()
         end = time.time() - start
-        # print("Constraints setting time ", end)
+        if timing:
+            print("Constraints setting time ", end)
 
         self.set_objective()
 
         start = time.time()
         self.m.solve()
         end = time.time() - start
-        # print("Simplex time ", end)
-
-        # print(self.m.status)
-        # print(len(self.matches))
+        if timing:
+            print("Simplex time ", end)
+        print(len(self.matches))
         xpSolution = self.x
         self.assign_flights(xpSolution)
         solution.make_solution(self)
 
         self.offer_solution_maker()
-
 
         # for i in self.slots:
         #     if self.x[i, i].x == 0:
@@ -200,11 +196,9 @@ class IstopXpress(mS.ModelStructure):
                 print("********************** danno *********************************",
                       flight, flight.eta, flight.newSlot.time)
 
-
         # for i in range(len(self.matches)):
         #     if self.c[i].x != 0:
         #         print(self.matches[i])
-
 
     def other_airlines_compatible_slots(self, flight):
         others_slots = []

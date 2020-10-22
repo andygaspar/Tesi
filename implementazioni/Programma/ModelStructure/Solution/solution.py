@@ -29,13 +29,15 @@ def make_df_solution(model):
     from Programma.ModelStructure.modelStructure import ModelStructure
     model: ModelStructure
 
+    model.solution = model.df.copy(deep=True)
+
     new_slot = [flight.newSlot.index for flight in model.flights]
     new_arrival = [flight.newSlot.time for flight in model.flights]
     eta_slot = [flight.etaSlot for flight in model.flights]
-    model.df["new slot"] = new_slot
-    model.df["new arrival"] = new_arrival
-    model.df["eta slot"] = eta_slot
-    model.df.sort_values(by="new slot", inplace=True)
+    model.solution["new slot"] = new_slot
+    model.solution["new arrival"] = new_arrival
+    model.solution["eta slot"] = eta_slot
+    model.solution.sort_values(by="new slot", inplace=True)
 
 
 def make_solution(model):

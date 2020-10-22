@@ -3,7 +3,7 @@ from typing import Union, Callable, List
 import numpy as np
 import pandas as pd
 from Programma.ModelStructure.modelStructure import ModelStructure
-from Programma.UDPP.udppLocal import UDPPlocal
+from Programma.UDPP.udppLocalXpress import UDPPlocalXpress
 from Programma.UDPP.udppMerge import UDPPmerge
 from Programma.ModelStructure.Solution import solution
 from Programma.ModelStructure.Airline import airline as air
@@ -11,8 +11,7 @@ from Programma.ModelStructure.Flight import flight as fl
 
 import time
 
-
-class UDPPModel(ModelStructure):
+class UDPPModelXp(ModelStructure):
 
     def __init__(self, df_init: pd.DataFrame, costFun: Union[Callable, List[Callable]]):
 
@@ -21,11 +20,12 @@ class UDPPModel(ModelStructure):
         airline: air.Airline
         start = time.time()
         for airline in self.airlines:
-            UDPPlocal(airline, self.slots)
+            UDPPlocalXpress(airline, self.slots)
 
         UDPPmerge(self.flights, self.slots)
         print(time.time() - start)
         solution.make_solution(self)
+
 
     def get_new_df(self):
         self.df: pd.DataFrame

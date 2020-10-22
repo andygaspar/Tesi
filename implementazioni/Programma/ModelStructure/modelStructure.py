@@ -62,7 +62,7 @@ class ModelStructure:
         print(self.df)
 
     def print_performance(self):
-        print(self.solution)
+        # print(self.solution)
         print(self.report)
 
     def get_flight_by_slot(self, slot: sl.Slot):
