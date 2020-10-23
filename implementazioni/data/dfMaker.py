@@ -99,3 +99,9 @@ def df_maker(num_flights=20, num_airlines=3, distribution="uniform", capacity=1,
         {"slot": slot, "flight": flights, "eta": eta, "fpfs": fpfs, "time": fpfs, "priority": priority,
          "airline": airline, "cost": cost, "num": num})
 
+
+def schedule_types(show=False):
+    dfTypeList = ("uniform", "few_low", "few_high", "increasing", "hub")
+    if show:
+        print(dfTypeList)
+    return dfTypeList
