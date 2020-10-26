@@ -10,7 +10,7 @@ class AmalFlight(fl.Flight):
 
         self.priority = line["priority"]
 
-        self.currentDelay = self.gdp_arrival - self.eta
+        self.currentDelay = self.fpfs - self.eta
 
         self.classes = None
 
@@ -22,7 +22,7 @@ class AmalFlight(fl.Flight):
 
     def class_range(self, k):
         if k == 0:
-            return range(self.eta_slot, self.classes[k]+1)
+            return range(self.etaSlot, self.classes[k] + 1)
 
         return range(self.classes[k-1]+1, self.classes[k]+1)
 

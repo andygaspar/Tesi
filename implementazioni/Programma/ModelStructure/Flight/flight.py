@@ -1,15 +1,18 @@
 import numpy as np
+from typing import List, Callable
+
+from Programma.ModelStructure.Slot import slot as sl
 
 
 class Flight:
 
-    def __init__(self, line, airline, model):
+    def __init__(self, line, airline, slots: List[sl.Slot]):
 
-        self.slot = line["slot"]
+        self.slot = slots[line["slot"]]
 
         self.num = line["num"]
 
-        self.new_slot = None
+        self.newSlot = None
 
         self.name = line["flight"]
 
@@ -17,17 +20,36 @@ class Flight:
 
         self.eta = line["eta"]
 
-        self.eta_slot = len(model.gdp_schedule[model.gdp_schedule <= self.eta]) - 1
+        self.etaSlot = slots[len([slot for slot in slots if slot.time <= self.eta]) - 1]
 
-        self.gdp_arrival = line["gdp schedule"]
-
-        self.new_arrival = None
+        self.fpfs = line['fpfs']
 
         self.cost = line["cost"]
 
-        self.compatible_arrival_time, self.compatible_slots = self.compute_compatible_slots(model.df)
+        try:
+            self.margin = line["margins"]
+        except:
+            self.margin = None
 
-        self.not_compatible_slots = np.setdiff1d(model.df["slot"], self.compatible_slots)
+        self.costFun = None
+
+        self.compatibleSlots = self.compute_compatible_slots(slots)
+
+        self.notCompatibleSlots = self.compute_not_compatible_slots(slots)
+
+        self.localNum = None
+
+        # UDPP attributes ***************
+
+        self.UDPPLocalSlot = None
+
+        self.UDPPlocalSolution = None
+
+        # ISTOP attributes  *************
+
+        self.priority = line["priority"]
+
+        self.preference = None
 
     def __str__(self):
         return self.name
@@ -38,21 +60,30 @@ class Flight:
     def set_num(self, i):
         self.num = i
 
-    def compute_compatible_slots(self, df):
+    def set_local_num(self, i):
+        self.localNum = i
+
+    def set_cost_fun(self, costFun: Callable):
+        self.costFun = costFun
+
+    def delay(self, slot: sl.Slot):
+        return slot.time - self.eta
+
+    def compute_compatible_slots(self, slots: List[sl.Slot]):
         try:
-            second_comp_slot = df[df["gdp schedule"] > self.eta].iloc[0]["slot"]
-            compatible_arrival_times = df[df["slot"] >= second_comp_slot - 1]["gdp schedule"].to_numpy()
-            compatible_slots = df[df["slot"] >= second_comp_slot - 1]["slot"].to_numpy()
-            return compatible_arrival_times, compatible_slots
+            compatible_slots = []
+            for slot in slots:
+                if slot.time > self.eta:
+                    compatible_slots.append(slot)
+            if compatible_slots[0].index > 0:
+                compatible_slots.insert(0, slots[compatible_slots[0].index - 1])
+            return compatible_slots
         except IndexError:
-            try:
-                second_comp_slot = df[df["gdp schedule"] == self.eta].iloc[0]["slot"]
-                compatible_arrival_times = df[df["slot"] >= second_comp_slot]["gdp schedule"].to_numpy()
-                compatible_slots = df[df["slot"] >= second_comp_slot]["slot"].to_numpy()
-                return compatible_arrival_times, compatible_slots
-            except IndexError:
-                raise IndexError("No available slot for flight ",self.name)
+            raise IndexError("No available slot for flight ", self.name)
 
-
-
-
+    def compute_not_compatible_slots(self, slots):
+        notCompatibleSlots = []
+        for slot in slots:
+            if slot not in self.compatibleSlots:
+                notCompatibleSlots.append(slot)
+        return notCompatibleSlots

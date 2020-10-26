@@ -1,4 +1,4 @@
-import Programma.Mip.Solution.solution as sol
+import Programma.Istop.Solution.solution as sol
 import copy
 
 
@@ -29,11 +29,11 @@ class OffersList:
         offers_list = []
         offer_flight_list = []
         for flight in flight_list:
-            if flight.slot != flight.new_slot and flight not in selected_flights:
+            if flight.slot != flight.newSlot and flight not in selected_flights:
                 offer_flight_list.clear()
                 offer_flight_list.append(flight)
                 for i in range(3):
-                    flight = sol.get_flight(flight.new_slot, model.flights)
+                    flight = sol.get_flight(flight.newSlot, model.flights)
                     offer_flight_list.append(flight)
                 selected_flights += offer_flight_list
                 offers_list.append(Offer(copy.deepcopy(offer_flight_list)))
@@ -43,6 +43,6 @@ class OffersList:
         str_to_return = ""
         for offer in self.offers:
             for flight in offer.flight_offer_list:
-                str_to_return += (str(flight.slot)) + " " + (str(flight.new_slot)) + " "+(str(flight)) + "  --  "
+                str_to_return += (str(flight.slot)) + " " + (str(flight.newSlot)) + " " + (str(flight)) + "  --  "
             str_to_return += "\n"
         return str_to_return

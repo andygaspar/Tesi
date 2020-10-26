@@ -1,7 +1,7 @@
 from Programma.ModelStructure.Airline import airline as al
 from Programma.ModelStructure import modelStructure as mS
 import xpress as xp
-from Programma.Mip.Solution import solution as sol
+from Programma.Istop.Solution import solution as sol
 
 import numpy as np
 
@@ -46,12 +46,12 @@ class XpressModel(mS.ModelStructure):
 
     def set_constraints(self):
 
-        for i in self.empty_slots:
+        for i in self.emptySlots:
             for j in self.slotIndexes:
                 self.m.addConstraint(self.x[i, j] == 0)
 
         for flight in self.flights:
-            self.m.addConstraint(xp.Sum(self.x[flight.slot, j] for j in flight.compatible_slots) == 1)
+            self.m.addConstraint(xp.Sum(self.x[flight.slot, j] for j in flight.compatibleSlots) == 1)
 
         for j in self.slotIndexes:
             self.m.addConstraint(xp.Sum(self.x[i, j] for i in self.slotIndexes) <= 1)
@@ -127,7 +127,7 @@ class XpressModel(mS.ModelStructure):
 
     def other_airlines_compatible_slots(self, flight):
         others_slots = self.df[self.df["airline"] != flight.airline.name]["slot"].to_numpy()
-        return np.intersect1d(others_slots, flight.compatible_slots, assume_unique=True)
+        return np.intersect1d(others_slots, flight.compatibleSlots, assume_unique=True)
 
     def make_solution_array(self, x):
         solution_array = np.zeros((self.slotIndexes.shape[0], self.slotIndexes.shape[0]))

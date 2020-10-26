@@ -1,7 +1,7 @@
 from Programma.ModelStructure.Flight import flight as fl
 
 
-class ModelFlight(fl.Flight):
+class IstopFlight(fl.Flight):
 
     def __init__(self, line, airline, model):
 
@@ -12,7 +12,7 @@ class ModelFlight(fl.Flight):
         self.preference = None
 
     def set_preference(self, sum_priorities, f):
-        self.preference = self.compute_preference(self.airline.num_flights, sum_priorities, f)
+        self.preference = self.compute_preference(self.airline.numFlights, sum_priorities, f)
 
     def compute_preference(self, num_flights, sum_priorities, f):
         return f(self.priority, num_flights) / sum_priorities

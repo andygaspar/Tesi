@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from Programma.Mip.Solution import offer as ol
+from Programma.Istop.Solution import offer as ol
 
 
 # kind of duplication of function in flightList
@@ -24,10 +24,10 @@ class Solution:
         df = pd.DataFrame(columns=cols)
         for j in model.slotIndexes:
             for i in model.slotIndexes:
-                if model.solution_array[i, j] != 0:
+                if model.solutionArray[i, j] != 0:
                     flight = get_flight(i, model.flights)
                     row = dict(zip(cols,
-                                   [j, flight.name, flight.airline.name, model.gdp_schedule[j], flight.gdp_arrival,
+                                   [j, flight.name, flight.airline.name, model.slotTimeGrid[j], flight.fpfs,
                                     flight.eta, flight.cost * model.delays[i, j],
                                     flight.cost * model.delays[i, i], flight.priority]))
                     df = df.append(row, ignore_index=True)
@@ -40,17 +40,17 @@ class Solution:
         for airline in model.airlines:
             for flight in airline.flights:
                 old_balance[airline.index] += flight.cost * model.delays[flight.slot, flight.slot]
-                new_balance[airline.index] += flight.cost * model.delays[flight.slot, flight.new_slot]
+                new_balance[airline.index] += flight.cost * model.delays[flight.slot, flight.newSlot]
         return pd.DataFrame({"airline": model.airlines, "new balance": new_balance, "old balance": old_balance})
 
     @staticmethod
     def update_flights_status(model):
         for j in model.slotIndexes:
             for i in model.slotIndexes:
-                if model.solution_array[i, j] != 0:
+                if model.solutionArray[i, j] != 0:
                     flight = get_flight(i, model.flights)
-                    flight.new_slot = j
-                    flight.new_arrival = model.gdp_schedule[j]
+                    flight.newSlot = j
+                    flight.new_arrival = model.slotTimeGrid[j]
 
     def __repr__(self):
         return self.df
