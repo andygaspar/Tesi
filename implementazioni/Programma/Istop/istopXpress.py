@@ -180,6 +180,7 @@ class IstopXpress(mS.ModelStructure):
             print("Simplex time ", end)
         print(len(self.matches))
         xpSolution = self.x
+        print(self.m.getSolution(self.x))
         self.assign_flights(xpSolution)
         solution.make_solution(self)
 

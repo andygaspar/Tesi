@@ -9,15 +9,17 @@ from Programma.Istop import istopXpress
 from Programma.ModelStructure.Costs.costFunctionDict import CostFuns
 from Programma.UDPP import udppModel
 from Programma.UDPP import udppModelXp
+import random
 
 # df = pd.read_csv("../data/data_ruiz.csv")
 scheduleType = dfMaker.schedule_types(show=True)
-df = dfMaker.df_maker(55, 15, distribution=scheduleType[4])
-
+df = dfMaker.df_maker(40, 5, distribution=scheduleType[0])
+df["margins"] = [random.choice(range(10, 50)) for i in range(df.shape[0])]
+print(df.margins)
 df_max = df.copy(deep=True)
 df_UDPP = df_max.copy(deep=True)
 
-costFun = CostFuns().costFun["quadratic"]
+costFun = CostFuns().costFun["step"]
 # max_model = max_benefit.MaxBenefitModel(df_max, costFun)
 # max_model.run()
 # max_model.print_performance()

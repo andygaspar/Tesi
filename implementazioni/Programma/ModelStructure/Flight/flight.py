@@ -26,6 +26,11 @@ class Flight:
 
         self.cost = line["cost"]
 
+        try:
+            self.margin = line["margins"]
+        except:
+            self.margin = None
+
         self.costFun = None
 
         self.compatibleSlots = self.compute_compatible_slots(slots)
@@ -71,7 +76,7 @@ class Flight:
                 if slot.time > self.eta:
                     compatible_slots.append(slot)
             if compatible_slots[0].index > 0:
-                compatible_slots.insert(0, slots[compatible_slots[0].index-1])
+                compatible_slots.insert(0, slots[compatible_slots[0].index - 1])
             return compatible_slots
         except IndexError:
             raise IndexError("No available slot for flight ", self.name)
@@ -82,8 +87,3 @@ class Flight:
             if slot not in self.compatibleSlots:
                 notCompatibleSlots.append(slot)
         return notCompatibleSlots
-
-
-
-
-
