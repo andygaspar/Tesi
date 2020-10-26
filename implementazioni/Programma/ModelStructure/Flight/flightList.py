@@ -14,7 +14,7 @@ def make_flight_list(model):
 def get_flight(i, airlines):
     for a in airlines:
         for f in a.flights:
-            if i == f.slot:
+            if i == f.slot.index:
                 return f
 
 

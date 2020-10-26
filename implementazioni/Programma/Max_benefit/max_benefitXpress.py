@@ -1,7 +1,7 @@
-from typing import Callable
+from typing import Callable, List, Union
 
 from Programma.ModelStructure import modelStructure as mS
-from mip import *
+import xpress as xp
 from Programma.ModelStructure.Airline import airline as air
 from Programma.ModelStructure.Flight import flight as modFl
 from Programma.ModelStructure.Solution import solution
@@ -13,7 +13,7 @@ import pandas as pd
 import time
 
 
-class MaxBenefitModel(mS.ModelStructure):
+class MaxBenefitModelXp(mS.ModelStructure):
 
     def __init__(self, df_init: pd.DataFrame, costFun: Union[Callable, List[Callable]], model_name="Max Benefit"):
 
@@ -21,58 +21,60 @@ class MaxBenefitModel(mS.ModelStructure):
         self.flightConstructor = modFl.Flight
         super().__init__(df_init=df_init, costFun=costFun)
 
-        self.m = Model(model_name)
+        self.m = xp.problem()
         self.x = None
-        self.m.threads = -1
-        self.m.verbose = 0
-        self.mipSolution = None
 
     def set_variables(self):
         flight: modFl.Flight
         airline: air.Airline
-        self.x = np.array([[self.m.add_var(var_type=BINARY) for k in self.slots] for flight in self.flights])
+        self.x = np.array([[xp.var(vartype=xp.binary) for k in self.slots] for flight in self.flights])
+        self.m.addVariable(self.x)
 
     def set_constraints(self):
         flight: modFl.Flight
         airline: air.Airline
         for flight in self.flights:
-            self.m += xsum(self.x[flight.num, slot.index] for slot in flight.compatibleSlots) == 1
+            self.m.addConstraint(
+                xp.Sum(self.x[flight.num, slot.index] for slot in flight.compatibleSlots) == 1
+            )
 
         for slot in self.slots:
-            self.m += xsum(self.x[flight.num, slot.index] for flight in self.flights) <= 1
+            self.m.addConstraint(
+                xp.Sum(self.x[flight.num, slot.index] for flight in self.flights) <= 1
+            )
 
         for airline in self.airlines:
-            self.m += xsum(flight.costFun(flight, flight.slot) for flight in airline.flights) >= \
-                      xsum(self.x[flight.num, slot.index] * flight.costFun(flight, slot)
-                           for flight in airline.flights for slot in self.slots)
+            self.m.addConstraint(
+                xp.Sum(flight.costFun(flight, flight.slot) for flight in airline.flights) >= \
+                xp.Sum(self.x[flight.num, slot.index] * flight.costFun(flight, slot)
+                       for flight in airline.flights for slot in self.slots)
+            )
 
     def set_objective(self):
         flight: modFl.Flight
-        self.m.objective = minimize(
-            xsum(self.x[flight.num, slot.index] * flight.costFun(flight, slot)
-                 for flight in self.flights for slot in self.slots))
+        self.m.setObjective(
+            xp.Sum(self.x[flight.num, slot.index] * flight.costFun(flight, slot)
+                   for flight in self.flights for slot in self.slots)
+        )
 
-    def run(self):
-
-        self.set_variables()
+    def run(self, timing=False):
 
         start = time.time()
+        self.set_variables()
         self.set_constraints()
         end = time.time() - start
-        #print("Constraints setting time ", end)
+        if timing:
+            print("Variables and constraints setting time ", end)
 
         self.set_objective()
 
         start = time.time()
-        self.m.optimize()
+        self.m.solve()
         end = time.time() - start
-        #print("Simplex time ", end)
+        if timing:
+            print("Simplex time ", end)
 
-        #print(self.m.status)
-
-        mipSolution = self.x
-
-        self.assign_flights(mipSolution)
+        self.assign_flights(self.x)
 
         solution.make_solution(self)
 
@@ -81,8 +83,8 @@ class MaxBenefitModel(mS.ModelStructure):
                 print("********************** danno *********************************",
                       flight, flight.eta, flight.newSlot.time)
 
-    def assign_flights(self, mipSolution):
+    def assign_flights(self, sol):
         for flight in self.flights:
             for slot in self.slots:
-                if mipSolution[flight.slot.index, slot.index].x != 0:
+                if self.m.getSolution(sol[flight.slot.index, slot.index]) != 0:
                     flight.newSlot = slot

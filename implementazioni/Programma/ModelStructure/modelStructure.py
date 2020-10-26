@@ -1,69 +1,56 @@
 import numpy as np
+import pandas as pd
+from typing import Union, List, Callable
 from itertools import product
+from Programma.ModelStructure.Slot import slotList as sl
+from Programma.ModelStructure.Airline import airline as air
+from Programma.ModelStructure.Flight import flightList as fll
+from Programma.ModelStructure.Airline import airlineList as airList
 
 
 class ModelStructure:
 
-    def compute_delays(self):
-        delays = np.zeros((self.slotIndexes.shape[0], self.slotIndexes.shape[0]))
-        for flight, j in product(self.flights, self.slotIndexes):
-            delays[flight.num, j] = (self.gdp_schedule[j] - flight.eta)
-
-        delays = np.where(delays < 0, 0, delays)
-        return delays
-
-    @staticmethod
-    def delay_cost(flight, delay):
-        return (flight.cost * delay ** 2)/2
-
-    def __init__(self, df_init, cost_kind):
+    def __init__(self, df_init: pd.DataFrame, costFun: Union[Callable, List[Callable]], airline_ctor=air.Airline):
 
         self.df = df_init
 
-        self.slotIndexes = self.df["slot"].to_numpy()
+        self.slots = sl.make_slots_list(self.df)
 
-        self.gdp_schedule = self.df["gdp schedule"].to_numpy()
+        self.airlines = airList.make_airlines_list(self.df, self.slots, airline_ctor)
 
-        from Programma.ModelStructure.Flight import flightList as fll
-        from Programma.ModelStructure.Airline import airlineList as airList
-
-        self.cost_kind = cost_kind
-
-        self.airlines = airList.make_airlines_list(self)
-
-        self.num_airlines = len(np.unique(self.df["airline"]))
+        self.numAirlines = len(np.unique(self.df["airline"]))
 
         self.flights = fll.make_flight_list(self)
 
-        #fll.assign_flight_num(self.flights)
+        self.set_flights_cost_functions(costFun)
 
-        self.num_flights = len(self.flights)
+        self.numFlights = len(self.flights)
 
-        self.delays = self.compute_delays()
+        self.initialTotalCosts = self.compute_costs(self.flights, "initial")
 
-        self.initial_total_costs = self.compute_costs(self.flights, "initial")
+        self.emptySlots = self.df[self.df["flight"] == "Empty"]["slot"].to_numpy()
 
-        self.empty_slots = self.df[self.df["flight"] == "Empty"]["slot"].to_numpy()
+        # self.mipSolution = None
 
-        self.mipSolution = None
-
-        self.solution_array = None
+        # self.solutionArray = None
 
         self.solution = None
 
-        self.solutionDf = None
-
         self.report = None
 
-    def cost_function(self, flight, j):
-        from Programma.ModelStructure.Costs.costs import cost_function as cf
-        return cf(self, flight, j)
-
-    def compute_costs(self, flights, which):
+    @staticmethod
+    def compute_costs(flights, which):
         if which == "initial":
-            return sum([self.cost_function(flight, flight.slot) for flight in flights])
+            return sum([flight.costFun(flight, flight.slot) for flight in flights])
         if which == "final":
-            return sum([self.cost_function(flight, flight.new_slot) for flight in flights])
+            return sum([flight.costFun(flight, flight.newSlot) for flight in flights])
+
+    @staticmethod
+    def compute_delays(flights, which):
+        if which == "initial":
+            return sum([flight.slot.time-flight.eta for flight in flights])
+        if which == "final":
+            return sum([flight.newSlot.time-flight.eta for flight in flights])
 
     def __str__(self):
         return str(self.airlines)
@@ -74,22 +61,26 @@ class ModelStructure:
     def print_schedule(self):
         print(self.df)
 
-    def print_solution(self):
-        print(self.solutionDf)
+    def print_performance(self):
+        # print(self.solution)
+        print(self.report)
 
-    def get_flight_by_slot_index(self, i):
+    def get_flight_by_slot(self, slot: sl.Slot):
         for flight in self.flights:
-            if flight.slot == i:
+            if flight.slot == slot:
                 return flight
 
-    def get_flight_name(self, f_name):
+    def get_flight_from_name(self, f_name):
         for flight in self.flights:
             if flight.name == f_name:
                 return flight
 
-    def find_match(self, i):
-        for j in self.slotIndexes[self.slotIndexes != i]:
-            if self.mipSolution[i.slot, j] == 1:
-                return self.flights[j]
-
-
+    def set_flights_cost_functions(self, costFun):
+        if isinstance(costFun, Callable):
+            for flight in self.flights:
+                flight.set_cost_fun(costFun)
+        else:
+            i = 0
+            for flight in self.flights:
+                flight.set_cost_fun(costFun[i])
+                i += 1

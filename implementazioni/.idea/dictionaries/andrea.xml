@@ -2,6 +2,11 @@
   <dictionary name="andrea">
     <words>
       <w>fpfs</w>
+      <w>istop</w>
+      <w>plocal</w>
+      <w>pmerge</w>
+      <w>udpp</w>
+      <w>uslots</w>
     </words>
   </dictionary>
 </component>

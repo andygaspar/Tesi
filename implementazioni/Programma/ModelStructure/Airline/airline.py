@@ -1,21 +1,23 @@
+from __future__ import annotations
 import numpy as np
 import pandas as pd
+from typing import List, Callable
 from itertools import combinations
-
-from Programma.ModelStructure.modelStructure import ModelStructure
+from Programma.ModelStructure.Flight.flight import Flight
+from Programma.ModelStructure.Slot.slot import Slot
 
 
 class Airline:
 
-    def make_airline_flight_list(self, model):
+    def make_airline_flight_list(self, slots: List[Slot], flight_ctor: Callable):
         flight_list = []
         for i in range(self.df.shape[0]):
             line = self.df.iloc[i]
-            flight_list.append(model.flightConstructor(line, self, model))
+            flight_list.append(flight_ctor(line, self, slots))
 
         return np.array(flight_list)
 
-    def __init__(self, df_airline: pd.DataFrame, airline_index, model: ModelStructure):
+    def __init__(self, df_airline: pd.DataFrame, airline_index: int, slots: List[Slot], flight_ctor: Callable = Flight):
 
         self.df = df_airline
 
@@ -23,16 +25,23 @@ class Airline:
 
         self.index = airline_index
 
-        self.num_flights = df_airline.shape[0]
+        self.numFlights = df_airline.shape[0]
 
-        self.flights = self.make_airline_flight_list(model)
+        self.flights = self.make_airline_flight_list(slots, flight_ctor)
 
-        #self.initialCosts = sum([flight.cost for flight in self.flights])
+        self.AUslots = np.array([flight.slot for flight in self.flights])
 
         self.finalCosts = None
+
+        for i in range(len(self.flights)):
+            self.flights[i].set_local_num(i)
 
     def __str__(self):
         return self.name
 
     def __repr__(self):
         return self.name
+
+    def __eq__(self, other: Airline):
+        return self.index == other.index
+
