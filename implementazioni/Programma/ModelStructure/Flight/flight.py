@@ -20,7 +20,7 @@ class Flight:
 
         self.eta = line["eta"]
 
-        self.etaSlot = slots[len([slot for slot in slots if slot.time <= self.eta]) - 1]
+        self.etaSlot = self.getEtaSlot(self.eta, slots) #slots[len([slot for slot in slots if slot.time <= self.eta])]
 
         self.fpfs = line['fpfs']
 
@@ -73,10 +73,10 @@ class Flight:
         try:
             compatible_slots = []
             for slot in slots:
-                if slot.time > self.eta:
+                if slot.time >= self.eta:
                     compatible_slots.append(slot)
-            if compatible_slots[0].index > 0:
-                compatible_slots.insert(0, slots[compatible_slots[0].index - 1])
+            # if compatible_slots[0].index > 0:
+            #     compatible_slots.insert(0, slots[compatible_slots[0].index - 1])
             return compatible_slots
         except IndexError:
             raise IndexError("No available slot for flight ", self.name)
@@ -87,3 +87,9 @@ class Flight:
             if slot not in self.compatibleSlots:
                 notCompatibleSlots.append(slot)
         return notCompatibleSlots
+
+    def getEtaSlot(self, eta, slots):
+        i = 0
+        while slots[i].time < eta:
+            i += 1
+        return slots[i]

@@ -2,10 +2,7 @@
 import time
 from data import dfMaker
 import pandas as pd
-from Programma.Istop import istop
-from Programma.Amal import amal
-from Programma.UDPP import udppModel
-from Programma.Max_benefit import max_benefit
+from MIp import udppModelMip, istopMip, maxBenefitMip
 import numpy as np
 
 # df = pd.read_csv("../data/data_ruiz.csv")
@@ -32,19 +29,19 @@ for i in range(1):
 
     print(df)
 
-    max_model = max_benefit.MaxBenefitModel(df_max)
+    max_model = maxBenefitMip.MaxBenefitModel(df_max)
     max_model.run()
     print("max benefit")
 
     #amal_model = amal.Amal(df_amal, offerMakerFunType="1")
     #amal_model.run()
 
-    udpp_model = udppModel.UDPPModel(df_UDPP)
+    udpp_model = udppModelMip.UDPPModel(df_UDPP)
 
     print("udpp")
 
     print(udpp_model.get_new_df()[["flight", "new slot", "new arrival", "eta slot", "cost"]])
-    model = istop.Istop(udpp_model.get_new_df(), 0)
+    model = istopMip.Istop(udpp_model.get_new_df(), 0)
     model.run()
     print(model.offers)
 
@@ -53,7 +50,7 @@ for i in range(1):
     print("model")
 
 
-    model1 = istop.Istop(df, 0)
+    model1 = istopMip.Istop(df, 0)
     model1.run()
     # print("con base")
     # print(model1.offers)

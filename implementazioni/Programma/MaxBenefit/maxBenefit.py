@@ -13,7 +13,7 @@ import pandas as pd
 import time
 
 
-class MaxBenefitModelXp(mS.ModelStructure):
+class MaxBenefitModel(mS.ModelStructure):
 
     def __init__(self, df_init: pd.DataFrame, costFun: Union[Callable, List[Callable]], model_name="Max Benefit"):
 

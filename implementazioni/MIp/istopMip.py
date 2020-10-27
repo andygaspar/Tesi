@@ -10,16 +10,13 @@ from Programma.Istop import istopFlight as modFl
 from Programma.ModelStructure.Solution import solution
 from Programma.ModelStructure.Slot.slot import Slot
 
+
 import numpy as np
 import pandas as pd
 
 import time
-import xpress as xp
 
-xp.controls.outputlog = 0
-
-
-class IstopXpress(mS.ModelStructure):
+class Istop(mS.ModelStructure):
 
     @staticmethod
     def index(array, elem):
@@ -66,12 +63,12 @@ class IstopXpress(mS.ModelStructure):
         self.airlines_pairs = np.array(list(combinations(self.airlines, 2)))
 
         self.epsilon = sys.float_info.min
-        self.m = xp.problem()
-
+        self.m = Model(model_name)
         self.x = None
         self.c = None
-        # self.m.threads = -1
-        # self.m.verbose = 0
+        self.m.threads = -1
+        self.m.verbose = 0
+        self.status = True
 
         self.matches = []
         self.couples = []
@@ -97,69 +94,66 @@ class IstopXpress(mS.ModelStructure):
                         self.flights_in_matches.append(couple[0])
                     if not self.f_in_matched(couple[1]):
                         self.flights_in_matches.append(couple[1])
-        self.x = np.array([[xp.var(vartype=xp.binary) for j in self.slots] for i in self.slots])
+        self.x = np.array([[self.m.add_var(var_type=BINARY) for j in self.slots] for i in self.slots])
 
-        self.c = np.array([xp.var(vartype=xp.binary) for i in self.matches])
-        print(self.x.shape)
+        self.c = np.array([self.m.add_var(var_type=BINARY) for i in self.matches])
         print("preprocess concluded.  number of couples: *******  ", len(self.c))
-        self.m.addVariable(self.x, self.c)
 
     def set_constraints(self):
 
         for i in self.emptySlots:
             for j in self.slots:
-                self.m.addConstraint(self.x[i, j] == 0)
+                self.m += self.x[i, j] == 0
 
         for flight in self.flights:
-            self.m.addConstraint(xp.Sum(self.x[flight.slot.index, j.index] for j in flight.compatibleSlots) == 1)
+            self.m += xsum(self.x[flight.slot.index, j.index] for j in flight.compatibleSlots) == 1
             if not self.f_in_matched(flight):
-                self.m.addConstraint(self.x[flight.slot.index, flight.slot.index] == 1)
+                self.m += self.x[flight.slot.index, flight.slot.index] == 1
 
         for j in self.slots:
-            self.m.addConstraint(xp.Sum(self.x[i.index, j.index] for i in self.slots) <= 1)
+            self.m += xsum(self.x[i.index, j.index] for i in self.slots) <= 1
 
         for flight in self.flights:
             for j in flight.notCompatibleSlots:
-                self.m.addConstraint(self.x[flight.slot.index, j.index] == 0)
+                self.m += self.x[flight.slot.index, j.index] == 0
 
         for flight in self.flights_in_matches:
-            self.m.addConstraint(xp.Sum(self.x[flight.slot.index, slot_to_swap.index] for slot_to_swap in
-                                        [s for s in self.slots if s != flight.slot]) \
-                                 == xp.Sum([self.c[j] for j in self.get_match_for_flight(flight)]))
+            self.m += xsum(self.x[flight.slot.index, slot_to_swap.index] for slot_to_swap in
+                           [s for s in self.slots if s != flight.slot]) \
+                      == xsum([self.c[j] for j in self.get_match_for_flight(flight)])
 
         for flight in self.flights:
             for other_flight in flight.airline.flights:
                 if flight != other_flight:
-                    self.m.addConstraint(self.x[flight.slot.index, other_flight.slot.index] == 0)
+                    self.m += self.x[flight.slot.index, other_flight.slot.index] == 0
 
         k = 0
         for match in self.matches:
             pairA = match[0]
             pairB = match[1]
 
-            self.m.addConstraint(xp.Sum(self.x[i.slot.index, j.slot.index] for i in pairA for j in pairB) + \
-                                 xp.Sum(self.x[i.slot.index, j.slot.index] for i in pairB for j in pairA) >= \
-                                 (self.c[k]) * 4)
+            self.m += xsum(self.x[i.slot.index, j.slot.index] for i in pairA for j in pairB) + \
+                      xsum(self.x[i.slot.index, j.slot.index] for i in pairB for j in pairA) >= \
+                      (self.c[k]) * 4
 
-            self.m.addConstraint(
-                xp.Sum(self.x[i.slot.index, j.slot.index] * i.costFun(i, j.slot) for i in pairA for j in pairB) - \
-                (1 - self.c[k]) * 100000 \
-                <= xp.Sum(self.x[i.slot.index, j.slot.index] * i.costFun(i, i.slot) for i in pairA for j in pairB) - \
-                self.epsilon)
 
-            self.m.addConstraint(
-                xp.Sum(self.x[i.slot.index, j.slot.index] * i.costFun(i, j.slot) for i in pairB for j in pairA) - \
-                (1 - self.c[k]) * 100000 \
-                <= xp.Sum(self.x[i.slot.index, j.slot.index] * i.costFun(i, i.slot) for i in pairB for j in pairA) - \
-                self.epsilon)
+            self.m += xsum(self.x[i.slot.index, j.slot.index] * i.costFun(i, j.slot) for i in pairA for j in pairB) - \
+                      (1-self.c[k]) * 100000 \
+                      <= xsum(self.x[i.slot.index, j.slot.index] * i.costFun(i, i.slot) for i in pairA for j in pairB) - \
+                      self.epsilon
+
+            self.m += xsum(self.x[i.slot.index, j.slot.index] * i.costFun(i, j.slot) for i in pairB for j in pairA) - \
+                      (1-self.c[k]) * 100000 \
+                      <= xsum(self.x[i.slot.index, j.slot.index] * i.costFun(i, i.slot) for i in pairB for j in pairA) - \
+                      self.epsilon
 
             k += 1
 
     def set_objective(self):
 
-        self.m.setObjective(
-            xp.Sum(self.x[flight.slot.index, j.index] * self.score(flight, j)
-                   for flight in self.flights for j in self.slots), sense=xp.minimize)
+        self.m.objective = minimize(
+            xsum(self.x[flight.slot.index, j.index] * self.score(flight, j)
+                 for flight in self.flights for j in self.slots))
 
     def run(self, timing=False):
 
@@ -168,23 +162,32 @@ class IstopXpress(mS.ModelStructure):
         start = time.time()
         self.set_constraints()
         end = time.time() - start
+
         if timing:
             print("Constraints setting time ", end)
 
         self.set_objective()
 
         start = time.time()
-        self.m.solve()
+        self.m.optimize()
         end = time.time() - start
+
         if timing:
             print("Simplex time ", end)
+
+        print(self.m.status)
+
+        if self.status == OptimizationStatus.INFEASIBLE:
+
+            self.status = False
+
         print(len(self.matches))
-        xpSolution = self.x
-        print(self.m.getSolution(self.x))
-        self.assign_flights(xpSolution)
+        mipSolution = self.x
+        self.assign_flights(mipSolution)
         solution.make_solution(self)
 
-        self.offer_solution_maker()
+        # self.offer_solution_maker()
+
 
         # for i in self.slots:
         #     if self.x[i, i].x == 0:
@@ -197,9 +200,11 @@ class IstopXpress(mS.ModelStructure):
                 print("********************** danno *********************************",
                       flight, flight.eta, flight.newSlot.time)
 
+
         # for i in range(len(self.matches)):
         #     if self.c[i].x != 0:
         #         print(self.matches[i])
+
 
     def other_airlines_compatible_slots(self, flight):
         others_slots = []
@@ -298,14 +303,14 @@ class IstopXpress(mS.ModelStructure):
                 return True
         return False
 
-    def assign_flights(self, xpSolution):
+    def assign_flights(self, mipSolution):
         for flight in self.flights:
             for slot in self.slots:
-                if self.m.getSolution(xpSolution[flight.slot.index, slot.index]) != 0:
+                if mipSolution[flight.slot.index, slot.index].x != 0:
                     flight.newSlot = slot
                     # print(flight, flight.slot, flight.newSlot)
 
-    # def find_match(self, i):
-    #     for j in self.slotIndexes[self.slotIndexes != i]:
-    #         if self.xpSolution[i.slot, j] == 1:
-    #             return self.flights[j]
+    def find_match(self, i):
+        for j in self.slotIndexes[self.slotIndexes != i]:
+            if self.mipSolution[i.slot, j] == 1:
+                return self.flights[j]
