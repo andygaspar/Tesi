@@ -35,25 +35,25 @@ class MaxBenefitModel(mS.ModelStructure):
         airline: air.Airline
         for flight in self.flights:
             self.m.addConstraint(
-                xp.Sum(self.x[flight.num, slot.index] for slot in flight.compatibleSlots) == 1
+                xp.Sum(self.x[flight.slot.index, slot.index] for slot in flight.compatibleSlots) == 1
             )
 
         for slot in self.slots:
             self.m.addConstraint(
-                xp.Sum(self.x[flight.num, slot.index] for flight in self.flights) <= 1
+                xp.Sum(self.x[flight.slot.index, slot.index] for flight in self.flights) <= 1
             )
 
         for airline in self.airlines:
             self.m.addConstraint(
                 xp.Sum(flight.costFun(flight, flight.slot) for flight in airline.flights) >= \
-                xp.Sum(self.x[flight.num, slot.index] * flight.costFun(flight, slot)
+                xp.Sum(self.x[flight.slot.index, slot.index] * flight.costFun(flight, slot)
                        for flight in airline.flights for slot in self.slots)
             )
 
     def set_objective(self):
         flight: modFl.Flight
         self.m.setObjective(
-            xp.Sum(self.x[flight.num, slot.index] * flight.costFun(flight, slot)
+            xp.Sum(self.x[flight.slot.index, slot.index] * flight.costFun(flight, slot)
                    for flight in self.flights for slot in self.slots)
         )
 
@@ -86,5 +86,5 @@ class MaxBenefitModel(mS.ModelStructure):
     def assign_flights(self, sol):
         for flight in self.flights:
             for slot in self.slots:
-                if self.m.getSolution(sol[flight.slot.index, slot.index]) != 0:
+                if self.m.getSolution(sol[flight.slot.index, slot.index]) > 0.5:
                     flight.newSlot = slot

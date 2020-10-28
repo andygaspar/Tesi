@@ -100,12 +100,11 @@ class Istop(mS.ModelStructure):
         self.x = np.array([[xp.var(vartype=xp.binary) for j in self.slots] for i in self.slots])
 
         self.c = np.array([xp.var(vartype=xp.binary) for i in self.matches])
-        print(self.x.shape)
+        # print(self.x.shape)
         print("preprocess concluded.  number of couples: *******  ", len(self.c))
         self.m.addVariable(self.x, self.c)
 
     def set_constraints(self):
-        print(self.emptySlots)
         for i in self.emptySlots:
             for j in self.slots:
                 self.m.addConstraint(self.x[i, j] == 0)
@@ -180,10 +179,10 @@ class Istop(mS.ModelStructure):
         if timing:
             print("Simplex time ", end)
 
-        print("status: ", self.m.getProbStatus())
+        # print("status: ", self.m.getProbStatus())
         print("problem status, explained: ", self.m.getProbStatusString())
         xpSolution = self.x
-        print(self.m.getSolution(self.x))
+        # print(self.m.getSolution(self.x))
         self.assign_flights(xpSolution)
         solution.make_solution(self)
 
@@ -200,9 +199,12 @@ class Istop(mS.ModelStructure):
                 print("********************** danno *********************************",
                       flight, flight.eta, flight.newSlot.time)
 
-        # for i in range(len(self.matches)):
-        #     if self.c[i].x != 0:
-        #         print(self.matches[i])
+        offers = 0
+        for i in range(len(self.matches)):
+            if self.m.getSolution(self.c[i]) > 0.5:
+                # print(self.matches[i])
+                offers += 1
+        print("offers: ", offers)
 
     def other_airlines_compatible_slots(self, flight):
         others_slots = []

@@ -21,7 +21,7 @@ class UDPPModelOpt(ModelStructure):
         airline: air.Airline
         start = time.time()
         for airline in self.airlines:
-            UDPPlocalOptTest(airline, self.slots)
+            UDPPlocalOpt(airline, self.slots)
 
         UDPPmerge(self.flights, self.slots)
         print(time.time() - start)
