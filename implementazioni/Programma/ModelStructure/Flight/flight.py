@@ -20,7 +20,7 @@ class Flight:
 
         self.eta = line["eta"]
 
-        self.etaSlot = self.getEtaSlot(self.eta, slots) #slots[len([slot for slot in slots if slot.time <= self.eta])]
+        self.etaSlot = self.get_eta_slot(self.eta, slots) #slots[len([slot for slot in slots if slot.time <= self.eta])]
 
         self.fpfs = line['fpfs']
 
@@ -82,7 +82,8 @@ class Flight:
                 notCompatibleSlots.append(slot)
         return notCompatibleSlots
 
-    def getEtaSlot(self, eta, slots):
+    @staticmethod
+    def get_eta_slot(eta, slots):
         i = 0
         while slots[i].time < eta:
             i += 1

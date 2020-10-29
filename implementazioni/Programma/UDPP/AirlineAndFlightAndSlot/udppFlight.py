@@ -19,14 +19,17 @@ class UDPPflight(fl.Flight):
 
         self.margin = self.margin
 
-        self.tna = self.margin
+        self.tna = self.eta + self.margin
 
         self.tnb = self.eta
 
     def set_prioritisation(self, num: float, margin: int):
         pass
 
-
+    def assign(self, solutionSlot):
+        self.newSlot = solutionSlot
+        solutionSlot.free = False
+        solutionSlot.flight = self
 
 
 

@@ -7,11 +7,10 @@ def sort_flights_by_time(flights):
     return np.array([flights[i] for i in sorted_indexes])
 
 
-def getFirstCompatibleFlight(slot, soted_flights, slots):
-    for flight in soted_flights:
-        if flight.eta < slot.time:
+def getFirstCompatibleFlight(slot, sorted_flights, slots):
+    for flight in sorted_flights:
+        if flight.eta <= slot.time:
             return flight
-
 
 
 def UDPPmerge(flights, slots):

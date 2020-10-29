@@ -15,7 +15,7 @@ def sort_flights_by_priority(flights):
 
 
 def get_target_slot(targetTime, slotList: List[UDPPslot]):
-    if targetTime <= slotList[0].time:
+    if targetTime < slotList[0].time:
         return UDPPslot.is_null()
 
     for i in range(len(slotList) - 1):
@@ -33,7 +33,10 @@ def available_free_slot_at_or_earlier(targetSlot: UDPPslot, slotList: List[UDPPs
 
 def move_flight_earlier(targetSlot: UDPPslot, flight: UDPPflight, slotList: List[UDPPslot]):
     fromSlot = targetSlot
-    toSlot = slotList[targetSlot.localIndex-1]
+    if fromSlot.localIndex > 0:
+        toSlot = slotList[targetSlot.localIndex-1]
+    else:
+        toSlot = UDPPslot.is_null()
     while True:
 
         if flight.eta > fromSlot.time:
@@ -67,7 +70,7 @@ def manage_solution_earlier(targetSlot: UDPPslot, flight: UDPPflight, slotList: 
     else:
         for currentSlot in slotList[targetSlot.localIndex:]:
             solutionSlot = move_flight_earlier(currentSlot, flight, slotList)
-            if solutionSlot:
+            if not solutionSlot.isNull:
                 return solutionSlot
 
 
@@ -81,7 +84,7 @@ def manage_time_solution(targetTime, flight: UDPPflight, slotList: List[UDPPslot
     targetSlot = get_target_slot(targetTime, slotList)
     solutionSlot = manage_solution_earlier(targetSlot, flight, slotList)
 
-    if solutionSlot.isNull:
+    if solutionSlot.isNull or solutionSlot.shiftBlocked:
         solutionSlot = get_first_later_free_slot(targetSlot, slotList)
 
     flight.assign(solutionSlot)
@@ -89,5 +92,8 @@ def manage_time_solution(targetTime, flight: UDPPflight, slotList: List[UDPPslot
 
 def manage_Mflights(Mflights: List[UDPPflight], slotList: List[UDPPslot]):
     Mflights = list(sort_flights_by_priority(Mflights))
+
     for mf in Mflights:
+        if mf.name == "FD38":
+            print("jkl")
         manage_time_solution(mf.tna, mf, slotList)

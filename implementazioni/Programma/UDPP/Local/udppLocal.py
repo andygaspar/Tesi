@@ -12,8 +12,10 @@ from Programma.UDPP.Local.manageMflights import manage_Mflights
 def make_slot_list(flights: List[UDPPflight]):
     return [flight for flight in flights if flight.priority != "B"]
 
+
 def manage_Pflights(Pflights, slotList):
     pass
+
 
 def udpp_local(airline: UDPPairline, slots: List[Slot]):
 
@@ -27,4 +29,7 @@ def udpp_local(airline: UDPPairline, slots: List[Slot]):
 
     Mflights = [flight for flight in airline.flights if flight.priority != "P"]
     manage_Mflights(Mflights, slotList)
+
+    for flight in airline.flights:
+        flight.UDPPlocalSolution = flight.newSlot
 

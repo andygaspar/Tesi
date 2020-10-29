@@ -17,8 +17,10 @@ class UDPPslot(Slot):
     def shift_blocked():
         sb = UDPPslot(Slot(None, None))
         sb.shiftBlocked = True
+        return sb
 
     @staticmethod
     def is_null():
         null = UDPPslot(Slot(None, None))
         null.isNull = True
+        return null
