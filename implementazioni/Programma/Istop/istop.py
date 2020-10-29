@@ -3,12 +3,9 @@ from typing import Callable
 from Programma.ModelStructure import modelStructure as mS
 from mip import *
 import sys
-from Programma.Istop.Solution import solution as sol
 from itertools import combinations
-from Programma.Istop import istopAirline as air
-from Programma.Istop import istopFlight as modFl
+from Programma.Istop.AirlineAndFlight import istopAirline as air, istopFlight as modFl
 from Programma.ModelStructure.Solution import solution
-from Programma.ModelStructure.Slot.slot import Slot
 
 import numpy as np
 import pandas as pd
@@ -79,8 +76,7 @@ class Istop(mS.ModelStructure):
 
         # self.initial_objective_value = sum([self.score(flight, flight.slot) for flight in self.flights])
 
-    def set_variables(self):
-
+    def check_and_set_matches(self):
         for airl_pair in self.airlines_pairs:
             fl_pair_a = airl_pair[0].flight_pairs
             fl_pair_b = airl_pair[1].flight_pairs
@@ -97,11 +93,16 @@ class Istop(mS.ModelStructure):
                         self.flights_in_matches.append(couple[0])
                     if not self.f_in_matched(couple[1]):
                         self.flights_in_matches.append(couple[1])
+
+        print("preprocess concluded.  number of couples: *******  ", len(self.matches))
+        return len(self.matches) > 0
+
+    def set_variables(self):
         self.x = np.array([[xp.var(vartype=xp.binary) for j in self.slots] for i in self.slots])
 
         self.c = np.array([xp.var(vartype=xp.binary) for i in self.matches])
         # print(self.x.shape)
-        print("preprocess concluded.  number of couples: *******  ", len(self.c))
+
         self.m.addVariable(self.x, self.c)
 
     def set_constraints(self):
@@ -163,27 +164,34 @@ class Istop(mS.ModelStructure):
 
     def run(self, timing=False):
 
-        self.set_variables()
+        feasible = self.check_and_set_matches()
 
-        start = time.time()
-        self.set_constraints()
-        end = time.time() - start
-        if timing:
-            print("Constraints setting time ", end)
+        if feasible:
+            self.set_variables()
 
-        self.set_objective()
+            start = time.time()
+            self.set_constraints()
+            end = time.time() - start
+            if timing:
+                print("Constraints setting time ", end)
 
-        start = time.time()
-        self.m.solve()
-        end = time.time() - start
-        if timing:
-            print("Simplex time ", end)
+            self.set_objective()
 
-        # print("status: ", self.m.getProbStatus())
-        print("problem status, explained: ", self.m.getProbStatusString())
-        xpSolution = self.x
-        # print(self.m.getSolution(self.x))
-        self.assign_flights(xpSolution)
+            start = time.time()
+            self.m.solve()
+            end = time.time() - start
+            if timing:
+                print("Simplex time ", end)
+
+            # print("status: ", self.m.getProbStatus())
+            print("problem status, explained: ", self.m.getProbStatusString())
+            xpSolution = self.x
+            # print(self.m.getSolution(self.x))
+            self.assign_flights(xpSolution)
+
+        else:
+            self.assign_flights([flight.slot for flight in self.flights])
+
         solution.make_solution(self)
 
         self.offer_solution_maker()

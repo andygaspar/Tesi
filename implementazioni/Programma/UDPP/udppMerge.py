@@ -17,7 +17,7 @@ def getFirstCompatibleFlight(slot, soted_flights, slots):
 def UDPPmerge(flights, slots):
     sorted_flights = list(sort_flights_by_time(flights))
     i = 0
-    while len(sorted_flights)>0:
+    while len(sorted_flights) > 0:
         if sorted_flights[0].eta <= slots[i].time:
             sorted_flights[0].newSlot = slots[i]
             sorted_flights.pop(0)

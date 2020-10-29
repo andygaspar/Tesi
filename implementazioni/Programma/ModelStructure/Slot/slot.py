@@ -1,9 +1,10 @@
 from __future__ import annotations
+from typing import Union
 
 
 class Slot:
 
-    def __init__(self, index: int, time: int):
+    def __init__(self, index: Union[int, None] = None, time: Union[int, None] = None):
         self.index = index
         self.time = time
         # self.flight = flight

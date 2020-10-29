@@ -100,8 +100,6 @@ def UDPPlocalOpt(airline: air.Airline, slots: List[sl.Slot]):
 
     m.solve()
 
-    # print(m.status)
-
     protection = False
     for flight in airline.flights:
         xsol = "*"

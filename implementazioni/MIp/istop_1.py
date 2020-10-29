@@ -3,10 +3,8 @@ from typing import Callable
 from Programma.ModelStructure import modelStructure as mS
 from mip import *
 import sys
-from Programma.Istop.Solution import solution as sol
 from itertools import combinations
-from Programma.Istop import istopAirline as air
-from Programma.Istop import istopFlight as modFl
+from Programma.Istop.AirlineAndFlight import istopAirline as air, istopFlight as modFl
 from Programma.ModelStructure.Solution import solution
 # from Programma.ModelStructure.Costs.costs import cost_function as cf
 

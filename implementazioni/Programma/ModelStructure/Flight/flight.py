@@ -39,12 +39,6 @@ class Flight:
 
         self.localNum = None
 
-        # UDPP attributes ***************
-
-        self.UDPPLocalSlot = None
-
-        self.UDPPlocalSolution = None
-
         # ISTOP attributes  *************
 
         self.priority = line["priority"]
@@ -93,3 +87,7 @@ class Flight:
         while slots[i].time < eta:
             i += 1
         return slots[i]
+
+    def assign(self, solutionSlot: sl.Slot):
+        self.newSlot = solutionSlot
+        solutionSlot.free = False

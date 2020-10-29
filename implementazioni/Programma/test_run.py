@@ -4,14 +4,14 @@ from Programma.MaxBenefit import maxBenefit
 from Programma.Istop import istop
 
 from Programma.ModelStructure.Costs.costFunctionDict import CostFuns
-from Programma.UDPP import udppModelOpt
+from Programma.UDPP import udppModel
 import random
 import pandas as pd
 
 # df = pd.read_csv("../data/data_ruiz.csv")
 scheduleType = dfMaker.schedule_types(show=True)
 # df = pd.read_csv("dfcrash")
-df = dfMaker.df_maker(40, 5, distribution=scheduleType[0])
+df = dfMaker.df_maker(40, 5, distribution=scheduleType[3])
 df["margins"] = [random.choice(range(10, 50)) for i in range(df.shape[0])]
 # df.to_csv("dfcrash")
 df_max = df.copy(deep=True)
@@ -26,7 +26,8 @@ max_model.run()
 max_model.print_performance()
 
 print("UDPP from FPFS")
-udpp_model_xp = udppModelOpt.UDPPModelOpt(df_UDPP, costFun)
+udpp_model_xp = udppModel.UDPPModelOpt(df_UDPP, costFun)
+udpp_model_xp.run(optimised=False)
 udpp_model_xp.print_performance()
 
 print("max from UDPP")

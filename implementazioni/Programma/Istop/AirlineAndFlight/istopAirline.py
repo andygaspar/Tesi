@@ -1,9 +1,7 @@
-from typing import Callable
-
 import numpy as np
 import pandas as pd
 from itertools import combinations
-from Programma.Istop.istopFlight import IstopFlight
+from Programma.Istop.AirlineAndFlight.istopFlight import IstopFlight
 from Programma.ModelStructure.Airline import airline as air
 
 
