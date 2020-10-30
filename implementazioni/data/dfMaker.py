@@ -1,3 +1,5 @@
+from typing import Union, List
+
 import numpy as np
 import random
 import string
@@ -72,9 +74,17 @@ def distribution_maker(num_flights, num_airlines, distribution="uniform"):
     return dist
 
 
-def df_maker(num_flights=20, num_airlines=3, distribution="uniform", capacity=1, new_capacity=2):
-    dist = distribution_maker(num_flights, num_airlines, distribution)
-    airline = [[string.ascii_uppercase[j] for i in range(dist[j])] for j in range(num_airlines)]
+def df_maker(num_flights=20, num_airlines=3, distribution="uniform", capacity=1, new_capacity=2,
+             custom=Union[None, List[int]]):
+
+    if custom is None:
+        dist = distribution_maker(num_flights, num_airlines, distribution)
+        airline = [[string.ascii_uppercase[j] for i in range(dist[j])] for j in range(num_airlines)]
+    else:
+        num_airlines = len(custom)
+        num_flights = sum(custom)
+        airline = [[string.ascii_uppercase[j] for i in range(custom[j])] for j in range(num_airlines)]
+
     airline = [val for sublist in airline for val in sublist]
     airline = np.random.permutation(airline)
     flights = ["F" + airline[i] + str(i) for i in range(num_flights)]

@@ -94,6 +94,4 @@ def manage_Mflights(Mflights: List[UDPPflight], slotList: List[UDPPslot]):
     Mflights = list(sort_flights_by_priority(Mflights))
 
     for mf in Mflights:
-        if mf.name == "FD38":
-            print("jkl")
         manage_time_solution(mf.tna, mf, slotList)
