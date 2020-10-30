@@ -25,7 +25,7 @@ max_model = maxBenefit.MaxBenefitModel(df_max, costFun)
 max_model.run()
 max_model.print_performance()
 
-print("UDPP from FPFS")
+print("UDPPnonOpt from FPFS")
 udpp_model_xp = udppModel.UDPPModelOpt(df_UDPP, costFun)
 udpp_model_xp.run(optimised=False)
 udpp_model_xp.print_performance()
@@ -40,5 +40,20 @@ xpModel = istop.Istop(udpp_model_xp.get_new_df(), costFun)
 xpModel.run(True)
 xpModel.print_performance()
 
+
+print("UDPP Opt from FPFS")
+udpp_model_xp = udppModel.UDPPModelOpt(df_UDPP, costFun)
+udpp_model_xp.run(optimised=True)
+udpp_model_xp.print_performance()
+
+print("max from UDPP")
+maxFromUDPP = maxBenefit.MaxBenefitModel(udpp_model_xp.get_new_df(), costFun)
+maxFromUDPP.run()
+maxFromUDPP.print_performance()
+
+print("istop from UDPP")
+xpModel = istop.Istop(udpp_model_xp.get_new_df(), costFun)
+xpModel.run(True)
+xpModel.print_performance()
 
 

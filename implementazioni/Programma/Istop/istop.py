@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Union
 
 from Programma.ModelStructure import modelStructure as mS
 from mip import *

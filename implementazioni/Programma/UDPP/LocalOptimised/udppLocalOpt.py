@@ -100,26 +100,17 @@ def UDPPlocalOpt(airline: air.Airline, slots: List[sl.Slot]):
 
     m.solve()
 
-    protection = False
+
     for flight in airline.flights:
-        xsol = "*"
-        ysol = "*"
 
         for k in range(airline.numFlights):
-            if m.getSolution(x[flight.localNum, k]) != 0:
-                xsol = airline.flights[k].slot
+            if m.getSolution(x[flight.localNum, k]) > 0.5:
                 flight.UDPPlocalSolution = airline.flights[k].slot
 
         for slot in slots:
-            if m.getSolution(y[flight.localNum, slot.index]) != 0:
-                ysol = slots[j.index]
+            if m.getSolution(y[flight.localNum, slot.index]) > 0.5:
                 flight.UDPPlocalSolution = slot
-                # print("protection ++++++ ", flight, flight.eta, flight.UDPPlocalSolution.time)
-                protection = True
 
-    # if protection:
-    #     for flight in airline.flights:
-    #         print(flight)
 
     for flight in airline.flights:
         if flight.eta > flight.UDPPlocalSolution.time:
