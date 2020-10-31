@@ -26,7 +26,7 @@ max_model.run()
 max_model.print_performance()
 
 print("UDPPnonOpt from FPFS")
-udpp_model_xp = udppModel.UDPPModelOpt(df_UDPP, costFun)
+udpp_model_xp = udppModel.UDPPmodel(df_UDPP, costFun)
 udpp_model_xp.run(optimised=False)
 udpp_model_xp.print_performance()
 
@@ -42,7 +42,7 @@ xpModel.print_performance()
 
 
 print("UDPP Opt from FPFS")
-udpp_model_xp = udppModel.UDPPModelOpt(df_UDPP, costFun)
+udpp_model_xp = udppModel.UDPPmodel(df_UDPP, costFun)
 udpp_model_xp.run(optimised=True)
 udpp_model_xp.print_performance()
 

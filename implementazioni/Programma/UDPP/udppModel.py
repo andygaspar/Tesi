@@ -12,7 +12,7 @@ from Programma.ModelStructure.Slot.slot import Slot
 import time
 
 
-class UDPPModelOpt(ModelStructure):
+class UDPPmodel(ModelStructure):
 
     def __init__(self, df_init: pd.DataFrame, costFun: Union[Callable, List[Callable]]):
 
