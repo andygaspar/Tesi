@@ -24,3 +24,18 @@ class UDPPslot(Slot):
         null = UDPPslot(Slot(None, None))
         null.isNull = True
         return null
+
+    def __str__(self):
+        if self.isNull:
+            return "NULL"
+        if self.shiftBlocked:
+            return "SHIFT BLOCKED"
+        return str(self.index)
+
+    def __repr__(self):
+        if self.isNull:
+            return "NULL"
+        if self.shiftBlocked:
+            return "SHIFT BLOCKED"
+        return str(self.index)+":"+str(self.time)
+

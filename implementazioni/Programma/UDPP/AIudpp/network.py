@@ -19,8 +19,10 @@ from Programma.UDPP.Local.manageMflights import manage_Mflights
 
 class AirNetwork:
 
-    def __init__(self):
+    def __init__(self, inputDimension, batchSize):
 
+        self.inputDimension = inputDimension
+        self.batchSize = batchSize
         lr = 1e-3
         lambdaL2 = 1e-5
         epochs = 1000
@@ -28,22 +30,41 @@ class AirNetwork:
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         self.network = nn.Sequential(
-            nn.Linear(24, 64),
+            nn.Linear(self.inputDimension, 64),
             nn.ReLU(),
             nn.Linear(64, 6))
         self.network.to(self.device)
 
+        torch.cuda.current_device()
+        print(torch.cuda.is_available())
+        self.optimizer = optim.Adam(self.network.parameters(), lr=1e-5, weight_decay=1e-5)
+
     def prioritisation(self, input_list: List[float]):
 
-        X = torch.tensor(input_list).to(self.device).reshape(1, 24).type(dtype=torch.float32)
-        print(X.shape)
+        X = torch.tensor(input_list, requires_grad=True).to(self.device).reshape(1, self.inputDimension).type(dtype=torch.float32)
 
         with torch.no_grad():
             priorities = self.network(X).flatten().cpu().numpy()
 
         return priorities
 
+    def train(self, inputs, initialCosts: np.array, finalCosts: np.array):
+        X = torch.tensor(inputs).to(self.device)\
+            .reshape(self.batchSize, self.inputDimension).type(dtype=torch.float32)
 
+        with torch.no_grad():
+            Y = self.network(X)
+
+        priorities = Y.flatten().cpu().numpy()
+
+        loss = self.averageReduction(initialCosts, finalCosts)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+    @staticmethod
+    def averageReduction(initialCosts, finalCosts):
+        return torch.tensor(initialCosts-finalCosts)
 
 # criterion = nn.CrossEntropyLoss()
 #
