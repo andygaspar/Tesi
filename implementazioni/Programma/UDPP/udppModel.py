@@ -6,7 +6,9 @@ from Programma.UDPP.LocalOptimised.udppLocalOpt import UDPPlocalOpt
 from Programma.UDPP.udppMerge import UDPPmerge
 from Programma.ModelStructure.Solution import solution
 from Programma.UDPP.AirlineAndFlightAndSlot.udppAirline import UDPPairline
+from Programma.UDPP.AirlineAndFlightAndSlot.udppFlight import UDPPflight
 from Programma.UDPP.Local.udppLocal import udpp_local
+from Programma.ModelStructure.Slot.slot import Slot
 import time
 
 
@@ -40,3 +42,7 @@ class UDPPModelOpt(ModelStructure):
         newDf["slot"] = newDf["new slot"]
         newDf["fpfs"] = newDf["new arrival"]
         return newDf
+
+    @staticmethod
+    def compute_UDPP_local_cost(flights: List[UDPPflight]):
+        return sum([flight.costFun(flight, Slot(None,flight.UDPPlocalSolution)) for flight in flights])

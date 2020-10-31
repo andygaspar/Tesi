@@ -1,78 +1,96 @@
+import random
+from typing import List
+
+import matplotlib.pyplot as plt
+
 import numpy as np
 import torch
 from torch import nn, optim
 from IPython import display
 
+from Programma.UDPP import udppModel
+from Programma.UDPP.AirlineAndFlightAndSlot.udppAirline import UDPPairline
+from Programma.UDPP.AirlineAndFlightAndSlot.udppSlot import UDPPslot
+from data.dfMaker import df_maker
+from Programma.ModelStructure.modelStructure import ModelStructure
+from Programma.ModelStructure.Costs.costFunctionDict import CostFuns
+from Programma.UDPP.Local.manageMflights import manage_Mflights
 
-class Network:
-    device: torch.device
-    inputDimension: int
-    hidden: int
-    network: torch.nn.Sequential
 
-    def __init__(self, inputDim: int, outputDim: int):
+class AirNetwork:
+
+    def __init__(self):
+
+        lr = 1e-3
+        lambdaL2 = 1e-5
+        epochs = 1000
+
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.loss = 0
-        self.inputDimension = inputDim
-        self.outputDimension = outputDim
-        self.hidden = 10
+
         self.network = nn.Sequential(
-            nn.Linear(self.inputDimension, 30),
-            nn.LeakyReLU(),
-            nn.Linear(self.inputDimension, self.inputDimension),
-            nn.LeakyReLU(),
-            nn.Linear(self.inputDimension, self.inputDimension),
-            nn.Linear(30, 3),
-            # nn.Dropout(p=0.2)
-            # nn.LeakyReLU(),
-        )
+            nn.Linear(24, 64),
+            nn.ReLU(),
+            nn.Linear(64, 6))
         self.network.to(self.device)
-        torch.cuda.current_device()
-        print(torch.cuda.is_available())
-        self.optimizer = optim.Adam(self.network.parameters(), lr=1e-5, weight_decay=1e-5)
-        # self.optimizer = optim.SGD(self.network.parameters(), lr=1e-2, momentum=0.9)
 
-    @staticmethod
-    def sample_action(priorities: torch.tensor) -> int:
-        return torch.argmax(torch.flatten(priorities)).item()
+    def prioritisation(self, input_list: List[float]):
 
-    def get_prioritisation(self, state: np.array) -> int:
-        X = torch.from_numpy(state).to(self.device).reshape(1, self.inputDimension).type(dtype=torch.float32)
+        X = torch.tensor(input_list).to(self.device).reshape(1, 24).type(dtype=torch.float32)
+        print(X.shape)
+
         with torch.no_grad():
-            Q_values = torch.flatten(self.network(X)).to(self.device)
-            return self.sample_action(Q_values)
+            priorities = self.network(X).flatten().cpu().numpy()
 
-    def update_weights(self, batch: tuple, gamma: float, target_network):
-        criterion = torch.nn.MSELoss()
+        return priorities
 
-        states, actions, nextStates, rewards, dones = batch
 
-        X = torch.tensor([el.tolist() for el in states]).to(self.device).float().reshape(-1, self.inputDimension)
-        X_next = torch.tensor([el.tolist() for el in nextStates]).to(self.device) \
-            .reshape(-1, self.inputDimension)
-        actions = torch.tensor(actions).to(self.device)
-        rewards = torch.tensor(rewards).to(self.device)
-        dones = torch.tensor(dones, dtype=int).to(self.device)
-        for i in range(5):
-            curr_Q = self.network(X).gather(1, actions.unsqueeze(1)).to(self.device).squeeze(1)
 
-            with torch.no_grad():
-                next_Q = target_network.network(X_next).to(self.device)
-                max_next_Q = torch.max(next_Q, 1)[0]
-                expected_Q = (rewards + (1 - dones) * gamma * max_next_Q).to(self.device)
-
-            loss = criterion(curr_Q, expected_Q.detach())
-            self.loss = loss.item()
-            self.optimizer.zero_grad()
-            loss.backward()
-            # torch.nn.utils.clip_grad_norm_(self.network.parameters(), 1)
-            self.optimizer.step()
-
-    def take_weights(self, model_network):
-        self.network.load_state_dict(model_network.network.state_dict())
-
-    def load_weights(self, file):
-        self.network.load_state_dict(torch.load(file))
-
-    def save_weights(self, filename: str):
-        torch.save(self.network.state_dict(), filename + '.pt')
+# criterion = nn.CrossEntropyLoss()
+#
+# optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=lambdaL2)
+#
+# torch.manual_seed(41)
+# N = 1000  # num_samples_per_class
+# D = 2  # dimensions
+# C = 3  # num_classes
+# H = 100  # num_hidden_units
+#
+# X = torch.zeros(N * C, D).to(device)
+# y = torch.zeros(N * C, dtype=torch.long).to(device)
+# print(torch.cuda.is_available())
+#
+# # for c in range(C):
+# #     index = 0
+# #     t = torch.linspace(0, 1, N)
+# #     # When c = 0 and t = 0: start of linspace
+# #     # When c = 0 and t = 1: end of linpace
+# #     # This inner_var is for the formula inside sin() and cos() like sin(inner_var) and cos(inner_Var)
+# #     inner_var = torch.linspace(
+# #         # When t = 0
+# #         (2 * np.pi / C) * (c),
+# #         # When t = 1
+# #         (2 * np.pi / C) * (2 + c),
+# #         N
+# #     ) + torch.randn(N) * 0.2
+# #
+# #     for ix in range(N * c, N * (c + 1)):
+# #         X[ix] = t[index] * torch.FloatTensor((
+# #             np.sin(inner_var[index]), np.cos(inner_var[index])
+# #         ))
+# #         y[ix] = c
+# #         index += 1
+#
+#
+# print("Shapes:")
+# print("X:", X.size())
+# print("y:", y.size())
+#
+# # for e in range(epochs):
+# #     y_pred = model(X)
+# #     loss = criterion(y_pred, y)
+# #     print("[EPOCH]: {}, [LOSS]: {}".format(e, loss.item()))
+# #     display.clear_output(wait=True)
+# #
+# #     optimizer.zero_grad()
+# #     loss.backward()
+#     optimizer.step()
