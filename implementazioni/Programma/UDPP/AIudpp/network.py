@@ -43,17 +43,20 @@ class AirNetwork:
         self.inputDimension = inputDimension
         self.batchSize = batchSize
         self.lr = 1e-3
-        self.lambdaL2 = 1e-5
+        self.lambdaL2 = 1e-4
         self.epochs = 50
         self.width = 64
-        self.loss
+        self.loss = 0
 
         self.network = nn.Sequential(
             nn.Linear(self.inputDimension, self.width),
             nn.LeakyReLU(),
-            nn.Linear(self.width, self.width),
+            nn.Linear(self.width, self.width*2),
             nn.LeakyReLU(),
-            nn.Linear(self.width, 6),
+            # nn.Dropout(p=0.2),
+            nn.Linear(self.width*2, self.width*3),
+            nn.LeakyReLU(),
+            nn.Linear(self.width * 3, 6),
             # nn.Dropout(p=0.2)
             # nn.LeakyReLU(),
         )
@@ -93,18 +96,18 @@ class AirNetwork:
                 run_UDPP_local(priorities[i], airlines[i], UDPPmodels[i].slots)
                 finalCosts.append(UDPPmodels[i].compute_costs(airlines[i].flights, "final"))
 
-            reward = (initialCosts - finalCosts) / initialCosts
-            fc = torch.tensor([[reward[j] for i in range(numFlights)] for j in range(batchSize)])
+            rewards = torch.tensor((initialCosts - finalCosts) / initialCosts)
 
-            # loss = self.averageReduction(initialCosts, np.array(finalCosts))
-            loss = criterion(Y, fc)
+            loss = self.my_loss(Y, rewards)
             loss.backward()
             self.optimizer.step()
-            if e % 50 == 0:
-                print(loss)
             finalCosts = []
 
+            if e == self.epochs-1:
+                self.loss = loss.item()
+
     @staticmethod
-    def averageReduction(initialCosts, finalCosts):
-        output = torch.tensor((initialCosts - finalCosts), requires_grad=True)
-        return torch.mean(output)
+    def my_loss(Y, rewards):
+        sumTens = torch.sum(Y, 1)
+        loss = torch.mean((sumTens - rewards)**2)
+        return loss

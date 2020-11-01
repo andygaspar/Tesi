@@ -1,7 +1,7 @@
 from mip import *
 import numpy as np
-from Programma.ModelStructure.Airline import airline as air
-from Programma.ModelStructure.Flight import flight as fl
+from Programma.UDPP.AirlineAndFlightAndSlot import udppAirline as air
+from Programma.UDPP.AirlineAndFlightAndSlot import udppFlight as fl
 from Programma.ModelStructure.Slot import slot as sl
 import xpress as xp
 
@@ -31,7 +31,7 @@ def UDPPlocalOptTest(airline: air.Airline, slots: List[sl.Slot]):
 
     m.addVariable(x, z, y)
 
-    flight: fl.Flight
+    flight: fl.UDPPflight
 
     m.addConstraint(
         xp.Sum(x[0, k] for k in range(airline.numFlights)) == 1
@@ -115,6 +115,7 @@ def UDPPlocalOptTest(airline: air.Airline, slots: List[sl.Slot]):
             if m.getSolution(x[flight.localNum, k]) != 0:
                 xsol = airline.flights[k].slot
                 flight.UDPPlocalSolution = airline.flights[k].slot
+
 
         for slot in slots:
             if m.getSolution(y[flight.localNum, slot.index]) != 0:
