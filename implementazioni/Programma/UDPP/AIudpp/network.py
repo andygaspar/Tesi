@@ -59,7 +59,7 @@ class AirNetwork:
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.network.to(self.device)
 
-        torch.cuda.current_device()
+        # torch.cuda.current_device()
         print(torch.cuda.is_available())
         self.optimizer = optim.Adam(self.network.parameters(), lr=self.lr, weight_decay=self.lambdaL2)
 
@@ -92,7 +92,9 @@ class AirNetwork:
                 run_UDPP_local(priorities[i], airlines[i], UDPPmodels[i].slots)
                 finalCosts.append(UDPPmodels[i].compute_costs(airlines[i].flights, "final"))
 
-            fc = torch.tensor(finalCosts)
+            reward = (initialCosts - finalCosts)/initialCosts
+            fc = torch.tensor([[reward[j] for i in range(numFlights)] for j in range(batchSize)])
+
             #loss = self.averageReduction(initialCosts, np.array(finalCosts))
             loss = criterion(Y,fc)
             loss.backward()
