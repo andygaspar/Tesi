@@ -9,7 +9,7 @@ from torch import nn, optim
 from IPython import display
 
 from Programma.UDPP import udppModel
-from Programma.UDPP.AIudpp.udppRun import run_UDPP_local
+from Programma.UDPP.AIudpp.trainAuxFuns import run_UDPP_local
 from Programma.UDPP.AirlineAndFlightAndSlot.udppAirline import UDPPairline
 from Programma.UDPP.AirlineAndFlightAndSlot.udppSlot import UDPPslot
 from Programma.UDPP.udppModel import UDPPmodel
@@ -44,8 +44,9 @@ class AirNetwork:
         self.batchSize = batchSize
         self.lr = 1e-3
         self.lambdaL2 = 1e-5
-        self.epochs = 1000
+        self.epochs = 50
         self.width = 64
+        self.loss
 
         self.network = nn.Sequential(
             nn.Linear(self.inputDimension, self.width),
@@ -65,7 +66,7 @@ class AirNetwork:
 
     def prioritisation(self, input_list: List[float]):
 
-        X = torch.tensor(input_list, requires_grad=False).\
+        X = torch.tensor(input_list, requires_grad=False). \
             to(self.device).reshape(1, self.inputDimension).type(dtype=torch.float32)
 
         self.network.eval()
@@ -81,7 +82,7 @@ class AirNetwork:
         self.network.train()
         for e in range(self.epochs):
             self.optimizer.zero_grad()
-            X = torch.tensor(inputs, requires_grad=True).to(self.device)\
+            X = torch.tensor(inputs, requires_grad=True).to(self.device) \
                 .reshape(self.batchSize, self.inputDimension).type(dtype=torch.float32)
 
             Y = self.network(X)
@@ -92,18 +93,18 @@ class AirNetwork:
                 run_UDPP_local(priorities[i], airlines[i], UDPPmodels[i].slots)
                 finalCosts.append(UDPPmodels[i].compute_costs(airlines[i].flights, "final"))
 
-            reward = (initialCosts - finalCosts)/initialCosts
+            reward = (initialCosts - finalCosts) / initialCosts
             fc = torch.tensor([[reward[j] for i in range(numFlights)] for j in range(batchSize)])
 
-            #loss = self.averageReduction(initialCosts, np.array(finalCosts))
-            loss = criterion(Y,fc)
+            # loss = self.averageReduction(initialCosts, np.array(finalCosts))
+            loss = criterion(Y, fc)
             loss.backward()
             self.optimizer.step()
-            print(loss)
+            if e % 50 == 0:
+                print(loss)
             finalCosts = []
 
     @staticmethod
     def averageReduction(initialCosts, finalCosts):
-        output = torch.tensor((initialCosts-finalCosts), requires_grad=True)
+        output = torch.tensor((initialCosts - finalCosts), requires_grad=True)
         return torch.mean(output)
-
