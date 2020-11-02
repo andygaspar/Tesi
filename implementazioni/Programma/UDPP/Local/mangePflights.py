@@ -28,6 +28,10 @@ def sort_flights_by_tna(flights):
     return np.array([flights[i] for i in sorted_indexes])
 
 
+def sort_Pflights(Pflights):
+    pass
+
+
 def manage_Pflights(Pflights: List[UDPPflight], localSlots: List[UDPPslot], slots: List[UDPPslot]):
 
     for pf in Pflights:
@@ -42,5 +46,8 @@ def manage_Pflights(Pflights: List[UDPPflight], localSlots: List[UDPPslot], slot
             if pf.tnb >= pf.eta:
                 pf.assign(get_target_slot(pf.tnb, slots))
             else:
-                pf.assign(get_target_slot(pf.tnb, slots))
+                pf.assign(get_target_slot(pf.eta, slots))
 
+        localSlots.remove(targetSlot)
+        
+    sort_Pflights(Pflights)
