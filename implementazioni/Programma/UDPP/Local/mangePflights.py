@@ -17,15 +17,18 @@ def get_target_slot(targetTime, slotList: List[UDPPslot]):
             return slotList[i]
     return slotList[-1]
 
+
 def get_first_later_free_slot(targetSlot: UDPPslot, slotList: List[UDPPslot]):
     for slot in slotList[targetSlot.localIndex:]:
         if slot.free:
             return slot
 
+
 def sort_flights_by_tna(flights):
     tnaList = [f.tna for f in flights]
     sorted_indexes = np.flip(np.argsort(tnaList))
     return np.array([flights[i] for i in sorted_indexes])
+
 
 def sort_slots_by_time(slotList):
     timeList = [slot.time for slot in slotList]

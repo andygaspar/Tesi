@@ -13,13 +13,13 @@ class UDPPflight(fl.Flight):
 
         self.UDPPlocalSolution = None
 
-        self.priorityValue = "M"
+        self.priorityValue = "N"
 
         self.priorityNumber = self.cost
 
         self.margin = self.margin
 
-        self.tna = self.eta + self.margin
+        self.tna = self.eta #+ self.margin
 
         self.tnb = self.eta
 

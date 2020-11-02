@@ -10,7 +10,7 @@ import numpy as np
 
 def sort_flights_by_priority(flights):
     priorityList = [f.priorityNumber for f in flights]
-    sorted_indexes = np.flip(np.argsort(priorityList))
+    sorted_indexes = np.argsort(priorityList)#np.flip(np.argsort(priorityList))
     return np.array([flights[i] for i in sorted_indexes])
 
 
