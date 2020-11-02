@@ -1,6 +1,8 @@
 from typing import Union, Callable, List
 
 import pandas as pd
+
+from Programma.GlobalFuns.globalFuns import HiddenPrints
 from Programma.ModelStructure.modelStructure import ModelStructure
 from Programma.UDPP.LocalOptimised.udppLocalOpt import UDPPlocalOpt
 from Programma.UDPP.udppMerge import UDPPmerge
@@ -23,7 +25,8 @@ class UDPPmodel(ModelStructure):
         start = time.time()
         for airline in self.airlines:
             if optimised:
-                UDPPlocalOpt(airline, self.slots)
+                with HiddenPrints():
+                    UDPPlocalOpt(airline, self.slots)
             else:
                 udpp_local(airline, self.slots)
 

@@ -3,21 +3,13 @@ import sys
 import os
 import numpy as np
 
+from Programma.GlobalFuns.globalFuns import HiddenPrints
 from Programma.ModelStructure.Costs.costFunctionDict import CostFuns
 from Programma.UDPP import udppModel
 from Programma.UDPP.AirlineAndFlightAndSlot.udppAirline import UDPPairline
 from Programma.UDPP.Local.udppLocal import udpp_local
 from Programma.UDPP.LocalOptimised.udppLocalOpt import UDPPlocalOpt
 from data.dfMaker import df_maker
-
-class HiddenPrints:
-    def __enter__(self):
-        self._original_stdout = sys.stdout
-        sys.stdout = open(os.devnull, 'w')
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        sys.stdout.close()
-        sys.stdout = self._original_stdout
 
 
 def run_UDPP_local(prior: np.array, air: UDPPairline, slots):
@@ -32,7 +24,7 @@ def make_network_input(air: UDPPairline):
 
 
 def make_network_output(air: UDPPairline):
-    vals = [[0 if f.priorityValue is "M" else 1, f.UDPPlocalSolution.time] for f in air.flights]
+    vals = [[0 if f.priorityValue is "M" else 1, f.newSlot.time] for f in air.flights]
     return [item for val in vals for item in val]
 
 

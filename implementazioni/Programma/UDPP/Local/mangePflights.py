@@ -1,5 +1,6 @@
 from typing import Union, Callable, List
 
+from Programma.ModelStructure.Slot.slot import Slot
 from Programma.UDPP.AirlineAndFlightAndSlot.udppFlight import UDPPflight
 from Programma.UDPP.AirlineAndFlightAndSlot.udppAirline import UDPPairline
 from Programma.UDPP.AirlineAndFlightAndSlot.udppSlot import UDPPslot
@@ -26,13 +27,13 @@ def get_first_later_free_slot(targetSlot: UDPPslot, slotList: List[UDPPslot]):
 
 def sort_flights_by_tna(flights):
     tnaList = [f.tna for f in flights]
-    sorted_indexes = np.flip(np.argsort(tnaList))
+    sorted_indexes = np.argsort(tnaList)
     return np.array([flights[i] for i in sorted_indexes])
 
 
 def sort_slots_by_time(slotList):
     timeList = [slot.time for slot in slotList]
-    sorted_indexes = np.flip(np.argsort(timeList))
+    sorted_indexes = np.argsort(timeList)
     return np.array([slotList[i] for i in sorted_indexes])
 
 
@@ -51,16 +52,16 @@ def manage_Pflights(Pflights: List[UDPPflight], localSlots: List[UDPPslot], slot
     for pf in Pflights:
         targetSlot = get_target_slot(pf.tna, localSlots)
 
-        if targetSlot.is_null():
+        if targetSlot.isNull:
             targetSlot = get_first_later_free_slot(localSlots[0], localSlots)
 
         if targetSlot.time >= pf.tnb:
             pf.assign(targetSlot)
         else:
             if pf.tnb >= pf.eta:
-                pf.assign(get_target_slot(pf.tnb, slots))
+                pf.assign(UDPPslot(Slot(None, pf.tnb)))
             else:
-                pf.assign(get_target_slot(pf.eta, slots))
+                pf.assign(UDPPslot(Slot(None, pf.eta)))
 
         localSlots.remove(targetSlot)
         
