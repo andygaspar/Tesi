@@ -1,7 +1,7 @@
 from mip import *
 import numpy as np
-from Programma.ModelStructure.Airline import airline as air
-from Programma.ModelStructure.Flight import flight as fl
+from Programma.UDPP.AirlineAndFlightAndSlot import udppAirline as air
+from Programma.UDPP.AirlineAndFlightAndSlot import udppFlight as fl
 from Programma.ModelStructure.Slot import slot as sl
 import xpress as xp
 xp.controls.outputlog = 0
@@ -11,7 +11,7 @@ def slot_range(k: int, AUslots: List[sl.Slot]):
     return range(AUslots[k].index + 1, AUslots[k + 1].index)
 
 
-def eta_limit_slot(flight: fl.Flight, AUslots: List[sl.Slot]):
+def eta_limit_slot(flight: fl.UDPPflight, AUslots: List[sl.Slot]):
     i = 0
     for slot in AUslots:
         if slot >= flight.etaSlot:
@@ -19,7 +19,7 @@ def eta_limit_slot(flight: fl.Flight, AUslots: List[sl.Slot]):
         i += 1
 
 
-def UDPPlocalOpt(airline: air.Airline, slots: List[sl.Slot]):
+def UDPPlocalOpt(airline: air.UDPPairline, slots: List[sl.Slot]):
     m = xp.problem()
 
     x = np.array([[xp.var(vartype=xp.binary) for j in slots] for i in airline.flights])
@@ -100,7 +100,6 @@ def UDPPlocalOpt(airline: air.Airline, slots: List[sl.Slot]):
 
     m.solve()
 
-
     for flight in airline.flights:
 
         for k in range(airline.numFlights):
@@ -112,7 +111,7 @@ def UDPPlocalOpt(airline: air.Airline, slots: List[sl.Slot]):
             if m.getSolution(y[flight.localNum, slot.index]) > 0.5:
                 flight.UDPPlocalSolution = slot
                 flight.priorityNumber = slot.time
-                flight.priority = "P"
+                flight.priorityValue = "P"
 
 
     for flight in airline.flights:

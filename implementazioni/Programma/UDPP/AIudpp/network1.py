@@ -9,7 +9,7 @@ from torch import nn, optim
 from IPython import display
 
 from Programma.UDPP import udppModel
-from Programma.UDPP.AIudpp.trainAuxFuns import run_UDPP_local
+from Programma.UDPP.AIudpp.trainAuxFuns1 import run_UDPP_local
 from Programma.UDPP.AirlineAndFlightAndSlot.udppAirline import UDPPairline
 from Programma.UDPP.AirlineAndFlightAndSlot.udppSlot import UDPPslot
 from Programma.UDPP.udppModel import UDPPmodel
@@ -56,7 +56,7 @@ class AirNetwork:
             # nn.Dropout(p=0.2),
             nn.Linear(self.width*2, self.width*3),
             nn.LeakyReLU(),
-            nn.Linear(self.width * 3, 6),
+            nn.Linear(self.width * 3, 12),
             # nn.Dropout(p=0.2)
             # nn.LeakyReLU(),
         )
@@ -78,7 +78,7 @@ class AirNetwork:
 
         return priorities
 
-    def train(self, numFlights, batchSize, inputs, initialCosts: np.array,
+    def train(self, numFlights, batchSize, inputs, outputs,
               airlines: List[UDPPairline], UDPPmodels: List[UDPPmodel]):
         criterion = torch.nn.MSELoss()
         finalCosts = []
@@ -90,15 +90,15 @@ class AirNetwork:
 
             Y = self.network(X)
 
-            priorities = Y.flatten().cpu().detach().numpy().reshape(batchSize, numFlights)
+            # priorities = Y.flatten().cpu().detach().numpy().reshape(batchSize, numFlights)
 
-            for i in range(batchSize):
-                run_UDPP_local(priorities[i], airlines[i], UDPPmodels[i].slots)
-                finalCosts.append(UDPPmodels[i].compute_costs(airlines[i].flights, "final"))
+            # for i in range(batchSize):
+            #     run_UDPP_local(priorities[i], airlines[i], UDPPmodels[i].slots)
+            #     finalCosts.append(UDPPmodels[i].compute_costs(airlines[i].flights, "final"))
 
-            rewards = torch.tensor((initialCosts - finalCosts) / initialCosts)
+            Y_test = torch.tensor(outputs).to(self.device).type(dtype=torch.float32)
 
-            loss = self.my_loss(Y, rewards)
+            loss = criterion(Y, Y_test)
             loss.backward()
             self.optimizer.step()
             finalCosts = []
