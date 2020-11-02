@@ -27,6 +27,8 @@ udMod = udppModel.UDPPmodel(df_UDPP, costFun)
 air = udMod.airlines[0]
 
 
+udMod.run(optimised=False)
+udMod.print_performance()
 
 # for f in air.flights:
 #     print(f, f.slot, f.newSlot, f.priorityValue, f.priorityNumber)
@@ -37,23 +39,12 @@ udMod.print_performance()
 #print(udMod.compute_costs(air.flights, "final"))
 
 
-# for f in air.flights:
-#     print(f, f.slot, f.newSlot.time, f.priorityValue, f.cost, f.margin)
-
-print(udMod.compute_costs(air.flights,"initial"))
-print(udMod.compute_costs(air.flights,"final"))
-
-# udpp_local(air, udMod.slots)
-udMod.run()
+udMod.run(optimised=False)
 udMod.print_performance()
 
 print("\n")
 
 
-
-
-# for f in air.flights:
-#     print(f, f.slot, f.newSlot.time, f.priorityValue, f.cost, f.margin, f.priorityNumber)
 print(udMod.compute_costs(air.flights,"initial"))
 print(udMod.compute_costs(air.flights,"final"))
 
