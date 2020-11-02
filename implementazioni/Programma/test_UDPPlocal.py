@@ -39,17 +39,20 @@ for f in air.flights:
     print(f, f.slot, f.UDPPlocalSolution, f.priorityValue, f.cost, f.margin)
 
 print(udMod.compute_costs(air.flights,"initial"))
-
+print(udMod.compute_costs(air.flights,"final"))
 
 udpp_local(air, udMod.slots)
 
-print(udMod.compute_costs(air.flights,"final"))
+
 print("\n")
+
+
 
 
 for f in air.flights:
     print(f, f.slot, f.newSlot, f.priorityValue, f.cost, f.margin, f.priorityNumber)
-
+print(udMod.compute_costs(air.flights,"initial"))
+print(udMod.compute_costs(air.flights,"final"))
 
 
 

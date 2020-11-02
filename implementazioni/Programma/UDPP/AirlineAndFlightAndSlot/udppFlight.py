@@ -13,7 +13,7 @@ class UDPPflight(fl.Flight):
 
         self.UDPPlocalSolution = None
 
-        self.priorityValue = "N"
+        self.priorityValue = "M"
 
         self.priorityNumber = self.cost
 

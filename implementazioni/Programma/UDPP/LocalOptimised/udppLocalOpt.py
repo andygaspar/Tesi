@@ -106,6 +106,7 @@ def UDPPlocalOpt(airline: air.UDPPairline, slots: List[sl.Slot]):
             if m.getSolution(x[flight.localNum, k]) > 0.5:
                 flight.UDPPlocalSolution = airline.flights[k].slot
                 flight.priorityNumber = k
+                flight.priorityValue = "N"
 
         for slot in slots:
             if m.getSolution(y[flight.localNum, slot.index]) > 0.5:
