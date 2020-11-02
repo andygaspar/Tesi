@@ -7,14 +7,11 @@ from Programma.UDPP.AirlineAndFlightAndSlot.udppSlot import UDPPslot
 from Programma.ModelStructure.modelStructure import ModelStructure
 from Programma.ModelStructure.Solution import solution
 from Programma.UDPP.Local.manageMflights import manage_Mflights
+from Programma.UDPP.Local.mangePflights import manage_Pflights
 
 
 def make_slot_list(flights: List[UDPPflight]):
     return [flight for flight in flights if flight.priority != "B"]
-
-
-def manage_Pflights(Pflights, slotList):
-    pass
 
 
 def udpp_local(airline: UDPPairline, slots: List[Slot]):

@@ -23,13 +23,24 @@ def get_first_later_free_slot(targetSlot: UDPPslot, slotList: List[UDPPslot]):
             return slot
 
 def sort_flights_by_tna(flights):
-    priorityList = [f.priorityNumber for f in flights]
-    sorted_indexes = np.flip(np.argsort(priorityList))
+    tnaList = [f.tna for f in flights]
+    sorted_indexes = np.flip(np.argsort(tnaList))
     return np.array([flights[i] for i in sorted_indexes])
+
+def sort_slots_by_time(slotList):
+    timeList = [slot.time for slot in slotList]
+    sorted_indexes = np.flip(np.argsort(timeList))
+    return np.array([slotList[i] for i in sorted_indexes])
 
 
 def sort_Pflights(Pflights):
-    pass
+    pfSorted = sort_flights_by_tna(Pflights)
+    slotSorted = sort_slots_by_time([pf.newSlot for pf in Pflights])
+    for i in range(len(Pflights)):
+        pfSorted[i].newSlot = slotSorted[i]
+    for pf in Pflights:
+        if pf.newSlot.time < pf.eta:
+            print("problem in Pflights sorting")
 
 
 def manage_Pflights(Pflights: List[UDPPflight], localSlots: List[UDPPslot], slots: List[UDPPslot]):
