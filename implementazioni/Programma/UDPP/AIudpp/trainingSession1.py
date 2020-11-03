@@ -40,11 +40,13 @@ batchSize = 100
 net = nn.AirNetwork(24, batchSize)
 
 
-for i in range(50):
-    inputs, outputs, airlines, UDPPmodels = make_batch(batchSize)
-    net.train(6, batchSize, inputs, outputs, airlines, UDPPmodels)
-    print(i, net.loss)
+# for i in range(200):
+#     inputs, outputs, airlines, UDPPmodels = make_batch(batchSize)
+#     net.train(6, batchSize, inputs, outputs, airlines, UDPPmodels)
+#     print(i, net.loss)
 
+
+net.save_weights()
 
 udMod.run(optimised=True)
 

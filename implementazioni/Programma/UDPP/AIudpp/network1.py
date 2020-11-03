@@ -1,3 +1,4 @@
+import copy
 import random
 from typing import List
 
@@ -46,31 +47,32 @@ class AirNetwork:
         self.lambdaL2 = 1e-4
         self.epochs = 200
         self.width = 64
-        self.loss = 0
+        self.loss = 1e4
+        self.bestWaits = None
 
         self.network = nn.Sequential(
             nn.Linear(self.inputDimension, self.width),
             nn.LeakyReLU(),
             nn.Linear(self.width, self.width*2),
             nn.LeakyReLU(),
-            # nn.Dropout(p=0.2),
-            nn.Linear(self.width*2, self.width*3),
+            nn.Dropout(p=0.2),
+            nn.Linear(self.width*2, self.width*4),
             nn.LeakyReLU(),
-            nn.Linear(self.width * 3, 12),
+            nn.Linear(self.width * 4, 12),
             # nn.Dropout(p=0.2)
             # nn.LeakyReLU(),
         )
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.network.to(self.device)
 
-        # torch.cuda.current_device()
+        torch.cuda.current_device()
         print(torch.cuda.is_available())
         self.optimizer = optim.Adam(self.network.parameters(), lr=self.lr, weight_decay=self.lambdaL2)
 
     def train(self, numFlights, batchSize, inputs, outputs,
               airlines: List[UDPPairline], UDPPmodels: List[UDPPmodel]):
         criterion = torch.nn.MSELoss()
-        finalCosts = []
+        tempLoss = 0
         self.network.train()
         for e in range(self.epochs):
             self.optimizer.zero_grad()
@@ -88,7 +90,12 @@ class AirNetwork:
             finalCosts = []
 
             if e == self.epochs-1:
-                self.loss = loss.item()
+                tempLoss = loss.item()
+                print(tempLoss)
+
+        if tempLoss < self.loss:
+            self.loss = tempLoss
+            self.bestWaits = copy.deepcopy(self.network.state_dict())
 
     @staticmethod
     def my_loss(Y, rewards):
@@ -107,4 +114,8 @@ class AirNetwork:
 
         return priorities
 
+    def save_weights(self, filename: str = "netWeights"):
+        torch.save(self.bestWaits, filename + '.pt')
 
+    def load_weights(self, file: str = "netWeights.pt"):
+        self.network.load_state_dict(torch.load(file))
