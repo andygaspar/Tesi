@@ -36,18 +36,26 @@ udMod.print_performance()
 # UDPPlocalOpt(air, udMod.slots)
 udMod.run(optimised=True)
 udMod.print_performance()
+ciccio = udMod.get_new_df()
 #print(udMod.compute_costs(air.flights, "final"))
 
 
 udMod.run(optimised=False)
 udMod.print_performance()
-
+caio = udMod.get_new_df()
 print("\n")
 
 
 print(udMod.compute_costs(air.flights,"initial"))
 print(udMod.compute_costs(air.flights,"final"))
 
+
+
+a = ciccio["flight"].to_list()
+b = caio["flight"].to_list()
+print(type(a))
+for i in range(len(a)):
+    print(a[i],b[i])
 
 
 

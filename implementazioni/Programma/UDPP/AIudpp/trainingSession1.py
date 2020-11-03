@@ -8,11 +8,13 @@ from IPython import display
 import torch.tensor
 
 from Programma.UDPP import udppModel
-from Programma.UDPP.AIudpp.trainAuxFuns1 import make_batch, run_UDPP_local
-from Programma.UDPP.AirlineAndFlightAndSlot.udppAirline import UDPPairline as Airline
+from Programma.UDPP.AIudpp.trainAuxFuns1 import make_batch, make_network_input, make_prioritisation
+from Programma.UDPP.AirlineAndFlightAndSlot.udppAirline import UDPPairline
 from Programma.UDPP.AirlineAndFlightAndSlot.udppSlot import UDPPslot
 from Programma.UDPP.Local.udppLocal import udpp_local
 from Programma.UDPP.LocalOptimised.udppLocalOpt import UDPPlocalOpt
+from Programma.UDPP.udppModel import UDPPmodel
+from data import dfMaker
 from data.dfMaker import df_maker
 from Programma.ModelStructure.modelStructure import ModelStructure
 from Programma.ModelStructure.Costs.costFunctionDict import CostFuns
@@ -20,11 +22,19 @@ from Programma.UDPP.AIudpp import network1 as nn
 
 
 
+# df = pd.read_csv("../data/data_ruiz.csv")
+scheduleType = dfMaker.schedule_types(show=True)
+# df = pd.read_csv("dfcrash")
+df = df_maker(custom=[6, 4, 3, 7, 2, 8])
+df["margins"] = [random.choice(range(10, 50)) for i in range(df.shape[0])]
+# df.to_csv("dfcrash")
+
+costFun = CostFuns().costFun["step"]
+udMod = UDPPmodel(df, costFun)
 
 
-
-airline: Airline
-
+airline: UDPPairline
+airline = [air for air in udMod.airlines if air.name == "A"][0]
 batchSize = 100
 
 net = nn.AirNetwork(24, batchSize)
@@ -36,19 +46,16 @@ for i in range(50):
     print(i, net.loss)
 
 
+udMod.run(optimised=True)
 
 
-# for i in range(10):
-#     inputs, initialCosts, airlines, UDPPmodels = make_batch(1)
-#     udpp_local(airlines[0],UDPPmodels[0].slots)
-#     print(UDPPmodels[0].compute_costs(airlines[0].flights, "final"), "  base")
-#
-#     UDPPlocalOpt(airlines[0], UDPPmodels[0].slots)
-#     for flight in airlines[0].flights:
-#         flight.newSlot = flight.UDPPlocalSolution
-#     print(UDPPmodels[0].compute_costs(airlines[0].flights, "final"), "  opt")
-#
-#     run_UDPP_local(net.prioritisation(inputs), airlines[0], UDPPmodels[0])
-#     print(UDPPmodels[0].compute_costs(airlines[0].flights, "final"), "   nn\n\n")
+output = net.prioritisation(make_network_input(airline))
+prValues, times = make_prioritisation(output)
+i = 0
+for f in airline.flights:
+    print(f.priorityValue, f.newSlot.time, prValues[i], times[i])
+    i += 1
+
+
 
 

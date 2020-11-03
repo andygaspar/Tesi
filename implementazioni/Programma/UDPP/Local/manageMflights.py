@@ -94,8 +94,6 @@ def manage_time_solution(targetTime, flight: UDPPflight, slotList: List[UDPPslot
 def manage_Mflights(Mflights: List[UDPPflight], slotList: List[UDPPslot]):
     Mflights = list(sort_flights_by_priority(Mflights))
 
-    i = 0
     for mf in Mflights:
         manage_time_solution(mf.tna, mf, slotList)
 
-        i += 1

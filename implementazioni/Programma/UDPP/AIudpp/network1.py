@@ -44,7 +44,7 @@ class AirNetwork:
         self.batchSize = batchSize
         self.lr = 1e-3
         self.lambdaL2 = 1e-4
-        self.epochs = 50
+        self.epochs = 200
         self.width = 64
         self.loss = 0
 
@@ -67,17 +67,6 @@ class AirNetwork:
         print(torch.cuda.is_available())
         self.optimizer = optim.Adam(self.network.parameters(), lr=self.lr, weight_decay=self.lambdaL2)
 
-    def prioritisation(self, input_list: List[float]):
-
-        X = torch.tensor(input_list, requires_grad=False). \
-            to(self.device).reshape(1, self.inputDimension).type(dtype=torch.float32)
-
-        self.network.eval()
-        with torch.no_grad():
-            priorities = self.network(X).flatten().cpu().numpy()
-
-        return priorities
-
     def train(self, numFlights, batchSize, inputs, outputs,
               airlines: List[UDPPairline], UDPPmodels: List[UDPPmodel]):
         criterion = torch.nn.MSELoss()
@@ -90,11 +79,6 @@ class AirNetwork:
 
             Y = self.network(X)
 
-            # priorities = Y.flatten().cpu().detach().numpy().reshape(batchSize, numFlights)
-
-            # for i in range(batchSize):
-            #     run_UDPP_local(priorities[i], airlines[i], UDPPmodels[i].slots)
-            #     finalCosts.append(UDPPmodels[i].compute_costs(airlines[i].flights, "final"))
 
             Y_test = torch.tensor(outputs).to(self.device).type(dtype=torch.float32)
 
@@ -111,3 +95,16 @@ class AirNetwork:
         sumTens = torch.sum(Y, 1)
         loss = torch.mean((sumTens - rewards)**2)
         return loss
+
+    def prioritisation(self, input_list: List[float]):
+
+        X = torch.tensor(input_list, requires_grad=False). \
+            to(self.device).reshape(1, self.inputDimension).type(dtype=torch.float32)
+
+        self.network.eval()
+        with torch.no_grad():
+            priorities = self.network(X).flatten().cpu().numpy()
+
+        return priorities
+
+

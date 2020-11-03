@@ -24,7 +24,7 @@ def make_network_input(air: UDPPairline):
 
 
 def make_network_output(air: UDPPairline):
-    vals = [[0 if f.priorityValue is "M" else 1, f.newSlot.time] for f in air.flights]
+    vals = [[0 if f.priorityValue is "P" else 1, f.newSlot.time] for f in air.flights]
     return [item for val in vals for item in val]
 
 
@@ -40,11 +40,9 @@ def make_batch(batchSize):
         df["margins"] = [random.choice(range(10, 50)) for i in range(df.shape[0])]
         costFun = CostFuns().costFun["linear"]
 
-
         udMod = udppModel.UDPPmodel(df, costFun)
 
         UDPPmodels.append(udMod)
-
 
         airline = [air for air in udMod.airlines if air.name == "A"][0]
         airlines.append(airline)
@@ -54,10 +52,21 @@ def make_batch(batchSize):
         with HiddenPrints():
             UDPPlocalOpt(airline, udMod.slots)
 
-
         inputVect = make_network_input(airline)
         outputVect = make_network_output(airline)
         inputs.append(inputVect)
         outputs.append(outputVect)
 
     return inputs, outputs, airlines, UDPPmodels
+
+
+def make_prioritisation(inputs: np.array):
+    prValues = []
+    times = []
+    for i in range(len(inputs)):
+        if i % 2 == 0:
+            prValues.append("P" if inputs[i] < 0.5 else "N")
+        else:
+            times.append(round(inputs[i]))
+
+    return prValues, times
