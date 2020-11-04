@@ -19,12 +19,12 @@ def run_UDPP_local(prior: np.array, air: UDPPairline, slots):
 
 
 def make_network_input(air: UDPPairline):
-    vals = [[f.tna, f.eta, f.slot.time, f.cost] for f in air.flights]
+    vals = [[f.tna/100, f.eta/100, f.slot.time/100, f.cost] for f in air.flights]
     return [item for val in vals for item in val]
 
 
 def make_network_output(air: UDPPairline):
-    vals = [[0 if f.priorityValue is "P" else 1, f.newSlot.time] for f in air.flights]
+    vals = [[0 if f.priorityValue is "P" else 1, f.newSlot.time/100] for f in air.flights]
     return [item for val in vals for item in val]
 
 
@@ -67,6 +67,6 @@ def make_prioritisation(inputs: np.array):
         if i % 2 == 0:
             prValues.append("P" if inputs[i] < 0.5 else "N")
         else:
-            times.append(round(inputs[i]))
+            times.append(int(round(inputs[i]*100)))
 
     return prValues, times

@@ -48,6 +48,7 @@ class AirNetwork:
         self.epochs = 200
         self.width = 64
         self.loss = 1e4
+        self.bestLoss = 1e4
         self.bestWaits = None
 
         self.network = nn.Sequential(
@@ -72,7 +73,6 @@ class AirNetwork:
     def train(self, numFlights, batchSize, inputs, outputs,
               airlines: List[UDPPairline], UDPPmodels: List[UDPPmodel]):
         criterion = torch.nn.MSELoss()
-        tempLoss = 0
         self.network.train()
         for e in range(self.epochs):
             self.optimizer.zero_grad()
@@ -90,11 +90,10 @@ class AirNetwork:
             finalCosts = []
 
             if e == self.epochs-1:
-                tempLoss = loss.item()
-                print(tempLoss)
+                self.loss = loss.item()
 
-        if tempLoss < self.loss:
-            self.loss = tempLoss
+        if self.loss < self.bestLoss:
+            self.bestLoss = self.loss
             self.bestWaits = copy.deepcopy(self.network.state_dict())
 
     @staticmethod

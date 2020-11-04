@@ -35,15 +35,15 @@ udMod = UDPPmodel(df, costFun)
 
 airline: UDPPairline
 airline = [air for air in udMod.airlines if air.name == "A"][0]
-batchSize = 100
+batchSize = 500
 
 net = nn.AirNetwork(24, batchSize)
 
 
-# for i in range(200):
-#     inputs, outputs, airlines, UDPPmodels = make_batch(batchSize)
-#     net.train(6, batchSize, inputs, outputs, airlines, UDPPmodels)
-#     print(i, net.loss)
+for i in range(1000):
+    inputs, outputs, airlines, UDPPmodels = make_batch(batchSize)
+    net.train(6, batchSize, inputs, outputs, airlines, UDPPmodels)
+    print(i, net.loss*1000)
 
 
 net.save_weights()
