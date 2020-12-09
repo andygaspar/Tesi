@@ -2,12 +2,12 @@ import copy
 import random
 from typing import List
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 import numpy as np
 import torch
 from torch import nn, optim
-from IPython import display
+#from IPython import display
 
 from Programma.UDPP import udppModel
 from Programma.UDPP.AIudpp.trainAuxFuns1 import run_UDPP_local

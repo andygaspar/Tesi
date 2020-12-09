@@ -1,6 +1,7 @@
 from data import dfMaker
 from Programma.MaxBenefit import maxBenefit
 
+
 from Programma.Istop import istop
 
 from Programma.ModelStructure.Costs.costFunctionDict import CostFuns
@@ -10,9 +11,9 @@ import pandas as pd
 
 # df = pd.read_csv("../data/data_ruiz.csv")
 scheduleType = dfMaker.schedule_types(show=True)
-df = pd.read_csv("dfcrash")
+# df = pd.read_csv("dfcrash")
 df = dfMaker.df_maker(40, 5, distribution=scheduleType[3])
-# df["margins"] = [random.choice(range(10, 50)) for i in range(df.shape[0])]
+df["margins"] = [random.choice(range(10, 50)) for i in range(df.shape[0])]
 # df.to_csv("dfcrash")
 df_max = df.copy(deep=True)
 df_UDPP = df_max.copy(deep=True)

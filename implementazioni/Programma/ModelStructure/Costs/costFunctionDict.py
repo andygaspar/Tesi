@@ -12,7 +12,11 @@ class CostFuns:
 
             "quadratic": lambda flight, slot: (flight.cost * (slot.time - flight.eta) ** 2)/2,
 
-            "step": lambda flight, slot: (slot.time - flight.eta) * flight.cost*10
-            if (slot.time - flight.eta) < flight.margin else ((slot.time - flight.eta) * flight.cost*10 + flight.cost*10)
+            "step": lambda flight, slot: (slot.time - flight.eta) * flight.cost/2
+            if (slot.time - flight.eta) < flight.margin else 4 + (slot.time - flight.eta) * flight.cost,
+
+            "step old": lambda flight, slot: (slot.time - flight.eta) * flight.cost * 10
+            if (slot.time - flight.eta) < flight.margin else (
+                        (slot.time - flight.eta) * flight.cost * 10 + flight.cost * 10)
 
         }

@@ -1,4 +1,4 @@
-from mip import *
+from typing import Callable, Union, List
 import numpy as np
 from Programma.UDPP.AirlineAndFlightAndSlot import udppAirline as air
 from Programma.UDPP.AirlineAndFlightAndSlot import udppFlight as fl
